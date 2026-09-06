@@ -1856,25 +1856,44 @@
                 const navSvg  = document.getElementById('navLogoSvg');
                 if (!navLogo || !navSvg) return;
 
-                let hoverTimer = null;
+                const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+                let hoverTimer = null, safetyTimer = null, touching = false;
 
                 function setHover() {
-                    clearTimeout(hoverTimer);
+                    clearTimeout(hoverTimer); clearTimeout(safetyTimer);
                     navSvg.classList.remove('nav-idle');
                     navSvg.classList.add('nav-hover');
+                    // rete di sicurezza: il logo non resta mai smontato (opacity 0)
+                    safetyTimer = setTimeout(() => setIdle(0), 1200);
                 }
                 function setIdle(delay) {
-                    clearTimeout(hoverTimer);
+                    clearTimeout(hoverTimer); clearTimeout(safetyTimer);
                     hoverTimer = setTimeout(() => {
                         navSvg.classList.remove('nav-hover');
                         navSvg.classList.add('nav-idle');
                     }, delay || 30);
                 }
 
-                navLogo.addEventListener('mouseenter', setHover);
-                navLogo.addEventListener('mouseleave', () => setIdle(30));
-                navLogo.addEventListener('touchstart', setHover, { passive: true });
-                navLogo.addEventListener('touchend', () => setIdle(200), { passive: true });
+                if (canHover) {
+                    navLogo.addEventListener('mouseenter', setHover);
+                    navLogo.addEventListener('mouseleave', () => setIdle(30));
+                } else {
+                    // touch: ciclo completo autonomo, non dipende da touchend
+                    // (su mobile touchend/mouseenter emulati sono inaffidabili)
+                    navLogo.addEventListener('touchstart', () => {
+                        if (touching) return;
+                        touching = true;
+                        setHover();
+                        setTimeout(() => { setIdle(0); touching = false; }, 480);
+                    }, { passive: true });
+                    navLogo.addEventListener('touchcancel', () => { setIdle(0); touching = false; }, { passive: true });
+                }
+
+                // se la tab torna visibile o la pagina viene ripristinata dalla bfcache, ricomponi
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden && navSvg.classList.contains('nav-hover')) setIdle(0);
+                });
+                window.addEventListener('pageshow', () => setIdle(0));
             })();
 
             // ── Menu mobile ──
