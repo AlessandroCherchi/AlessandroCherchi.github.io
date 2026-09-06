@@ -940,6 +940,20 @@
     </style>
 </head>
 <body>
+    <script>
+        /* apertura/reload: sempre dalla hero, mai dalla posizione salvata dal browser */
+        (function () {
+            if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+            var toTop = function () { window.scrollTo(0, 0); };
+            // niente hash residuo (#servizi ecc.) al primo caricamento
+            if (location.hash && location.hash !== '#hero') {
+                history.replaceState(null, '', location.pathname + location.search);
+            }
+            toTop();
+            window.addEventListener('load', toTop);
+            window.addEventListener('pageshow', function (e) { if (e.persisted) toTop(); });
+        })();
+    </script>
     <nav class="navbar" id="navbar" role="navigation" aria-label="Navigazione">
         <div class="navbar-inner">
             <a href="#hero" class="nav-logo" id="navLogoLink">
