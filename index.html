@@ -7,6 +7,25 @@
     <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f8f9fa" media="(prefers-color-scheme: light)">
     <meta name="color-scheme" content="dark light">
+
+    <!-- Hardening: limita da dove il browser può caricare/inviare dati.
+         connect-src elenca gli UNICI endpoint a cui la pagina può parlare:
+         un eventuale script iniettato non può esfiltrare i dati del form altrove. -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        base-uri 'self';
+        object-src 'none';
+        script-src 'self' 'unsafe-inline' https://ajax.googleapis.com blob:;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: blob:;
+        media-src 'self';
+        connect-src 'self' https://formspree.io blob: data:;
+        worker-src 'self' blob:;
+        form-action 'self';
+        frame-src 'none';
+        upgrade-insecure-requests">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>Alessandro Cherchi | Full-Stack Developer AI & Automation</title>
     <link rel="canonical" href="https://alessandrocherchi.dev/">
     <link rel="icon" href="asset/opt/logo-ac.svg" type="image/svg+xml">
