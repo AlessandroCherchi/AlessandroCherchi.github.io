@@ -15,15 +15,15 @@
         default-src 'self';
         base-uri 'self';
         object-src 'none';
-        script-src 'self' 'unsafe-inline' https://ajax.googleapis.com blob:;
+        script-src 'self' 'unsafe-inline' https://ajax.googleapis.com https://challenges.cloudflare.com blob:;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         font-src 'self' https://fonts.gstatic.com;
         img-src 'self' data: blob:;
         media-src 'self';
-        connect-src 'self' https://formspree.io blob: data:;
+        connect-src 'self' https://ac-form.sobesone87.workers.dev https://challenges.cloudflare.com blob: data:;
         worker-src 'self' blob:;
         form-action 'self';
-        frame-src 'none';
+        frame-src https://challenges.cloudflare.com;
         upgrade-insecure-requests">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>Alessandro Cherchi | Full-Stack Developer AI & Automation</title>
@@ -57,6 +57,9 @@
           href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
           onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"></noscript>
+
+    <!-- Turnstile: CAPTCHA invisibile, il token è validato dal Worker (i bot non lo ottengono) -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
     <!-- model-viewer (~300 KB) NON è caricato qui: arriva on-demand quando la sezione 3D si avvicina -->
 
@@ -1464,6 +1467,7 @@
                     <input type="checkbox" id="gdprConsent" name="gdprConsent" required>
                     <label for="gdprConsent" data-i18n="contact_gdpr">Acconsento al trattamento dei miei dati personali ai sensi del GDPR per essere ricontattato in merito alla mia richiesta.</label>
                 </div>
+                <div class="cf-turnstile" data-sitekey="0x4AAAAAAEqbAd4qyi1UKtek" data-theme="auto" data-size="flexible" style="margin-bottom:1rem;"></div>
                 <button type="submit" class="btn-submit" data-i18n="contact_submit">Invia Richiesta</button>
                 <div class="form-feedback" id="formFeedback" aria-live="polite"></div>
             </form>
@@ -2038,6 +2042,9 @@
                 if (!contactForm.gdprConsent.checked) {
                     return say(t('Accetta l\'informativa sulla privacy.', 'Please accept the privacy policy.'), 'error');
                 }
+                if (!data['cf-turnstile-response']) {
+                    return say(t('Completa la verifica anti-spam e riprova.', 'Please complete the anti-spam check and try again.'), 'error');
+                }
 
                 const btn = contactForm.querySelector('.btn-submit');
                 const original = btn.textContent;
@@ -2045,7 +2052,7 @@
                 btn.disabled = true;
                 btn.style.opacity = '0.7';
 
-                fetch('https://formspree.io/f/mzdneyyd', {
+                fetch('https://ac-form.sobesone87.workers.dev/', {
                     method: 'POST',
                     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -2055,9 +2062,13 @@
                     lastSentAt = Date.now();
                     say(t('Messaggio inviato con successo!', 'Message sent successfully!'), 'success');
                     contactForm.reset();
+                    if (window.turnstile) turnstile.reset();
                     setTimeout(() => say('', ''), 5000);
                 })
-                .catch(() => say(t('Errore nell\'invio. Riprova.', 'Error sending message. Please try again.'), 'error'))
+                .catch(() => {
+                    if (window.turnstile) turnstile.reset();
+                    say(t('Errore nell\'invio. Riprova.', 'Error sending message. Please try again.'), 'error');
+                })
                 .finally(() => {
                     btn.textContent = original;
                     btn.disabled = false;
