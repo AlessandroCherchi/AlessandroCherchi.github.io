@@ -456,6 +456,13 @@
                 radial-gradient(ellipse 60% 40% at 30% 70%, rgba(139,139,255,0.04) 0%, transparent 60%),
                 radial-gradient(ellipse 50% 50% at 80% 30%, rgba(139,139,255,0.03) 0%, transparent 60%);
         }
+        /* Showreel */
+        .showreel-frame {
+            position:relative; width:100%; max-width:1100px; margin:0 auto;
+            border-radius:16px; overflow:hidden; border:1px solid var(--border);
+            background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.35);
+        }
+        .showreel-frame video { display:block; width:100%; height:auto; }
         .hero-inner { max-width:780px; padding:2rem 1rem 3rem; position:relative; z-index:1; }
 
         /* Animated Hero Logo */
@@ -1332,6 +1339,17 @@
         </div>
     </section>
 
+    <section class="section" id="showreel" style="padding:5rem 1.8rem; max-width:none; width:100%;">
+        <div class="section-header">
+            <p class="section-label" data-anim="label" data-i18n="showreel_label">Motion &amp; Brand Identity</p>
+            <div data-anim="text-reveal"><h2 data-i18n="showreel_title">Showreel</h2></div>
+            <span class="accent-line" data-anim="line-wipe" data-delay="2"></span>
+        </div>
+        <div class="showreel-frame" data-anim="fade-up">
+            <video src="asset/logomotion-720p.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Logo motion showreel"></video>
+        </div>
+    </section>
+
     <section class="section" id="grafiche" style="padding:5rem 1.8rem; max-width:none; width:100%;">
         <div class="section-header">
             <p class="section-label" data-anim="label" data-i18n="graphic_label">UI &amp; Vector Design</p>
@@ -1607,6 +1625,8 @@
                     project_link_case: "Vedi Caso Studio",
                     project_link_github: "Vedi su GitHub",
                     project_link_view: "Vai all'App",
+                    showreel_label: "Motion & Brand Identity",
+                    showreel_title: "Showreel",
                     graphic_label: "UI & Vector Design",
                     graphic_title: "Graphic Design",
                     ring_hint: "Trascina, scorri o usa le frecce",
@@ -1744,6 +1764,8 @@
                     project_link_case: "View Case Study",
                     project_link_github: "View on GitHub",
                     project_link_view: "Go to App",
+                    showreel_label: "Motion & Brand Identity",
+                    showreel_title: "Showreel",
                     graphic_label: "UI & Vector Design",
                     graphic_title: "Graphic Design",
                     ring_hint: "Drag, scroll or use the arrows",
