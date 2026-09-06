@@ -554,6 +554,8 @@
         .project-card:hover { border-color:var(--border-medium); }
         .project-image { width:100%; aspect-ratio:16/10; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; border-bottom:1px solid var(--border-subtle); }
         .project-image img { width:100%; height:100%; object-fit:contain; padding:1rem; }
+        .project-image--logo { background:var(--bg-card); }
+        .project-image--logo img { padding:2.4rem; }
         .project-info { padding:1.5rem; flex:1; display:flex; flex-direction:column; }
         .project-info h3 { margin-bottom:0.3rem; }
         .project-desc { font-size:0.82rem; color:var(--text-tertiary); margin-bottom:1rem; flex:1; }
@@ -1285,6 +1287,17 @@
                     <a href="BILANCIASSE/smartaxle_calcolatore_distribuzione_pesi_flotta.html" class="project-link"><span data-i18n="project_link_view">Vai all'App</span> <span>→</span></a>
                 </div>
             </div>
+            <div class="project-card" data-anim="fade-up">
+                <div class="project-image project-image--logo"><img src="asset/opt/logo-gdo.svg" alt="Logo GDO OCR" width="483" height="483" loading="lazy" decoding="async"></div>
+                <div class="project-info">
+                    <h3 data-i18n="project6_title">GDO OCR</h3>
+                    <p class="project-desc" data-i18n="project6_desc">Estrazione automatica dei dati da documenti e bolle GDO tramite OCR.</p>
+                    <div class="project-tags">
+                        <span class="project-tag">Python</span><span class="project-tag">OCR</span><span class="project-tag">GDO</span>
+                    </div>
+                    <a href="https://github.com/AlessandroCherchi/gdo-ocr" target="_blank" rel="noopener noreferrer" class="project-link"><span data-i18n="project_link_github">Vedi su GitHub</span> <span>→</span></a>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -1549,6 +1562,8 @@
                     project4_graphic: "EAN-13 Generator",
                     project4_title: "Generatore EAN-13 GDO",
                     project4_desc: "Applicativo per la generazione massiva di codici a barre EAN-13 vettoriali.",
+                    project6_title: "GDO OCR",
+                    project6_desc: "Estrazione automatica dei dati da documenti e bolle GDO tramite OCR.",
                     project5_title: "SmartAxle – Distribuzione Pesi",
                     project5_desc: "Calcolatore di carichi per asse, baricentro e conformità CdS per flotte LCV e HGV.",
                     project_link_case: "Vedi Caso Studio",
@@ -1684,6 +1699,8 @@
                     project4_graphic: "EAN-13 Generator",
                     project4_title: "EAN-13 Generator",
                     project4_desc: "Tool for bulk generation of vector EAN-13 barcodes.",
+                    project6_title: "GDO OCR",
+                    project6_desc: "Automatic data extraction from retail documents and delivery notes via OCR.",
                     project5_title: "SmartAxle – Weight Distribution",
                     project5_desc: "Axle load, centre-of-gravity and road-compliance calculator for LCV and HGV fleets.",
                     project_link_case: "View Case Study",
