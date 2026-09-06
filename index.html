@@ -170,24 +170,17 @@
         body::before {
             content:'';
             position:fixed; inset:0; pointer-events:none; z-index:0;
-            background-image: linear-gradient(135deg, rgba(10,10,10,0.86) 0%, rgba(10,10,10,0.78) 100%);
+            background-image:
+                linear-gradient(135deg, rgba(10,10,10,0.86) 0%, rgba(10,10,10,0.78) 100%),
+                url('asset/opt/background.webp');
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
         }
         [data-theme="light"] body::before {
-            background-image: linear-gradient(135deg, rgba(248,249,250,0.82) 0%, rgba(248,249,250,0.72) 100%);
-        }
-        /* Il pattern (274 KB) solo da tablet in su: su mobile resta il gradiente,
-           che è comunque ciò che si vede all'86%. Per riattivarlo ovunque, sposta
-           queste due regole fuori dalla media query. */
-        @media (min-width: 768px) {
-            body::before { background-image:
-                linear-gradient(135deg, rgba(10,10,10,0.86) 0%, rgba(10,10,10,0.78) 100%),
-                url('asset/opt/background.webp'); }
-            [data-theme="light"] body::before { background-image:
+            background-image:
                 linear-gradient(135deg, rgba(248,249,250,0.82) 0%, rgba(248,249,250,0.72) 100%),
-                url('asset/opt/background.webp'); }
+                url('asset/opt/background.webp');
         }
 
         /* ── Sezione Grafiche: nessuno sfondo aggiuntivo ── */
