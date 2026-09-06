@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio Full-Stack Developer – Sviluppo applicazioni stabili, integrate con AI e automatizzate. Supabase, n8n, Zapier, Vector Design.">
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f8f9fa" media="(prefers-color-scheme: light)">
+    <meta name="color-scheme" content="dark light">
+    <title>Alessandro Cherchi | Full-Stack Developer AI & Automation</title>
+    <link rel="canonical" href="https://alessandrocherchi.dev/">
+    <link rel="icon" href="asset/opt/logo-ac.svg" type="image/svg+xml">
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="it_IT">
+    <meta property="og:title" content="Alessandro Cherchi | Full-Stack Developer AI &amp; Automation">
+    <meta property="og:description" content="Sviluppo applicazioni full-stack stabili, integrate con AI e automatizzate. Supabase, n8n, Zapier, Vector Design.">
+    <meta property="og:image" content="asset/opt/me.webp">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Applica tema e lingua PRIMA del primo paint (niente flash bianco/nero) -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+                var l = localStorage.getItem('lang') || (navigator.language.startsWith('it') ? 'it' : 'en');
+                document.documentElement.setAttribute('lang', l);
+            } catch (e) {}
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Font non bloccante: il testo appare subito con lo stack di sistema, poi passa a Inter -->
+    <link rel="preload" as="style"
+          href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+          onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"></noscript>
+
+    <!-- model-viewer (~300 KB) NON è caricato qui: arriva on-demand quando la sezione 3D si avvicina -->
+
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-card: #181818;
+            --bg-card-hover: #1f1f1f;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-medium: rgba(255, 255, 255, 0.10);
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --text-tertiary: #6b6b6b;
+            --accent: #8b8bff;   /* unico accento, tenue */
+            --accent-soft: rgba(139, 139, 255, 0.12);
+            --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 18px;
+            --transition-fast: 0.2s ease;
+            --transition-smooth: 0.3s ease;
+            --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --max-width: 1100px;
+            --nav-height: 64px;
+            --nav-bg: rgba(10, 10, 10, 0.8);
+            --hero-overlay: rgba(10, 10, 10, 0.5);
+        }
+
+        :root[data-theme="light"] {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f3f5;
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --border-medium: rgba(0, 0, 0, 0.14);
+            --text-primary: #111111;
+            --text-secondary: #495057;
+            --text-tertiary: #5f6670;
+            --accent: #4f46e5;
+            --accent-soft: rgba(79, 70, 229, 0.12);
+            --shadow-sm: 0 1px 4px rgba(0,0,0,0.05);
+            --nav-bg: rgba(240, 242, 245, 0.9);
+            --hero-overlay: rgba(248, 249, 250, 0.5);
+        }
+
+        .logo-icon, .modal-logo { filter: drop-shadow(0px 0px 2px var(--accent)) drop-shadow(0px 0px 1px var(--accent)); }
+        [data-theme="light"] .logo-icon, [data-theme="light"] .modal-logo { filter: none; }
+
+        /* ── Nav Logo SVG animato ── */
+        .nav-logo-svg {
+            height: 38px;
+            width: auto;
+            display: block;
+            flex-shrink: 0;
+            transform-style: preserve-3d;
+            perspective: 800px;
+            filter: drop-shadow(0 0 2px var(--accent)) drop-shadow(0 0 1px var(--accent));
+            transition: filter 0.3s ease;
+        }
+        [data-theme="light"] .nav-logo-svg { filter: none; }
+        .nav-logo-svg .logo-path { stroke: var(--accent); fill: var(--accent); }
+        .nav-logo-svg .logo-path-main { stroke: var(--text-primary); fill: var(--text-primary); }
+
+        /* keyframes per il disassemblaggio (hover = parti che esplodono) */
+        @keyframes navDisassemble1 {
+            0%   { transform: translate3d(0,0,0) rotateY(0) rotateX(0); opacity:1; }
+            100% { transform: translate3d(-35px,-28px,90px) rotateY(-35deg) rotateX(20deg); opacity:0; }
+        }
+        @keyframes navDisassemble2 {
+            0%   { transform: translate3d(0,0,0) rotateY(0) rotateX(0); opacity:1; }
+            100% { transform: translate3d(35px,28px,80px) rotateY(30deg) rotateX(-15deg); opacity:0; }
+        }
+        @keyframes navDisassemble3 {
+            0%   { transform: translate3d(0,0,0) rotateY(0) rotateX(0); opacity:1; }
+            100% { transform: translate3d(-28px,38px,110px) rotateY(-25deg) rotateX(30deg); opacity:0; }
+        }
+        @keyframes navDisassemble4 {
+            0%   { transform: translate3d(0,0,0) rotateY(0) rotateX(0) scale(1); opacity:1; }
+            100% { transform: translate3d(0,-48px,140px) rotateY(20deg) rotateX(-25deg) scale(0.7); opacity:0; }
+        }
+        /* keyframes per la ricomposizione (dal buco → posizione finale) */
+        @keyframes navAssemble1 {
+            0%   { transform: translate3d(-35px,-28px,90px) rotateY(-35deg) rotateX(20deg); opacity:0; }
+            60%  { transform: translate3d(-2px,-1px,8px) rotateY(-2deg) rotateX(1deg); opacity:1; }
+            100% { transform: translate3d(0,0,0) rotateY(0) rotateX(0); opacity:1; }
+        }
+        @keyframes navAssemble2 {
+            0%   { transform: translate3d(35px,28px,80px) rotateY(30deg) rotateX(-15deg); opacity:0; }
+            60%  { transform: translate3d(2px,1px,6px) rotateY(2deg) rotateX(-1deg); opacity:1; }
+            100% { transform: translate3d(0,0,0) rotateY(0) rotateX(0); opacity:1; }
+        }
+        @keyframes navAssemble3 {
+            0%   { transform: translate3d(-28px,38px,110px) rotateY(-25deg) rotateX(30deg); opacity:0; }
+            60%  { transform: translate3d(-1px,2px,7px) rotateY(-1deg) rotateX(2deg); opacity:1; }
+            100% { transform: translate3d(0,0,0) rotateY(0) rotateX(0); opacity:1; }
+        }
+        @keyframes navAssemble4 {
+            0%   { transform: translate3d(0,-48px,140px) rotateY(20deg) rotateX(-25deg) scale(0.7); opacity:0; }
+            60%  { transform: translate3d(0,-2px,10px) rotateY(1deg) rotateX(-1deg) scale(1); opacity:1; }
+            100% { transform: translate3d(0,0,0) rotateY(0) rotateX(0) scale(1); opacity:1; }
+        }
+
+        .nav-logo-svg .nav-anim-path { transform-origin: center; }
+        /* stato idle: logo composto */
+        .nav-logo-svg.nav-idle .nav-anim-path-1 { animation: navAssemble1 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+        .nav-logo-svg.nav-idle .nav-anim-path-2 { animation: navAssemble2 0.7s cubic-bezier(0.22,1,0.36,1) 0.06s both; }
+        .nav-logo-svg.nav-idle .nav-anim-path-3 { animation: navAssemble3 0.7s cubic-bezier(0.22,1,0.36,1) 0.12s both; }
+        .nav-logo-svg.nav-idle .nav-anim-path-4 { animation: navAssemble4 0.8s cubic-bezier(0.22,1,0.36,1) 0.18s both; }
+        /* stato hover: logo si smonta */
+        .nav-logo-svg.nav-hover .nav-anim-path-1 { animation: navDisassemble1 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+        .nav-logo-svg.nav-hover .nav-anim-path-2 { animation: navDisassemble2 0.45s cubic-bezier(0.22,1,0.36,1) 0.04s both; }
+        .nav-logo-svg.nav-hover .nav-anim-path-3 { animation: navDisassemble3 0.45s cubic-bezier(0.22,1,0.36,1) 0.08s both; }
+        .nav-logo-svg.nav-hover .nav-anim-path-4 { animation: navDisassemble4 0.5s cubic-bezier(0.22,1,0.36,1) 0.12s both; }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; scroll-padding-top:var(--nav-height); font-size:16px; -webkit-font-smoothing:antialiased; }
+        body {
+            font-family:var(--font-stack);
+            background-color:var(--bg-primary);
+            color:var(--text-primary);
+            line-height:1.6;
+            overflow-x:hidden;
+            min-height:100vh;
+            position:relative;
+        }
+        /* Sfondo pattern + overlay in UN SOLO layer fisso e compositato.
+           Prima era body{background-attachment:fixed} → ripaint a ogni scroll (killer su mobile). */
+        body::before {
+            content:'';
+            position:fixed; inset:0; pointer-events:none; z-index:0;
+            background-image: linear-gradient(135deg, rgba(10,10,10,0.86) 0%, rgba(10,10,10,0.78) 100%);
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+        }
+        [data-theme="light"] body::before {
+            background-image: linear-gradient(135deg, rgba(248,249,250,0.82) 0%, rgba(248,249,250,0.72) 100%);
+        }
+        /* Il pattern (274 KB) solo da tablet in su: su mobile resta il gradiente,
+           che è comunque ciò che si vede all'86%. Per riattivarlo ovunque, sposta
+           queste due regole fuori dalla media query. */
+        @media (min-width: 768px) {
+            body::before { background-image:
+                linear-gradient(135deg, rgba(10,10,10,0.86) 0%, rgba(10,10,10,0.78) 100%),
+                url('asset/opt/background.webp'); }
+            [data-theme="light"] body::before { background-image:
+                linear-gradient(135deg, rgba(248,249,250,0.82) 0%, rgba(248,249,250,0.72) 100%),
+                url('asset/opt/background.webp'); }
+        }
+
+        /* ── Sezione Grafiche: nessuno sfondo aggiuntivo ── */
+        #grafiche {
+            position: relative;
+            isolation: isolate;
+        }
+
+        h1,h2,h3 { font-weight:600; line-height:1.2; letter-spacing:-0.01em; }
+        h1 { font-size:clamp(2rem, 4.5vw, 3.2rem); }
+        h2 { font-size:clamp(1.5rem, 3vw, 2rem); margin-bottom:0.4rem; }
+        h3 { font-size:1.1rem; }
+        p { color:var(--text-secondary); font-size:0.95rem; }
+        a { color:inherit; text-decoration:none; }
+
+        .section-label {
+            display:inline-block; font-size:0.75rem; font-weight:600; letter-spacing:0.07em;
+            text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.4rem;
+        }
+
+        /* Navbar */
+        .navbar {
+            position:fixed; top:0; left:0; width:100%; height:var(--nav-height);
+            background:var(--nav-bg); backdrop-filter:blur(14px);
+            border-bottom:1px solid var(--border-subtle); z-index:1000; transition:var(--transition-smooth);
+        }
+        .navbar.scrolled { border-bottom-color:var(--border-medium); }
+        .navbar-inner {
+            max-width:var(--max-width); margin:0 auto; padding:0 1.8rem; height:100%;
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        .nav-logo { display:flex; align-items:center; gap:0.6rem; font-weight:600; font-size:1.2rem; z-index:1001; -webkit-tap-highlight-color:transparent; border-radius:var(--radius-sm); }
+        .nav-logo:focus-visible, .theme-toggle:focus-visible, .lang-toggle:focus-visible, .hamburger:focus-visible,
+        a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible,
+        .hidden-login-trigger:focus-visible {
+            outline:2px solid var(--accent); outline-offset:2px; border-radius:var(--radius-sm);
+        }
+        .nav-logo .logo-icon { height:42px; width:auto; max-width:180px; flex-shrink:0; object-fit:contain; }
+        .nav-links { display:flex; align-items:center; gap:2rem; list-style:none; }
+        .nav-links a {
+            font-size:0.85rem; font-weight:500; color:var(--text-secondary);
+            transition:color var(--transition-fast); padding:0.3rem 0;
+        }
+        .nav-links a:hover, .nav-links a:focus-visible { color:var(--text-primary); }
+        .btn-nav-cta {
+            display:inline-flex; align-items:center; gap:0.3rem; padding:0.5rem 1.4rem;
+            background:var(--accent); color:#0a0a0a; font-weight:600; font-size:0.8rem;
+            border-radius:50px; border:none; cursor:pointer; transition:var(--transition-fast);
+            white-space:nowrap; letter-spacing:0.02em;
+        }
+        .btn-nav-cta:hover { background:#a5a5ff; }
+        .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; z-index:1051; padding:8px; background:none; border:none; position:relative; }
+        .hamburger span { display:block; width:22px; height:2px; background:var(--text-primary); border-radius:2px; transition:all 0.35s cubic-bezier(0.22, 1, 0.36, 1); transform-origin:center; }
+        .hamburger.active span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+        .hamburger.active span:nth-child(2) { opacity:0; transform:scaleX(0); }
+        .hamburger.active span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+        /* Full-screen mobile overlay */
+        .mobile-overlay {
+            position:fixed; inset:0; z-index:1040;
+            background:var(--bg-primary);
+            display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;
+            clip-path:circle(0% at calc(100% - 40px) 32px);
+            transition:clip-path 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events:none;
+            opacity:0;
+        }
+        .mobile-overlay.active {
+            clip-path:circle(150% at calc(100% - 40px) 32px);
+            pointer-events:all;
+            opacity:1;
+        }
+        .mobile-overlay-links {
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            gap:0.3rem; list-style:none; padding:0; margin:0;
+        }
+        .mobile-overlay-links li {
+            opacity:0; transform:translateY(30px);
+            transition:opacity 0.4s ease, transform 0.4s ease;
+        }
+        .mobile-overlay.active .mobile-overlay-links li {
+            opacity:1; transform:translateY(0);
+        }
+        .mobile-overlay.active .mobile-overlay-links li:nth-child(1) { transition-delay:0.15s; }
+        .mobile-overlay.active .mobile-overlay-links li:nth-child(2) { transition-delay:0.25s; }
+        .mobile-overlay.active .mobile-overlay-links li:nth-child(3) { transition-delay:0.35s; }
+        .mobile-overlay.active .mobile-overlay-links li:nth-child(4) { transition-delay:0.45s; }
+        .mobile-overlay.active .mobile-overlay-links li:nth-child(5) { transition-delay:0.55s; }
+        .mobile-overlay.active .mobile-overlay-links li:nth-child(6) { transition-delay:0.65s; }
+        .mobile-overlay-links a {
+            font-size:clamp(2rem, 8vw, 3rem); font-weight:700; color:var(--text-primary);
+            text-decoration:none; letter-spacing:-0.02em; line-height:1.4;
+            transition:color 0.3s ease, transform 0.3s ease;
+            display:inline-block; position:relative;
+        }
+        .mobile-overlay-links a::after {
+            content:''; position:absolute; bottom:-2px; left:0; width:0; height:3px;
+            background:var(--accent); border-radius:2px;
+            transition:width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .mobile-overlay-links a:hover, .mobile-overlay-links a:focus-visible { color:var(--accent); transform:translateX(8px); }
+        .mobile-overlay-links a:hover::after, .mobile-overlay-links a:focus-visible::after { width:100%; }
+        .mobile-overlay-footer {
+            position:absolute; bottom:2.5rem; display:flex; align-items:center; gap:1rem;
+            opacity:0; transform:translateY(15px);
+            transition:opacity 0.4s ease 0.6s, transform 0.4s ease 0.6s;
+        }
+        .mobile-overlay.active .mobile-overlay-footer { opacity:1; transform:translateY(0); }
+        .mobile-overlay-footer .theme-toggle-mobile {
+            background:none; border:1px solid var(--border-medium); color:var(--text-secondary);
+            cursor:pointer; padding:0.6rem; display:flex; align-items:center; justify-content:center;
+            border-radius:50%; transition:var(--transition-fast); width:44px; height:44px;
+        }
+        .mobile-overlay-footer .theme-toggle-mobile:hover { color:var(--accent); border-color:var(--accent); }
+        .mobile-overlay-footer .lang-toggle-mobile {
+            background:none; border:1px solid var(--border-medium); color:var(--text-secondary);
+            cursor:pointer; padding:0.6rem; display:flex; align-items:center; justify-content:center;
+            border-radius:50%; transition:var(--transition-fast); width:44px; height:44px; font-weight:600; font-size:0.85rem;
+        }
+        .mobile-overlay-footer .lang-toggle-mobile:hover { color:var(--accent); border-color:var(--accent); }
+        .mobile-overlay-cta {
+            display:inline-flex; align-items:center; gap:0.4rem; padding:0.7rem 1.8rem;
+            background:var(--accent); color:#0a0a0a; font-weight:600; font-size:0.9rem;
+            border-radius:50px; text-decoration:none; transition:var(--transition-fast);
+            letter-spacing:0.02em;
+        }
+        .mobile-overlay-cta:hover { background:#a5a5ff; }
+        .theme-toggle { background:none; border:none; color:var(--text-primary); cursor:pointer; padding:0.5rem; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center; transition:var(--transition-fast); margin-left: 0.5rem; }
+        .theme-toggle:hover { color:var(--accent); }
+        .lang-toggle { background:none; border:none; color:var(--text-primary); cursor:pointer; padding:0.5rem; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center; transition:var(--transition-fast); margin-left: 0.2rem; font-weight:600; font-size:0.9rem; }
+        .lang-toggle:hover { color:var(--accent); }
+        [data-theme="light"] .sun-icon { display:none; }
+        [data-theme="light"] .moon-icon { display:block !important; }
+
+        /* Sezioni */
+        .section { position:relative; z-index:1; padding:5rem 1.8rem; max-width:var(--max-width); margin:0 auto; }
+        .section-header { text-align:center; margin-bottom:3.5rem; }
+        .section-header .accent-line {
+            display:block; width:36px; height:2px; border-radius:2px;
+            background:var(--accent); margin:0.6rem auto 0; opacity:0.7;
+        }
+
+        /* ── Scroll Animation System ── */
+        /* Base: all animatable elements start invisible.
+           will-change SOLO finché l'elemento non è entrato: dopo il layer viene rilasciato
+           (prima restava promosso per sempre → decine di layer GPU inutili). */
+        [data-anim]:not(.anim-in) { will-change: opacity, transform; }
+
+        /* fade-up: default — elements rise from below */
+        [data-anim="fade-up"] {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        [data-anim="fade-up"].anim-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* fade-left / fade-right: slide from sides */
+        [data-anim="fade-left"] {
+            opacity: 0;
+            transform: translateX(-40px);
+            transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        [data-anim="fade-left"].anim-in { opacity: 1; transform: translateX(0); }
+
+        [data-anim="fade-right"] {
+            opacity: 0;
+            transform: translateX(40px);
+            transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        [data-anim="fade-right"].anim-in { opacity: 1; transform: translateX(0); }
+
+        /* scale-up: cards pop into view from slightly small */
+        [data-anim="scale-up"] {
+            opacity: 0;
+            transform: translateY(30px) scale(0.94);
+            transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        [data-anim="scale-up"].anim-in { opacity: 1; transform: translateY(0) scale(1); }
+
+        /* text-reveal: headings clip-wipe horizontally */
+        [data-anim="text-reveal"] {
+            position: relative;
+            overflow: hidden;
+        }
+        [data-anim="text-reveal"] > * {
+            display: block;
+            transform: translateY(100%);
+            transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        [data-anim="text-reveal"].anim-in > * {
+            transform: translateY(0);
+        }
+
+        /* line-wipe: accent decorative lines */
+        [data-anim="line-wipe"] {
+            opacity: 0;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: opacity 0.4s ease,
+                        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        [data-anim="line-wipe"].anim-in { opacity: 0.7; transform: scaleX(1); }
+
+        /* label-slide: section-label small text */
+        [data-anim="label"] {
+            opacity: 0;
+            letter-spacing: 0.2em;
+            transform: translateY(12px);
+            transition: opacity 0.5s ease,
+                        transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                        letter-spacing 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        [data-anim="label"].anim-in {
+            opacity: 1;
+            transform: translateY(0);
+            letter-spacing: 0.07em;
+        }
+
+        /* Stagger delays for children */
+        [data-stagger] > *:nth-child(1) { transition-delay: 0.0s; }
+        [data-stagger] > *:nth-child(2) { transition-delay: 0.1s; }
+        [data-stagger] > *:nth-child(3) { transition-delay: 0.2s; }
+        [data-stagger] > *:nth-child(4) { transition-delay: 0.3s; }
+        [data-stagger] > *:nth-child(5) { transition-delay: 0.4s; }
+        [data-stagger] > *:nth-child(6) { transition-delay: 0.5s; }
+
+        /* Manual delay overrides */
+        [data-delay="1"] { transition-delay: 0.10s !important; }
+        [data-delay="2"] { transition-delay: 0.20s !important; }
+        [data-delay="3"] { transition-delay: 0.30s !important; }
+        [data-delay="4"] { transition-delay: 0.40s !important; }
+        [data-delay="5"] { transition-delay: 0.50s !important; }
+
+        /* Backward-compat: old .reveal still works */
+        .reveal { opacity:0; transform:translateY(25px); transition:opacity 0.6s ease, transform 0.6s ease; }
+        .reveal.visible, .reveal.anim-in { opacity:1; transform:translateY(0); }
+
+        /* Hero */
+        .hero { max-width:none; width:100%; min-height:100vh; display:flex; align-items:center; justify-content:center; text-align:center; padding-top:var(--nav-height); position:relative; overflow:hidden; }
+        .hero::before {
+            content:''; position:absolute; inset:0; z-index:0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% 40%, rgba(139,139,255,0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 30% 70%, rgba(139,139,255,0.04) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 80% 30%, rgba(139,139,255,0.03) 0%, transparent 60%);
+        }
+        .hero-inner { max-width:780px; padding:2rem 1rem 3rem; position:relative; z-index:1; }
+
+        /* Animated Hero Logo */
+        .hero-logo-wrapper {
+            position:relative; width:100%; max-width:420px; margin:0 auto 2.5rem;
+            perspective:1200px;
+        }
+        .hero-logo-svg {
+            width:100%; height:auto; display:block;
+            transform-style:preserve-3d;
+            opacity:0;
+            transition: opacity 0.4s ease;
+        }
+        .hero-logo-svg.animated { opacity:1; }
+        .hero-logo-svg path {
+            fill-opacity:0;
+            stroke-width:2.5;
+            stroke-miterlimit:10;
+            transition: fill-opacity 0.8s ease;
+        }
+        /* Glow filter for animated logo */
+        .hero-logo-svg .logo-path {
+            stroke: var(--accent);
+            fill: var(--accent);
+        }
+        [data-theme="light"] .hero-logo-svg .logo-path {
+            stroke: var(--accent);
+            fill: var(--accent);
+        }
+        .hero-logo-svg .logo-path-main {
+            stroke: var(--text-primary);
+            fill: var(--text-primary);
+        }
+
+        /* 3D assembly keyframes for each path */
+        @keyframes pathAssemble1 {
+            0% { transform: translate3d(-80px, -60px, 200px) rotateY(-35deg) rotateX(20deg); opacity:0; }
+            60% { transform: translate3d(-5px, -3px, 20px) rotateY(-3deg) rotateX(2deg); opacity:1; }
+            100% { transform: translate3d(0,0,0) rotateY(0) rotateX(0); opacity:1; }
+        }
+        @keyframes pathAssemble2 {
+            0% { transform: translate3d(80px, 60px, 180px) rotateY(30deg) rotateX(-15deg); opacity:0; }
+            60% { transform: translate3d(5px, 3px, 15px) rotateY(2deg) rotateX(-1deg); opacity:1; }
+            100% { transform: translate3d(0,0,0) rotateY(0) rotateX(0); opacity:1; }
+        }
+        @keyframes pathAssemble3 {
+            0% { transform: translate3d(-60px, 80px, 250px) rotateY(-25deg) rotateX(30deg); opacity:0; }
+            60% { transform: translate3d(-3px, 5px, 18px) rotateY(-2deg) rotateX(3deg); opacity:1; }
+            100% { transform: translate3d(0,0,0) rotateY(0) rotateX(0); opacity:1; }
+        }
+        @keyframes pathAssemble4 {
+            0% { transform: translate3d(0px, -100px, 300px) rotateY(20deg) rotateX(-25deg) scale(0.7); opacity:0; }
+            60% { transform: translate3d(0px, -5px, 25px) rotateY(1deg) rotateX(-2deg) scale(1); opacity:1; }
+            100% { transform: translate3d(0,0,0) rotateY(0) rotateX(0) scale(1); opacity:1; }
+        }
+
+        .hero-logo-svg .anim-path-1 { transform-origin:center; animation: pathAssemble1 1.4s cubic-bezier(0.22,1,0.36,1) 0.3s both; }
+        .hero-logo-svg .anim-path-2 { transform-origin:center; animation: pathAssemble2 1.4s cubic-bezier(0.22,1,0.36,1) 0.5s both; }
+        .hero-logo-svg .anim-path-3 { transform-origin:center; animation: pathAssemble3 1.4s cubic-bezier(0.22,1,0.36,1) 0.7s both; }
+        .hero-logo-svg .anim-path-4 { transform-origin:center; animation: pathAssemble4 1.6s cubic-bezier(0.22,1,0.36,1) 0.7s both; }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px) rotateX(0deg); }
+            50% { transform: translateY(-6px) rotateX(1deg); }
+        }
+        .hero-logo-svg.float-active {
+            animation: logoFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes heroGlowPulse {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(139,139,255,0.15)) drop-shadow(0 0 30px rgba(139,139,255,0.05)); }
+            50% { filter: drop-shadow(0 0 15px rgba(139,139,255,0.25)) drop-shadow(0 0 50px rgba(139,139,255,0.1)); }
+        }
+        .hero-logo-svg.glow-active {
+            animation: logoFloat 6s ease-in-out infinite, heroGlowPulse 4s ease-in-out infinite;
+        }
+        .hero h1 { margin-bottom:1rem; font-weight:600; color:var(--text-primary); }
+        .hero .subtitle { font-size:1rem; color:var(--text-secondary); max-width:580px; margin:0 auto 2.2rem; }
+        .hero-cta-group { display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin-bottom:2.5rem; }
+        .btn-primary {
+            display:inline-flex; align-items:center; gap:0.5rem; padding:0.7rem 1.8rem;
+            background:var(--accent); color:#0a0a0a; font-weight:600; font-size:0.9rem;
+            border-radius:50px; border:none; cursor:pointer; transition:var(--transition-fast);
+            letter-spacing:0.01em;
+        }
+        .btn-primary:hover { background:#a5a5ff; }
+        .tech-badges { display:flex; flex-wrap:wrap; gap:0.6rem; justify-content:center; }
+        .tech-badge {
+            display:inline-flex; padding:0.35rem 0.9rem; background:var(--bg-card);
+            border:1px solid var(--border-subtle); border-radius:50px; font-size:0.78rem;
+            font-weight:500; color:var(--text-secondary); white-space:nowrap;
+            transition:var(--transition-fast);
+        }
+        .tech-badge:hover { border-color:var(--border-medium); background:var(--bg-card-hover); }
+
+        /* Servizi */
+        .services-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.5rem; }
+        .service-card {
+            background:var(--bg-card); border:1px solid var(--border-subtle);
+            border-radius:var(--radius-lg); padding:1.8rem; transition:var(--transition-smooth);
+            cursor:default;
+        }
+        .service-card:hover { border-color:var(--border-medium); background:var(--bg-card-hover); transform:translateY(-2px); }
+        .service-icon { width:38px; height:38px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; margin-bottom:1.2rem; font-size:1.2rem; background:var(--bg-secondary); border:1px solid var(--border-subtle); color:var(--accent); }
+        .service-card h3 { margin-bottom:0.4rem; font-size:1rem; }
+        .service-card p { font-size:0.82rem; color:var(--text-tertiary); line-height:1.5; }
+
+        /* Portfolio */
+        .portfolio-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:1.8rem; }
+        .project-card { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden; transition:var(--transition-smooth); display:flex; flex-direction:column; }
+        .project-card:hover { border-color:var(--border-medium); }
+        .project-image { width:100%; aspect-ratio:16/10; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; border-bottom:1px solid var(--border-subtle); }
+        .project-image img { width:100%; height:100%; object-fit:contain; padding:1rem; }
+        .project-info { padding:1.5rem; flex:1; display:flex; flex-direction:column; }
+        .project-info h3 { margin-bottom:0.3rem; }
+        .project-desc { font-size:0.82rem; color:var(--text-tertiary); margin-bottom:1rem; flex:1; }
+        .project-tags { display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:1rem; }
+        .project-tag { font-size:0.7rem; font-weight:500; padding:0.2rem 0.7rem; border-radius:50px; background:rgba(139,139,255,0.08); color:var(--accent); }
+        .project-link { display:inline-flex; align-items:center; gap:0.3rem; font-weight:600; font-size:0.82rem; color:var(--accent); transition:gap var(--transition-fast); margin-top:auto; align-self:flex-start; }
+        .project-link:hover { gap:0.5rem; }
+
+        /* Chi sono */
+        .about-content { max-width:680px; margin:0 auto; text-align:center; font-size:0.98rem; line-height:1.7; color:var(--text-secondary); }
+        .about-content strong { color:var(--text-primary); font-weight:600; }
+        .about-intro-row {
+            display:flex; align-items:center; justify-content:center; gap:2rem;
+            margin-bottom:1.5rem; flex-wrap:wrap;
+        }
+        .about-intro-row .about-image { margin-bottom:0; flex-shrink:0; }
+        .about-name {
+            margin-top:0.9rem; font-size:1.15rem; font-weight:700; letter-spacing:-0.01em;
+            color:var(--text-primary); line-height:1.2;
+        }
+        .about-role {
+            margin-top:0.2rem; font-size:0.78rem; font-weight:500; letter-spacing:0.08em;
+            text-transform:uppercase; color:var(--accent);
+        }
+        .about-intro-location {
+            display:flex; align-items:center; gap:1rem; text-align:left;
+            background:var(--bg-card); border:1px solid var(--border-subtle);
+            border-radius:var(--radius-lg); padding:1rem 1.2rem;
+            transition:var(--transition-smooth);
+        }
+        .about-intro-location:hover { border-color:var(--border-medium); background:var(--bg-card-hover); }
+        .about-intro-location .location-icon { width:44px; height:44px; }
+        .about-intro-location h4 { font-size:0.85rem; font-weight:600; color:var(--text-primary); margin-bottom:0.2rem; }
+        .about-intro-location p { font-size:0.75rem; color:var(--text-tertiary); margin:0; line-height:1.4; }
+        @media (max-width: 480px) {
+            .about-intro-row { flex-direction:column; gap:1rem; }
+        }
+
+        /* Contatto */
+        .contact-form-wrapper { max-width:480px; margin:0 auto; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-xl); padding:2.4rem 2rem; }
+        .form-group { margin-bottom:1.2rem; }
+        .form-group label { display:block; font-size:0.8rem; font-weight:600; margin-bottom:0.3rem; color:var(--text-secondary); }
+        .form-group input, .form-group textarea, .form-group select {
+            width:100%; padding:0.7rem 0.9rem; background:var(--bg-secondary); border:1px solid var(--border-subtle);
+            border-radius:var(--radius-sm); color:var(--text-primary); font-family:var(--font-stack); font-size:0.9rem;
+            transition:var(--transition-fast); resize:vertical; outline:none;
+        }
+        .form-group select { cursor:pointer; resize:none; -webkit-appearance:none; -moz-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a0a0a0' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 0.9rem center; padding-right:2.5rem; }
+        .form-group select option { background:var(--bg-secondary); color:var(--text-primary); }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--accent); }
+        .form-group textarea { min-height:110px; }
+        .form-group-checkbox { display:flex; align-items:flex-start; gap:0.6rem; margin-bottom:1.2rem; }
+        .form-group-checkbox input[type="checkbox"] { width:18px; height:18px; min-width:18px; margin-top:0.15rem; accent-color:var(--accent); cursor:pointer; }
+        .form-group-checkbox label { font-size:0.78rem; color:var(--text-tertiary); line-height:1.4; cursor:pointer; }
+        .btn-submit {
+            width:100%; padding:0.8rem; background:var(--accent); color:#0a0a0a; font-weight:700; font-size:0.95rem;
+            border:none; border-radius:50px; cursor:pointer; transition:var(--transition-fast); letter-spacing:0.02em; margin-top:0.5rem;
+        }
+        .btn-submit:hover { background:#a5a5ff; }
+        .form-feedback { text-align:center; font-weight:500; font-size:0.85rem; margin-top:0.7rem; min-height:1.5rem; }
+        .form-feedback.success { color:#86efac; }
+        .form-feedback.error { color:#fca5a5; }
+
+        /* Location Card */
+        .location-icon { width:56px; height:56px; flex-shrink:0; opacity:0.85; filter:drop-shadow(0 2px 8px rgba(139,139,255,0.15)); }
+        .location-icon img { width:100%; height:100%; object-fit:contain; }
+        [data-theme="light"] .location-icon { filter:none; }
+        .location-info { flex:1; }
+        .location-info h4 { font-size:0.95rem; font-weight:600; color:var(--text-primary); margin-bottom:0.3rem; }
+        .location-info p { font-size:0.8rem; color:var(--text-tertiary); margin:0; line-height:1.5; }
+        .location-badges { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.6rem; }
+        .location-badge {
+            display:inline-flex; align-items:center; gap:0.35rem; padding:0.25rem 0.7rem;
+            background:rgba(139,139,255,0.08); border:1px solid rgba(139,139,255,0.15);
+            border-radius:50px; font-size:0.72rem; font-weight:500; color:var(--accent);
+        }
+        .location-badge .dot {
+            width:6px; height:6px; border-radius:50%; background:#86efac;
+            animation:dotPulse 2s ease-in-out infinite;
+        }
+        @keyframes dotPulse {
+            0%, 100% { opacity:1; box-shadow:0 0 0 0 rgba(134,239,172,0.4); }
+            50% { opacity:0.7; box-shadow:0 0 0 4px rgba(134,239,172,0); }
+        }
+
+        /* Footer */
+        .site-footer { text-align:center; padding:2rem 1.8rem; border-top:1px solid var(--border-subtle); font-size:0.8rem; color:var(--text-tertiary); position:relative; z-index:1; }
+        .site-footer a { color:var(--accent); }
+
+        /* Hidden login */
+        .hidden-login-trigger {
+            position:fixed; bottom:20px; right:20px; width:14px; height:14px; border-radius:50%;
+            background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); z-index:9999; opacity:0.4;
+            transition:opacity 0.3s, transform 0.3s; cursor:default;
+        }
+        /* invisible 44x44 hit-area, keeps visual dot tiny */
+        .hidden-login-trigger::before {
+            content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+            width:44px; height:44px;
+        }
+        .hidden-login-trigger:hover { opacity:1; background:rgba(139,139,255,0.15); border-color:var(--accent); transform:scale(1.3); cursor:pointer; }
+        .login-modal-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:10000;
+            display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s;
+        }
+        .login-modal-overlay.active { opacity:1; pointer-events:all; }
+        .login-modal {
+            background:var(--bg-card); border:1px solid var(--border-medium); border-radius:var(--radius-xl);
+            padding:2.5rem 2rem; width:90%; max-width:360px; text-align:center; position:relative;
+        }
+        .login-modal .modal-logo { width:42px; height:42px; margin:0 auto 1rem; display:block; }
+        .login-modal h3 { font-size:1.1rem; margin-bottom:0.2rem; }
+        .login-modal .modal-subtitle { font-size:0.78rem; color:var(--text-tertiary); margin-bottom:1.5rem; }
+        .login-modal input { width:100%; padding:0.65rem 0.9rem; background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); color:var(--text-primary); font-family:var(--font-stack); font-size:0.9rem; margin-bottom:0.7rem; outline:none; transition:var(--transition-fast); }
+        .login-modal input:focus { border-color:var(--accent); }
+        .login-modal .btn-login { width:100%; padding:0.7rem; background:var(--accent); color:#0a0a0a; font-weight:600; border:none; border-radius:50px; cursor:pointer; transition:var(--transition-fast); margin-top:0.3rem; }
+        .login-modal .btn-login:hover { background:#a5a5ff; }
+        .login-modal .close-modal { position:absolute; top:10px; right:14px; background:none; border:none; color:var(--text-tertiary); font-size:1.4rem; cursor:pointer; padding:4px 8px; border-radius:4px; }
+        .login-modal .close-modal:hover { color:var(--text-primary); background:rgba(255,255,255,0.05); }
+        .login-feedback { font-size:0.8rem; margin-top:0.4rem; min-height:1.2rem; }
+
+        /* Timeline */
+        .timeline-wrapper { margin-top:3.5rem; position:relative; width:100%; max-width: 950px; overflow-x:auto; padding:1rem 0; margin-left: auto; margin-right: auto; }
+        .timeline { display:flex; justify-content:space-between; position:relative; min-width:850px; padding:0 1rem; margin:0 auto; }
+        .timeline::before { content:''; position:absolute; top:20px; left:0; width:100%; height:2px; background:var(--border-medium); z-index:0; }
+        .timeline-item { position:relative; z-index:1; width:18%; text-align:center; display:flex; flex-direction:column; align-items:center; }
+        .timeline-dot { width:42px; height:42px; background:var(--bg-card); border:2px solid var(--accent); border-radius:50%; margin-bottom:1.2rem; box-shadow:0 0 10px var(--accent-soft); display:flex; align-items:center; justify-content:center; transition:var(--transition-smooth); }
+        .timeline-dot::after { content:''; width:12px; height:12px; background:var(--accent); border-radius:50%; transition:var(--transition-smooth); }
+        .timeline-item:hover .timeline-dot { box-shadow:0 0 15px var(--accent); background:var(--bg-secondary); transform:scale(1.1); }
+        .timeline-content { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:1.2rem 1rem; width:100%; transition:var(--transition-smooth); position:relative; }
+        .timeline-item:hover .timeline-content { border-color:var(--border-medium); transform:translateY(-4px); background:var(--bg-card-hover); }
+        .timeline-year { font-size:0.75rem; font-weight:700; color:var(--accent); margin-bottom:0.4rem; letter-spacing:0.05em; display:inline-block; padding:0.2rem 0.6rem; background:rgba(139,139,255,0.1); border-radius:50px; }
+        .timeline-role { font-size:0.85rem; font-weight:600; color:var(--text-primary); margin-bottom:0.3rem; line-height:1.3; }
+        .timeline-company { font-size:0.75rem; color:var(--text-tertiary); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display:none; }
+            .hamburger { display:flex; }
+            .btn-nav-cta.desktop-cta { display:none; }
+            .portfolio-grid { grid-template-columns:1fr; }
+            .services-grid { grid-template-columns:1fr 1fr; }
+            .nav-logo { z-index:1051; }
+            .navbar { z-index:1045; }
+            
+            .timeline-wrapper { overflow-x:visible; padding:0 1rem; }
+            .timeline { flex-direction:column; min-width:100%; gap:2.5rem; padding:0; }
+            .timeline::before { top:0; left:20px; width:2px; height:100%; }
+            .timeline-item { width:100%; flex-direction:row; align-items:flex-start; text-align:left; }
+            .timeline-dot { margin-bottom:0; margin-right:1.5rem; flex-shrink:0; }
+            .timeline-content { width:calc(100% - 60px); margin-top:-5px; }
+        }
+        @media (max-width: 480px) {
+            .services-grid { grid-template-columns:1fr; }
+            .hero-cta-group { flex-direction:column; align-items:center; }
+            .btn-primary, .btn-secondary { width:100%; justify-content:center; }
+        }
+
+        /* ── Gallery Carousel (coverflow con snap) ── */
+        .gallery {
+            --slide-w: min(460px, 76vw);
+            --slide-h: calc(var(--slide-w) * 0.66);
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .gallery-stage {
+            position: relative;
+            height: calc(var(--slide-h) + 4rem);
+            perspective: 1600px;
+            overflow: hidden;
+            cursor: grab;
+            outline: none;
+            touch-action: pan-y;          /* lo scroll verticale resta al browser */
+            -webkit-tap-highlight-color: transparent;
+            /* sfumatura ai bordi: sostituisce la vecchia vignette a colori fissi,
+               così funziona identica in dark e light senza duplicare le regole */
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%);
+                    mask-image: linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%);
+        }
+        .gallery-stage.is-grabbing { cursor: grabbing; }
+        .gallery-stage:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 4px;
+            border-radius: var(--radius-lg);
+        }
+        .gallery-track {
+            position: absolute;
+            inset: 0;
+            transform-style: preserve-3d;
+        }
+        .gallery-slide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: var(--slide-w);
+            height: var(--slide-h);
+            margin: calc(var(--slide-h) / -2) 0 0 calc(var(--slide-w) / -2);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+            transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                        opacity 0.55s ease,
+                        border-color 0.4s ease,
+                        box-shadow 0.4s ease;
+        }
+        /* durante il trascinamento le slide devono seguire il dito senza ritardo */
+        .gallery-track.is-dragging .gallery-slide { transition: none; }
+
+        .gallery-slide[data-active] {
+            border-color: var(--border-medium);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px var(--accent-soft);
+        }
+        /* in light mode l'ombra scura del dark è troppo pesante */
+        [data-theme="light"] .gallery-slide { box-shadow: 0 10px 30px rgba(0,0,0,0.09); }
+        [data-theme="light"] .gallery-slide[data-active] {
+            box-shadow: 0 16px 40px rgba(0,0,0,0.13), 0 0 0 1px var(--accent-soft);
+        }
+        /* velo che scurisce le slide laterali: --dim viene impostato da JS in base alla distanza */
+        .gallery-slide::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--bg-primary);
+            opacity: var(--dim, 0);
+            transition: opacity 0.55s ease;
+            pointer-events: none;
+        }
+        .gallery-slide img,
+        .gallery-slide video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            pointer-events: none;
+            user-select: none;
+        }
+        .gallery-slide img { object-fit: contain; padding: 0.9rem; }
+        .gallery-slide video { object-fit: cover; }
+
+        /* ── Controlli ── */
+        .gallery-ui {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.6rem;
+        }
+        .gallery-nav {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+        .gallery-nav:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+        }
+        .gallery-nav:active { transform: scale(0.94); }
+        .gallery-meta { min-width: 230px; text-align: center; }
+        .gallery-caption {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.3;
+        }
+        .gallery-counter {
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            color: var(--text-tertiary);
+            font-variant-numeric: tabular-nums;
+            margin: 0.15rem 0 0;
+        }
+        .gallery-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-top: 0.7rem;
+        }
+        .gallery-dot {
+            width: 6px;
+            height: 6px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            background: var(--border-medium);
+            cursor: pointer;
+            transition: width 0.35s cubic-bezier(0.22,1,0.36,1), background-color 0.3s ease;
+        }
+        .gallery-dot:hover { background: var(--text-tertiary); }
+        .gallery-dot[aria-selected="true"] {
+            width: 22px;
+            border-radius: 3px;
+            background: var(--accent);
+        }
+        .gallery-hint {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            margin-top: 1rem;
+            opacity: 0;
+            animation: hintFade 4s ease 1.2s forwards;
+        }
+        @keyframes hintFade {
+            0%   { opacity: 0; transform: translateY(4px); }
+            20%  { opacity: 1; transform: translateY(0); }
+            75%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        @media (max-width: 600px) {
+            .gallery { --slide-w: min(300px, 78vw); }
+            .gallery-ui { gap: 0.8rem; }
+            .gallery-meta { min-width: 0; flex: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .gallery-slide, .gallery-slide::after, .gallery-dot { transition: none !important; }
+            .gallery-hint { opacity: 1; animation: none; }
+        }
+
+        /* ── Sezione My Skills (3D) ── */
+        .about-avatar {
+            width:140px; height:140px; object-fit:cover; border-radius:50%;
+            border:2px solid var(--border-subtle);
+            filter:drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+        }
+        .setup-3d-container {
+            position:relative; width:100%; height:75vh; max-height:800px;
+            display:flex; align-items:center; justify-content:center;
+            overflow:hidden; border-radius:var(--radius-md); margin-top:2rem;
+        }
+        .skills-overlay {
+            position:absolute; top:50%; transform:translateY(-50%);
+            display:flex; flex-direction:column; gap:1.5rem; z-index:10; pointer-events:none;
+        }
+        .skills-left  { left:5%; }
+        .skills-right { right:5%; align-items:flex-end; }
+        .skill-badge {
+            background:rgba(255,255,255,0.05);
+            backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+            border:1px solid var(--border-subtle);
+            padding:0.8rem 1.5rem; border-radius:30px;
+            color:var(--text-primary); font-weight:500; font-size:0.95rem;
+            box-shadow:0 4px 15px rgba(0,0,0,0.2);
+            opacity:0; animation:badgeIn 1s ease forwards;
+        }
+        .skills-left  .skill-badge { transform:translateX(-20px); }
+        .skills-right .skill-badge { transform:translateX(20px); }
+        .skills-overlay .skill-badge:nth-child(1) { animation-delay:0.2s; }
+        .skills-overlay .skill-badge:nth-child(2) { animation-delay:0.4s; }
+        .skills-overlay .skill-badge:nth-child(3) { animation-delay:0.6s; }
+        .skills-overlay .skill-badge:nth-child(4) { animation-delay:0.8s; }
+        @keyframes badgeIn { to { opacity:1; transform:translateX(0); } }
+        [data-theme="light"] .skill-badge {
+            background:rgba(0,0,0,0.04);
+            border-color:rgba(0,0,0,0.08);
+        }
+        #gamerModel { width:100%; height:100%; outline:none; }
+        /* Placeholder mentre model-viewer non è ancora caricato: evita il salto di layout */
+        #gamerModel:not(:defined) { display:block; background:transparent; }
+        @media (max-width: 900px) {
+            .setup-3d-container { height:auto; min-height:85vh; padding:2rem 1rem; flex-direction:column; gap:1rem; }
+            .skills-overlay { position:static; transform:none; width:100%; align-items:center; }
+            .skills-left, .skills-right { flex-direction:row; flex-wrap:wrap; justify-content:center; gap:0.8rem; }
+            .skills-left .skill-badge, .skills-right .skill-badge { transform:translateY(12px); }
+            @keyframes badgeIn { to { opacity:1; transform:translateY(0); } }
+            #gamerModel { min-height:350px; flex:1; margin:2rem 0; }
+        }
+
+        /* ── Reduced motion: kill decorative animation, keep functional transitions ── */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration:0.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; }
+            [data-anim] { transition-duration:0.01ms !important; }
+            .hero-logo-svg.float-active, .hero-logo-svg.glow-active, .location-badge .dot { animation:none !important; }
+            .skill-badge { opacity:1 !important; transform:none !important; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar" role="navigation" aria-label="Navigazione">
+        <div class="navbar-inner">
+            <a href="#hero" class="nav-logo" id="navLogoLink">
+                <svg id="navLogoSvg" class="nav-logo-svg nav-idle" viewBox="0 0 370.81 241.16" xmlns="http://www.w3.org/2000/svg" aria-label="Logo">
+                    <defs>
+                        <filter id="nav-logo-glow" filterUnits="userSpaceOnUse">
+                            <feOffset dx="0" dy="0"/>
+                            <feGaussianBlur result="blur" stdDeviation="3"/>
+                            <feFlood flood-color="#8b8bff" flood-opacity="0.25"/>
+                            <feComposite in2="blur" operator="in"/>
+                            <feComposite in="SourceGraphic"/>
+                        </filter>
+                    </defs>
+                    <g filter="url(#nav-logo-glow)">
+                        <path class="logo-path nav-anim-path nav-anim-path-1"
+                            d="m307.82,100.06c-.19-1.45-.39-2.75-.61-3.95-3.01-18.8-9.5-36.79-19.3-53.47-4.11-7-8.83-13.79-14.04-20.19-6.33-7.75-13.43-14.96-21.1-21.47h61.87c30.7,25.67,50.42,60.83,55.59,99.06h-62.42Z" />
+                        <path class="logo-path nav-anim-path nav-anim-path-2"
+                            d="m252.79,240.16c1.89-1.59,3.74-3.25,5.65-5.03,2.68-2.49,4.98-4.76,7.02-6.94,2.93-3.04,5.76-6.24,8.41-9.5,4.48-5.48,8.66-11.35,12.42-17.47.52-.82,1.05-1.7,1.61-2.69.04-.05.07-.11.1-.17.56-.94,1.11-1.91,1.64-2.87.36-.62.7-1.26,1.04-1.9l.32-.6c.44-.81.85-1.62,1.27-2.43.9-1.75,1.7-3.38,2.41-4.92.96-2.05,1.71-3.74,2.38-5.31l.34-.84c.39-.93.78-1.88,1.14-2.83.59-1.48,1.18-3.04,1.79-4.77l.63-1.82c.09-.21.17-.45.24-.68.42-1.21.79-2.36,1.13-3.5.77-2.44,1.5-5.05,2.19-7.76.42-1.69.83-3.42,1.2-5.15.43-2.02.76-3.7,1.04-5.29.16-.89.31-1.78.45-2.68.21-1.19.41-2.48.6-3.94h62.42c-5.17,38.23-24.89,73.39-55.59,99.07h-61.86Z" />
+                        <path class="logo-path-main nav-anim-path nav-anim-path-4"
+                            d="m184.83,240.16c-1.57-1.31-2.98-2.52-4.29-3.7-7.77-6.98-14.87-14.67-21.08-22.83-16.37-21.56-26.84-46.84-30.3-73.1l-.06-.43h-64.44l.07.57c5.03,38.32,24.58,73.61,55.11,99.5h-61.88C27.13,214.36,7.36,178.98,2.31,140.53c-.87-6.57-1.31-13.28-1.31-19.95s.44-13.38,1.31-19.95c2.78-21.19,9.93-41.32,21.24-59.84C32.73,25.8,44.31,12.41,57.98,1h209.87c-1.96,1.67-3.7,3.21-5.29,4.69-.7.62-1.39,1.27-2.04,1.93-1.98,1.88-3.79,3.68-5.5,5.5-.69.7-1.25,1.31-1.77,1.9-1.65,1.77-3.16,3.47-4.59,5.17-.68.8-1.37,1.61-2.01,2.41-1.06,1.3-1.99,2.46-2.82,3.56-.58.73-1.18,1.54-1.84,2.46-.49.66-.99,1.33-1.46,2-.4.56-.8,1.12-1.18,1.67-.91,1.29-1.65,2.38-2.31,3.41-.25.35-.5.71-.71,1.08-.34.49-.67,1.03-1.01,1.57-.89,1.39-1.77,2.84-2.61,4.28l-.03.05c-.04.05-.06.1-.08.14l-.27.47c-.26.45-.52.92-.76,1.36-2.05,3.54-3.93,7.19-5.77,11.12-.69,1.48-1.26,2.73-1.79,4.02l-.04.09c-.06.13-.12.26-.16.4-.55,1.22-1.12,2.6-1.77,4.28-4.56,11.54-7.68,23.63-9.29,35.92-.88,6.61-1.32,13.36-1.32,20.08s.44,13.47,1.32,20.08c1.6,12.29,4.73,24.37,9.29,35.92.65,1.68,1.22,3.05,1.79,4.33.02.08.08.21.14.34l.05.1c.59,1.41,1.23,2.81,1.79,4.01.71,1.5,1.44,2.99,2.19,4.48.48.97,1.01,1.99,1.63,3.11.5.96,1.05,2.01,1.65,3.04.36.67.81,1.47,1.3,2.27.03.07.06.13.1.18l.03.07c.84,1.44,1.73,2.88,2.62,4.28.35.51.67,1.03.99,1.55.23.39.47.76.74,1.12.74,1.14,1.52,2.28,2.3,3.39.38.55.78,1.11,1.18,1.67.47.67.96,1.34,1.46,2.01.65.91,1.25,1.72,1.84,2.46.84,1.1,1.76,2.27,2.82,3.56l.08.09c.63.77,1.27,1.54,1.93,2.32,1.42,1.69,2.93,3.38,4.6,5.18,0,0,1.46,1.57,1.76,1.89,1.71,1.81,3.51,3.62,5.52,5.51.66.64,1.34,1.29,2.03,1.92,1.59,1.48,3.32,3.02,5.29,4.69h-83.02ZM86.12,40.27c-11.38,18.64-18.58,38.91-21.38,60.23l-.07.56h64.44l.06-.44c2.78-21.19,9.93-41.32,21.24-59.84l.46-.76h-64.6l-.15.24Z" />
+                    </g>
+                </svg>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#chi-sono" data-nav-link data-i18n="nav_about">Chi Sono</a></li>
+                <li><a href="#servizi" data-nav-link data-i18n="nav_services">Servizi</a></li>
+                <li><a href="#portfolio" data-nav-link data-i18n="nav_portfolio">Progetti</a></li>
+                <li><a href="#grafiche" data-nav-link data-i18n="nav_graphic">Graphic Design</a></li>
+                <li><a href="#setup-3d" data-nav-link data-i18n="nav_skills">My Skills</a></li>
+                <li><a href="#contatto" data-nav-link data-i18n="nav_contact">Contatto</a></li>
+            </ul>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+                <button class="theme-toggle" id="themeToggle" aria-label="Cambia tema">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+                <button class="lang-toggle" id="langToggle" aria-label="Cambia lingua">EN</button>
+                <a href="#contatto" class="btn-nav-cta desktop-cta" data-i18n="nav_cta">Lavoriamo Insieme</a>
+                <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Full-screen mobile menu overlay -->
+    <div class="mobile-overlay" id="mobileOverlay">
+        <ul class="mobile-overlay-links">
+            <li><a href="#hero" data-mobile-link data-i18n="mob_home">Home</a></li>
+            <li><a href="#chi-sono" data-mobile-link data-i18n="mob_about">Chi Sono</a></li>
+            <li><a href="#servizi" data-mobile-link data-i18n="mob_services">Servizi</a></li>
+            <li><a href="#portfolio" data-mobile-link data-i18n="mob_portfolio">Progetti</a></li>
+            <li><a href="#grafiche" data-mobile-link data-i18n="mob_graphic">Graphic Design</a></li>
+            <li><a href="#setup-3d" data-mobile-link data-i18n="mob_skills">My Skills</a></li>
+            <li><a href="#contatto" data-mobile-link data-i18n="mob_contact">Contatto</a></li>
+        </ul>
+        <div class="mobile-overlay-footer">
+            <button class="theme-toggle-mobile" id="themeToggleMobile" aria-label="Cambia tema">
+                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+            <button class="lang-toggle-mobile" id="langToggleMobile" aria-label="Cambia lingua">EN</button>
+            <a href="#contatto" class="mobile-overlay-cta" data-mobile-link data-i18n="mob_cta">Lavoriamo Insieme →</a>
+        </div>
+    </div>
+
+    <section class="hero section" id="hero">
+        <div class="hero-inner reveal">
+            <!-- Animated Hero Logo -->
+            <div class="hero-logo-wrapper">
+                <svg id="heroAnimatedLogo" class="hero-logo-svg" viewBox="0 0 370.81 241.16" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="hero-logo-glow" filterUnits="userSpaceOnUse">
+                            <feOffset dx="0" dy="0"/>
+                            <feGaussianBlur result="blur" stdDeviation="4"/>
+                            <feFlood flood-color="#8b8bff" flood-opacity="0.3"/>
+                            <feComposite in2="blur" operator="in"/>
+                            <feComposite in="SourceGraphic"/>
+                        </filter>
+                    </defs>
+                    <g filter="url(#hero-logo-glow)">
+                        <path class="logo-path anim-path-1"
+                            d="m307.82,100.06c-.19-1.45-.39-2.75-.61-3.95-3.01-18.8-9.5-36.79-19.3-53.47-4.11-7-8.83-13.79-14.04-20.19-6.33-7.75-13.43-14.96-21.1-21.47h61.87c30.7,25.67,50.42,60.83,55.59,99.06h-62.42Z" />
+                        <path class="logo-path anim-path-2"
+                            d="m252.79,240.16c1.89-1.59,3.74-3.25,5.65-5.03,2.68-2.49,4.98-4.76,7.02-6.94,2.93-3.04,5.76-6.24,8.41-9.5,4.48-5.48,8.66-11.35,12.42-17.47.52-.82,1.05-1.7,1.61-2.69.04-.05.07-.11.1-.17.56-.94,1.11-1.91,1.64-2.87.36-.62.7-1.26,1.04-1.9l.32-.6c.44-.81.85-1.62,1.27-2.43.9-1.75,1.7-3.38,2.41-4.92.96-2.05,1.71-3.74,2.38-5.31l.34-.84c.39-.93.78-1.88,1.14-2.83.59-1.48,1.18-3.04,1.79-4.77l.63-1.82c.09-.21.17-.45.24-.68.42-1.21.79-2.36,1.13-3.5.77-2.44,1.5-5.05,2.19-7.76.42-1.69.83-3.42,1.2-5.15.43-2.02.76-3.7,1.04-5.29.16-.89.31-1.78.45-2.68.21-1.19.41-2.48.6-3.94h62.42c-5.17,38.23-24.89,73.39-55.59,99.07h-61.86Z" />
+                        <path class="logo-path-main anim-path-4"
+                            d="m184.83,240.16c-1.57-1.31-2.98-2.52-4.29-3.7-7.77-6.98-14.87-14.67-21.08-22.83-16.37-21.56-26.84-46.84-30.3-73.1l-.06-.43h-64.44l.07.57c5.03,38.32,24.58,73.61,55.11,99.5h-61.88C27.13,214.36,7.36,178.98,2.31,140.53c-.87-6.57-1.31-13.28-1.31-19.95s.44-13.38,1.31-19.95c2.78-21.19,9.93-41.32,21.24-59.84C32.73,25.8,44.31,12.41,57.98,1h209.87c-1.96,1.67-3.7,3.21-5.29,4.69-.7.62-1.39,1.27-2.04,1.93-1.98,1.88-3.79,3.68-5.5,5.5-.69.7-1.25,1.31-1.77,1.9-1.65,1.77-3.16,3.47-4.59,5.17-.68.8-1.37,1.61-2.01,2.41-1.06,1.3-1.99,2.46-2.82,3.56-.58.73-1.18,1.54-1.84,2.46-.49.66-.99,1.33-1.46,2-.4.56-.8,1.12-1.18,1.67-.91,1.29-1.65,2.38-2.31,3.41-.25.35-.5.71-.71,1.08-.34.49-.67,1.03-1.01,1.57-.89,1.39-1.77,2.84-2.61,4.28l-.03.05c-.04.05-.06.1-.08.14l-.27.47c-.26.45-.52.92-.76,1.36-2.05,3.54-3.93,7.19-5.77,11.12-.69,1.48-1.26,2.73-1.79,4.02l-.04.09c-.06.13-.12.26-.16.4-.55,1.22-1.12,2.6-1.77,4.28-4.56,11.54-7.68,23.63-9.29,35.92-.88,6.61-1.32,13.36-1.32,20.08s.44,13.47,1.32,20.08c1.6,12.29,4.73,24.37,9.29,35.92.65,1.68,1.22,3.05,1.79,4.33.02.08.08.21.14.34l.05.1c.59,1.41,1.23,2.81,1.79,4.01.71,1.5,1.44,2.99,2.19,4.48.48.97,1.01,1.99,1.63,3.11.5.96,1.05,2.01,1.65,3.04.36.67.81,1.47,1.3,2.27.03.07.06.13.1.18l.03.07c.84,1.44,1.73,2.88,2.62,4.28.35.51.67,1.03.99,1.55.23.39.47.76.74,1.12.74,1.14,1.52,2.28,2.3,3.39.38.55.78,1.11,1.18,1.67.47.67.96,1.34,1.46,2.01.65.91,1.25,1.72,1.84,2.46.84,1.1,1.76,2.27,2.82,3.56l.08.09c.63.77,1.27,1.54,1.93,2.32,1.42,1.69,2.93,3.38,4.6,5.18,0,0,1.46,1.57,1.76,1.89,1.71,1.81,3.51,3.62,5.52,5.51.66.64,1.34,1.29,2.03,1.92,1.59,1.48,3.32,3.02,5.29,4.69h-83.02ZM86.12,40.27c-11.38,18.64-18.58,38.91-21.38,60.23l-.07.56h64.44l.06-.44c2.78-21.19,9.93-41.32,21.24-59.84l.46-.76h-64.6l-.15.24Z" />
+                    </g>
+                </svg>
+            </div>
+
+            <p class="section-label" data-i18n="hero_label">Full-Stack Developer · AI & Automation</p>
+            <h1 data-i18n="hero_title">Sviluppo applicazioni full‑stack stabili, integrate con AI e automatizzate per scalare il tuo business.</h1>
+            <p class="subtitle" data-i18n="hero_subtitle">
+                Unisco competenze back‑end e front‑end, gestisco database Supabase, creo automazioni con n8n e Zapier,
+                e realizzo asset grafici vettoriali per un prodotto completo e professionale.
+            </p>
+            <div class="hero-cta-group">
+                <a href="#contatto" class="btn-primary" data-i18n="hero_cta1">Richiedi una Consulenza</a>
+                <a href="#portfolio" class="btn-primary" data-i18n="hero_cta2">Vedi i Progetti</a>
+            </div>
+            <div class="tech-badges">
+                <span class="tech-badge">Supabase</span>
+                <span class="tech-badge">Node.js</span>
+                <span class="tech-badge">n8n</span>
+                <span class="tech-badge">AI / LLM</span>
+                <span class="tech-badge">Zapier</span>
+                <span class="tech-badge">Vector Design</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="chi-sono">
+        <div class="section-header">
+            <p class="section-label" data-anim="label" data-i18n="about_label">Chi Sono</p>
+            <div data-anim="text-reveal"><h2 data-i18n="about_title">Filosofia &amp; Approccio</h2></div>
+            <span class="accent-line" data-anim="line-wipe" data-delay="2"></span>
+        </div>
+        <div class="about-content">
+            <div class="about-intro-row" data-anim="scale-up">
+                <div class="about-image">
+                    <img src="asset/opt/me.webp" alt="Alessandro Cherchi" class="about-avatar"
+                         width="140" height="140" loading="lazy" decoding="async">
+                    <h3 class="about-name">Alessandro Cherchi</h3>
+                    <p class="about-role" data-i18n="about_role">Full-Stack Developer</p>
+                </div>
+                <div class="about-intro-location">
+                    <div class="location-icon">
+                        <img src="asset/opt/sardinia.svg" alt="Sardegna" width="44" height="44" loading="lazy" decoding="async">
+                    </div>
+                    <div class="location-info">
+                        <h4 data-i18n="location_title">📍 Based in Sardegna, Italia</h4>
+                        <p data-i18n="location_desc">Disponibile per collaborazioni in tutta Italia e a livello internazionale.</p>
+                        <div class="location-badges">
+                            <span class="location-badge"><span class="dot"></span> <span data-i18n="location_remote">Remote</span></span>
+                            <span class="location-badge" data-i18n="location_hybrid">Hybrid</span>
+                            <span class="location-badge" data-i18n="location_onsite">On-site (Sardegna)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p data-anim="fade-up" data-delay="1" data-i18n="about_p1">
+                Sono uno sviluppatore <strong>Full-Stack Middle</strong> orientato all'efficienza.
+                Ogni progetto che seguo deve essere <strong>stabile, scalabile e automatizzato</strong>.
+                Grazie all'integrazione di <strong>AI</strong> e a workflow con <strong>n8n e Zapier</strong>,
+                trasformo processi complessi in soluzioni fluide che fanno risparmiare tempo e risorse.
+            </p>
+            <p style="margin-top:1rem;" data-anim="fade-up" data-delay="2" data-i18n="about_p2">
+                Il mio plus? Creo <strong>asset grafici vettoriali</strong> direttamente, senza intermediari:
+                coerenza visiva, performance ottimizzate e controllo totale sul prodotto finale.
+                <strong>Risultati concreti, codice pulito, design che converte.</strong>
+            </p>
+        </div>
+
+        <div class="section-header" style="margin-top: 2rem;">
+            <p class="section-label" data-anim="label" data-i18n="exp_label">Esperienza</p>
+            <div data-anim="text-reveal"><h2 data-i18n="exp_title">Esperienze Trasversali</h2></div>
+            <span class="accent-line" data-anim="line-wipe" data-delay="2"></span>
+        </div>
+
+        <div class="timeline-wrapper" data-anim="fade-up" data-delay="3">
+            <div class="timeline" data-stagger>
+                <div class="timeline-item" data-anim="fade-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" data-i18n="timeline_year1">2013 - 2017</div>
+                        <h4 class="timeline-role" data-i18n="timeline_role1">Responsabile di Magazzino</h4>
+                        <p class="timeline-company" data-i18n="timeline_company1">Varese</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-anim="fade-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" data-i18n="timeline_year2">2018 - 2020</div>
+                        <h4 class="timeline-role" data-i18n="timeline_role2">Addetto Vendita</h4>
+                        <p class="timeline-company" data-i18n="timeline_company2">Eurospin</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-anim="fade-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" data-i18n="timeline_year3">2020 - 2023</div>
+                        <h4 class="timeline-role" data-i18n="timeline_role3">Capo Reparto GDO</h4>
+                        <p class="timeline-company" data-i18n="timeline_company3">GDO</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-anim="fade-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" data-i18n="timeline_year4">2023 - 2024</div>
+                        <h4 class="timeline-role" data-i18n="timeline_role4">Responsabile Logistica</h4>
+                        <p class="timeline-company" data-i18n="timeline_company4">Nieddu</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-anim="fade-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" data-i18n="timeline_year5">2025 - Attualmente</div>
+                        <h4 class="timeline-role" data-i18n="timeline_role5">Capo Reparto</h4>
+                        <p class="timeline-company" data-i18n="timeline_company5">Gruppo Conad</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section-header" style="margin-top: 4rem;">
+            <p class="section-label" data-anim="label" data-i18n="edu_label">Formazione & Tech</p>
+            <div data-anim="text-reveal"><h2 data-i18n="edu_title">Studi & Progetti Freelance</h2></div>
+        </div>
+
+        <div class="timeline-wrapper" data-anim="fade-up" data-delay="1">
+            <div class="timeline" data-stagger>
+                <div class="timeline-item" data-anim="fade-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" data-i18n="edu_year1">2013 - 2017</div>
+                        <h4 class="timeline-role" data-i18n="edu_role1">Sviluppo ERP & Siti Web</h4>
+                        <p class="timeline-company" data-i18n="edu_desc1">Sito aziendale e sistemi ERP</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-anim="fade-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" data-i18n="edu_year2">2015</div>
+                        <h4 class="timeline-role" data-i18n="edu_role2">Perito Informatico</h4>
+                        <p class="timeline-company" data-i18n="edu_desc2">Votazione: 86/100</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-anim="fade-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" data-i18n="edu_year3">2018</div>
+                        <h4 class="timeline-role" data-i18n="edu_role3">Freelance Designer</h4>
+                        <p class="timeline-company" data-i18n="edu_desc3">Loghi e Grafica Vettoriale</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-anim="fade-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" data-i18n="edu_year4">Dal 2020</div>
+                        <h4 class="timeline-role" data-i18n="edu_role4">Freelance Dev</h4>
+                        <p class="timeline-company" data-i18n="edu_desc4">Sviluppo Frontend & Backend</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-anim="fade-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" data-i18n="edu_year5">2025</div>
+                        <h4 class="timeline-role" data-i18n="edu_role5">AI & Automation</h4>
+                        <p class="timeline-company" data-i18n="edu_desc5">Sviluppo Workflow</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-anim="fade-up">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" data-i18n="edu_year6">Gen 2026 - Mag 2026</div>
+                        <h4 class="timeline-role" data-i18n="edu_role6">Contractor Developer</h4>
+                        <p class="timeline-company" data-i18n="edu_desc6">MindLead LLC</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="servizi">
+        <div class="section-header">
+            <p class="section-label" data-anim="label" data-i18n="services_label">Cosa Faccio</p>
+            <div data-anim="text-reveal"><h2 data-i18n="services_title">Servizi &amp; Competenze</h2></div>
+            <span class="accent-line" data-anim="line-wipe" data-delay="2"></span>
+        </div>
+        <div class="services-grid" data-stagger>
+            <div class="service-card" data-anim="scale-up">
+                <div class="service-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
+                </div>
+                <h3 data-i18n="service1_title">Full-Stack Dev &amp; Supabase</h3>
+                <p data-i18n="service1_desc">Applicazioni web complete con back‑end robusto, autenticazione e database gestiti tramite Supabase.</p>
+            </div>
+            <div class="service-card" data-anim="scale-up">
+                <div class="service-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <h3 data-i18n="service2_title">AI Integration</h3>
+                <p data-i18n="service2_desc">Integro modelli di intelligenza artificiale per automatizzare analisi, contenuti e decisioni.</p>
+            </div>
+            <div class="service-card" data-anim="scale-up">
+                <div class="service-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v4H4zM4 10h16v4H4zM4 16h16v4H4z"/></svg>
+                </div>
+                <h3 data-i18n="service3_title">Workflow Automation</h3>
+                <p data-i18n="service3_desc">Automazioni avanzate con n8n e Zapier per connettere servizi e ridurre il lavoro manuale.</p>
+            </div>
+            <div class="service-card" data-anim="scale-up">
+                <div class="service-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/></svg>
+                </div>
+                <h3 data-i18n="service4_title">UI &amp; Vector Design</h3>
+                <p data-i18n="service4_desc">Interfacce pulite e asset vettoriali scalabili, curati personalmente per coerenza visiva.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="portfolio">
+        <div class="section-header">
+            <p class="section-label" data-anim="label" data-i18n="portfolio_label">Portfolio</p>
+            <div data-anim="text-reveal"><h2 data-i18n="portfolio_title">Progetti Recenti</h2></div>
+            <span class="accent-line" data-anim="line-wipe" data-delay="2"></span>
+        </div>
+        <div class="portfolio-grid" data-stagger>
+            <div class="project-card" data-anim="fade-up">
+                <div class="project-image"><img src="asset/opt/nexus-crm.webp" alt="Anteprima Nexus CRM Enterprise" width="1000" height="563" loading="lazy" decoding="async"></div>
+                <div class="project-info">
+                    <h3 data-i18n="project2_title">Automazione CRM</h3>
+                    <p class="project-desc" data-i18n="project2_desc">Flussi automatici che collegano CRM, email e notifiche con n8n e Zapier.</p>
+                    <div class="project-tags">
+                        <span class="project-tag">n8n</span><span class="project-tag">Zapier</span><span class="project-tag">Automation</span>
+                    </div>
+                    <a href="https://crm2k26dev.netlify.app" target="_blank" rel="noopener noreferrer" class="project-link"><span data-i18n="project_link_view">Vai all'App</span> <span>→</span></a>
+                </div>
+            </div>
+            <div class="project-card" data-anim="fade-up">
+                <div class="project-image"><img src="asset/opt/gen-barcode.webp" alt="Anteprima generatore EAN-13" width="1000" height="563" loading="lazy" decoding="async"></div>
+                <div class="project-info">
+                    <h3 data-i18n="project4_title">Generatore EAN-13 GDO</h3>
+                    <p class="project-desc" data-i18n="project4_desc">Applicativo per la generazione massiva di codici a barre EAN-13 vettoriali.</p>
+                    <div class="project-tags">
+                        <span class="project-tag">JavaScript</span><span class="project-tag">SVG</span><span class="project-tag">Tool</span>
+                    </div>
+                    <a href="EAN13%20GENERATOR/barcode-generator.html?demo=1" class="project-link"><span data-i18n="project_link_view">Vai all'App</span> <span>→</span></a>
+                </div>
+            </div>
+            <div class="project-card" data-anim="fade-up">
+                <div class="project-image"><img src="asset/opt/smartaxle.webp" alt="Anteprima SmartAxle calcolatore distribuzione pesi flotta" width="1000" height="563" loading="lazy" decoding="async"></div>
+                <div class="project-info">
+                    <h3 data-i18n="project5_title">SmartAxle – Distribuzione Pesi</h3>
+                    <p class="project-desc" data-i18n="project5_desc">Calcolatore di carichi per asse, baricentro e conformità CdS per flotte LCV e HGV.</p>
+                    <div class="project-tags">
+                        <span class="project-tag">JavaScript</span><span class="project-tag">Logistica</span><span class="project-tag">Tool</span>
+                    </div>
+                    <a href="BILANCIASSE/smartaxle_calcolatore_distribuzione_pesi_flotta.html" class="project-link"><span data-i18n="project_link_view">Vai all'App</span> <span>→</span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="grafiche" style="padding:5rem 1.8rem; max-width:none; width:100%;">
+        <div class="section-header">
+            <p class="section-label" data-anim="label" data-i18n="graphic_label">UI &amp; Vector Design</p>
+            <div data-anim="text-reveal"><h2 data-i18n="graphic_title">Graphic Design</h2></div>
+            <span class="accent-line" data-anim="line-wipe" data-delay="2"></span>
+        </div>
+        <div class="gallery" data-anim="fade-up" id="gallery">
+            <div class="gallery-stage" id="galleryStage" tabindex="0"
+                 role="group" aria-roledescription="carousel"
+                 aria-label="Galleria lavori di graphic design"
+                 aria-describedby="galleryHint">
+                <div class="gallery-track" id="galleryTrack"></div>
+            </div>
+
+            <div class="gallery-ui">
+                <button class="gallery-nav" id="galleryPrev" type="button" aria-label="Lavoro precedente" data-i18n-label="gallery_prev">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+
+                <div class="gallery-meta">
+                    <p class="gallery-caption" id="galleryCaption" aria-live="polite"></p>
+                    <p class="gallery-counter" id="galleryCounter"></p>
+                    <div class="gallery-dots" id="galleryDots" role="tablist" aria-label="Scegli un lavoro"></div>
+                </div>
+
+                <button class="gallery-nav" id="galleryNext" type="button" aria-label="Lavoro successivo" data-i18n-label="gallery_next">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+
+            <p class="gallery-hint" id="galleryHint" data-i18n="ring_hint">Trascina, scorri o usa le frecce</p>
+        </div>
+    </section>
+
+    <section class="section" id="setup-3d" style="padding-top: 2rem;">
+        <div class="section-header">
+            <p class="section-label" data-anim="label">Tech Stack &amp; Workflow</p>
+            <div data-anim="text-reveal"><h2>My Skills</h2></div>
+            <span class="accent-line" data-anim="line-wipe" data-delay="2"></span>
+        </div>
+        <div class="setup-3d-container" data-anim="fade-up">
+            <div class="skills-overlay skills-left">
+                <span class="skill-badge">JavaScript</span>
+                <span class="skill-badge">Node.js</span>
+                <span class="skill-badge">React</span>
+                <span class="skill-badge">Supabase</span>
+            </div>
+
+            <div class="skills-overlay skills-right">
+                <span class="skill-badge">AI Agents</span>
+                <span class="skill-badge">AI Automation</span>
+                <span class="skill-badge">Adobe Illustrator</span>
+                <span class="skill-badge">Adobe Photoshop</span>
+            </div>
+
+            <!-- src impostato via JS solo quando la sezione si avvicina (modello 1.2 MB + libreria 300 KB) -->
+            <model-viewer
+                id="gamerModel"
+                data-src="asset/opt/pc_gamer.glb"
+                alt="Setup PC gamer in 3D"
+                camera-controls
+                interaction-prompt="none"
+                disable-zoom
+                shadow-intensity="1.2"
+                exposure="1"
+            ></model-viewer>
+        </div>
+    </section>
+
+    <section class="section" id="contatto">
+        <div class="section-header">
+            <p class="section-label" data-anim="label" data-i18n="contact_label">Contatto</p>
+            <div data-anim="text-reveal"><h2 data-i18n="contact_title">Parliamo del Tuo Progetto</h2></div>
+            <span class="accent-line" data-anim="line-wipe" data-delay="2"></span>
+        </div>
+        <div class="contact-form-wrapper" data-anim="scale-up">
+            <form id="contactForm" novalidate>
+                <div class="form-group">
+                    <label for="name" data-i18n="contact_name">Nome</label>
+                    <input type="text" id="name" name="name" placeholder="Il tuo nome" data-i18n-placeholder="contact_name_ph" required autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label for="email" data-i18n="contact_email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="La tua email" data-i18n-placeholder="contact_email_ph" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="requestType" data-i18n="contact_type">Tipo di Richiesta</label>
+                    <select id="requestType" name="requestType" required>
+                        <option value="" disabled selected data-i18n="contact_type_ph">Seleziona...</option>
+                        <option value="Consulenza" data-i18n="contact_type_1">Consulenza</option>
+                        <option value="Progetto Web" data-i18n="contact_type_2">Progetto Web</option>
+                        <option value="Automazione" data-i18n="contact_type_3">Automazione</option>
+                        <option value="Graphic Design" data-i18n="contact_type_4">Graphic Design</option>
+                        <option value="Altro" data-i18n="contact_type_5">Altro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="budget" data-i18n="contact_budget">Budget Indicativo</label>
+                    <select id="budget" name="budget">
+                        <option value="" disabled selected data-i18n="contact_budget_ph">Seleziona...</option>
+                        <option value="< 500€">&lt; 500€</option>
+                        <option value="500 - 1000€">500 - 1.000€</option>
+                        <option value="1000 - 3000€">1.000 - 3.000€</option>
+                        <option value="3000€+">3.000€+</option>
+                        <option value="Da definire" data-i18n="contact_budget_tbd">Da definire</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="referral" data-i18n="contact_referral">Come mi hai trovato?</label>
+                    <select id="referral" name="referral">
+                        <option value="" disabled selected data-i18n="contact_referral_ph">Seleziona...</option>
+                        <option value="LinkedIn">LinkedIn</option>
+                        <option value="Google">Google</option>
+                        <option value="Passaparola" data-i18n="contact_referral_wom">Passaparola</option>
+                        <option value="GitHub">GitHub</option>
+                        <option value="Altro" data-i18n="contact_referral_other">Altro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="message" data-i18n="contact_message">Messaggio</label>
+                    <textarea id="message" name="message" placeholder="Descrivi il tuo progetto..." data-i18n-placeholder="contact_message_ph" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="projectLink" data-i18n="contact_link">Link Progetto / Brief (opzionale)</label>
+                    <input type="url" id="projectLink" name="projectLink" placeholder="https://..." data-i18n-placeholder="contact_link_ph">
+                </div>
+                <div class="form-group-checkbox">
+                    <input type="checkbox" id="gdprConsent" name="gdprConsent" required>
+                    <label for="gdprConsent" data-i18n="contact_gdpr">Acconsento al trattamento dei miei dati personali ai sensi del GDPR per essere ricontattato in merito alla mia richiesta.</label>
+                </div>
+                <button type="submit" class="btn-submit" data-i18n="contact_submit">Invia Richiesta</button>
+                <div class="form-feedback" id="formFeedback" aria-live="polite"></div>
+            </form>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div style="display:flex; justify-content:center; margin-bottom:1rem;">
+            <a href="#hero" style="display:inline-flex;" aria-label="Torna all'inizio">
+                <img src="asset/opt/logo-ac.svg" alt="Alessandro Cherchi" class="logo-icon"
+                     width="52" height="36" style="height:36px;width:auto;" loading="lazy" decoding="async">
+            </a>
+        </div>
+        <p>&copy; <span id="currentYear"></span> <span data-i18n="footer_author">Alessandro Cherchi — Full-Stack Developer AI & Automation</span></p>
+        <p style="margin-top:0.2rem;"><span data-i18n="footer_built">Costruito con cura, orientato ai</span> <a href="#servizi" data-i18n="footer_results">risultati</a>.</p>
+    </footer>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Alessandro Cherchi",
+      "jobTitle": "Full-Stack Developer — AI & Automation",
+      "description": "Sviluppo applicazioni full-stack stabili, integrate con AI e automatizzate. Supabase, n8n, Zapier, Vector Design.",
+      "address": { "@type": "PostalAddress", "addressRegion": "Sardegna", "addressCountry": "IT" },
+      "knowsAbout": ["JavaScript", "Node.js", "React", "Supabase", "n8n", "Zapier", "AI Automation", "Vector Design"]
+    }
+    </script>
+
+    <!-- Hidden login trigger -->
+    <div class="hidden-login-trigger" id="hiddenLoginTrigger" role="button" tabindex="0" title="Accesso riservato" aria-label="Area riservata"></div>
+
+    <div class="login-modal-overlay" id="loginModalOverlay">
+        <div class="login-modal">
+            <button class="close-modal" id="closeLoginModal" aria-label="Chiudi">&times;</button>
+            <img src="asset/opt/logo-ac.svg" alt="" class="modal-logo" width="42" height="42" loading="lazy" decoding="async">
+            <h3 data-i18n="login_title">Accesso Riservato</h3>
+            <p class="modal-subtitle" data-i18n="login_subtitle">Area amministrativa portfolio</p>
+            <form id="loginForm" novalidate>
+                <input type="text" id="loginUser" placeholder="Username" data-i18n-placeholder="login_user_ph" required autocomplete="off">
+                <input type="password" id="loginPass" placeholder="Password" data-i18n-placeholder="login_pass_ph" required autocomplete="off">
+                <button type="submit" class="btn-login" data-i18n="login_submit">Accedi</button>
+                <div class="login-feedback" id="loginFeedback" aria-live="polite"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ── i18n / Translations ──
+        (function() {
+            const translations = {
+                it: {
+                    nav_about: "Chi Sono",
+                    nav_services: "Servizi",
+                    nav_portfolio: "Progetti",
+                    nav_graphic: "Graphic Design",
+                    nav_contact: "Contatto",
+                    nav_cta: "Lavoriamo Insieme",
+                    mob_home: "Home",
+                    mob_about: "Chi Sono",
+                    mob_services: "Servizi",
+                    mob_portfolio: "Progetti",
+                    mob_graphic: "Graphic Design",
+                    mob_contact: "Contatto",
+                    mob_cta: "Lavoriamo Insieme →",
+                    hero_label: "Full-Stack Developer · AI & Automation",
+                    hero_title: "Sviluppo applicazioni full‑stack stabili, integrate con AI e automatizzate per scalare il tuo business.",
+                    hero_subtitle: "Unisco competenze back‑end e front‑end, gestisco database Supabase, creo automazioni con n8n e Zapier, e realizzo asset grafici vettoriali per un prodotto completo e professionale.",
+                    hero_cta1: "Richiedi una Consulenza",
+                    hero_cta2: "Vedi i Progetti",
+                    about_role: "Full-Stack Developer",
+                    about_label: "Chi Sono",
+                    about_title: "Filosofia & Approccio",
+                    about_p1: "Sono uno sviluppatore <strong>Full-Stack Middle</strong> orientato all'efficienza. Ogni progetto che seguo deve essere <strong>stabile, scalabile e automatizzato</strong>. Grazie all'integrazione di <strong>AI</strong> e a workflow con <strong>n8n e Zapier</strong>, trasformo processi complessi in soluzioni fluide che fanno risparmiare tempo e risorse.",
+                    about_p2: "Il mio plus? Creo <strong>asset grafici vettoriali</strong> direttamente, senza intermediari: coerenza visiva, performance ottimizzate e controllo totale sul prodotto finale. <strong>Risultati concreti, codice pulito, design che converte.</strong>",
+                    timeline_year1: "2013 - 2017",
+                    timeline_role1: "Responsabile di Magazzino",
+                    timeline_company1: "Varese",
+                    timeline_year2: "2018 - 2020",
+                    timeline_role2: "Addetto Vendita",
+                    timeline_company2: "Eurospin",
+                    timeline_year3: "2020 - 2023",
+                    timeline_role3: "Capo Reparto GDO",
+                    timeline_company3: "GDO",
+                    timeline_year4: "2023 - 2024",
+                    timeline_role4: "Responsabile Logistica",
+                    timeline_company4: "Nieddu",
+                    timeline_year5: "2025 - Attualmente",
+                    timeline_role5: "Capo Reparto",
+                    timeline_company5: "Gruppo Conad",
+                    edu_label: "Formazione & Tech",
+                    edu_title: "Studi & Progetti Freelance",
+                    edu_year1: "2013 - 2017",
+                    edu_role1: "Sviluppo ERP & Siti Web",
+                    edu_desc1: "Sito aziendale e sistemi ERP",
+                    edu_year2: "2015",
+                    edu_role2: "Perito Informatico",
+                    edu_desc2: "Votazione: 86/100",
+                    edu_year3: "2018",
+                    edu_role3: "Freelance Designer",
+                    edu_desc3: "Loghi e Grafica Vettoriale",
+                    edu_year4: "Dal 2020",
+                    edu_role4: "Freelance Dev",
+                    edu_desc4: "Sviluppo Frontend & Backend",
+                    edu_year5: "2025",
+                    edu_role5: "AI & Automation",
+                    edu_desc5: "Sviluppo Workflow",
+                    services_label: "Cosa Faccio",
+                    services_title: "Servizi & Competenze",
+                    service1_title: "Full-Stack Dev & Supabase",
+                    service1_desc: "Applicazioni web complete con back‑end robusto, autenticazione e database gestiti tramite Supabase.",
+                    service2_title: "AI Integration",
+                    service2_desc: "Integro modelli di intelligenza artificiale per automatizzare analisi, contenuti e decisioni.",
+                    service3_title: "Workflow Automation",
+                    service3_desc: "Automazioni avanzate con n8n e Zapier per connettere servizi e ridurre il lavoro manuale.",
+                    service4_title: "UI & Vector Design",
+                    service4_desc: "Interfacce pulite e asset vettoriali scalabili, curati personalmente per coerenza visiva.",
+                    portfolio_label: "Portfolio",
+                    portfolio_title: "Progetti Recenti",
+                    project1_graphic: "Dashboard SaaS",
+                    project1_title: "Analytics SaaS con AI",
+                    project1_desc: "Dashboard full‑stack con insight generati da AI e autenticazione Supabase.",
+                    project2_graphic: "Workflow Automator",
+                    project2_title: "Automazione CRM",
+                    project2_desc: "Flussi automatici che collegano CRM, email e notifiche con n8n e Zapier.",
+                    project3_graphic: "Brand Generator",
+                    project3_title: "Generatore di Brand Kit",
+                    project3_desc: "Tool AI per loghi vettoriali e palette, esportazione SVG ottimizzata.",
+                    project4_graphic: "EAN-13 Generator",
+                    project4_title: "Generatore EAN-13 GDO",
+                    project4_desc: "Applicativo per la generazione massiva di codici a barre EAN-13 vettoriali.",
+                    project5_title: "SmartAxle – Distribuzione Pesi",
+                    project5_desc: "Calcolatore di carichi per asse, baricentro e conformità CdS per flotte LCV e HGV.",
+                    project_link_case: "Vedi Caso Studio",
+                    project_link_github: "Vedi su GitHub",
+                    project_link_view: "Vai all'App",
+                    graphic_label: "UI & Vector Design",
+                    graphic_title: "Graphic Design",
+                    ring_hint: "Trascina, scorri o usa le frecce",
+                    gallery_prev: "Lavoro precedente",
+                    gallery_next: "Lavoro successivo",
+                    contact_label: "Contatto",
+                    contact_title: "Parliamo del Tuo Progetto",
+                    contact_name: "Nome",
+                    contact_name_ph: "Il tuo nome",
+                    contact_email: "Email",
+                    contact_email_ph: "La tua email",
+                    contact_type: "Tipo di Richiesta",
+                    contact_type_ph: "Seleziona...",
+                    contact_type_1: "Consulenza",
+                    contact_type_2: "Progetto Web",
+                    contact_type_3: "Automazione",
+                    contact_type_4: "Graphic Design",
+                    contact_type_5: "Altro",
+                    contact_budget: "Budget Indicativo",
+                    contact_budget_ph: "Seleziona...",
+                    contact_budget_tbd: "Da definire",
+                    contact_referral: "Come mi hai trovato?",
+                    contact_referral_ph: "Seleziona...",
+                    contact_referral_wom: "Passaparola",
+                    contact_referral_other: "Altro",
+                    contact_message: "Messaggio",
+                    contact_message_ph: "Descrivi il tuo progetto...",
+                    contact_link: "Link Progetto / Brief (opzionale)",
+                    contact_link_ph: "https://...",
+                    contact_gdpr: "Acconsento al trattamento dei miei dati personali ai sensi del GDPR per essere ricontattato in merito alla mia richiesta.",
+                    contact_submit: "Invia Richiesta",
+                    location_title: "📍 Based in Sardegna, Italia",
+                    location_desc: "Disponibile per collaborazioni in tutta Italia e a livello internazionale.",
+                    location_remote: "Remote",
+                    location_hybrid: "Ibrido",
+                    location_onsite: "In sede (Sardegna)",
+                    exp_label: "Esperienza",
+                    exp_title: "Esperienze Trasversali",
+                    edu_year6: "Gen 2026 - Mag 2026",
+                    edu_role6: "Contractor Developer",
+                    edu_desc6: "MindLead LLC",
+                    footer_author: "Alessandro Cherchi — Full-Stack Developer AI & Automation",
+                    footer_built: "Costruito con cura, orientato ai",
+                    footer_results: "risultati",
+                    login_title: "Accesso Riservato",
+                    login_subtitle: "Area amministrativa portfolio",
+                    login_user_ph: "Username",
+                    login_pass_ph: "Password",
+                    login_submit: "Accedi"
+                },
+                en: {
+                    nav_about: "About",
+                    nav_services: "Services",
+                    nav_portfolio: "Projects",
+                    nav_graphic: "Graphic Design",
+                    nav_contact: "Contact",
+                    nav_cta: "Let's Work Together",
+                    mob_home: "Home",
+                    mob_about: "About",
+                    mob_services: "Services",
+                    mob_portfolio: "Projects",
+                    mob_graphic: "Graphic Design",
+                    mob_contact: "Contact",
+                    mob_cta: "Let's Work Together →",
+                    hero_label: "Full-Stack Developer · AI & Automation",
+                    hero_title: "I build stable, full-stack applications integrated with AI and automation to scale your business.",
+                    hero_subtitle: "I combine back-end and front-end skills, manage Supabase databases, create automations with n8n and Zapier, and design vector graphics for a complete and professional product.",
+                    hero_cta1: "Request a Consultation",
+                    hero_cta2: "View Projects",
+                    about_role: "Full-Stack Developer",
+                    about_label: "About Me",
+                    about_title: "Philosophy & Approach",
+                    about_p1: "I am an efficiency-oriented <strong>Mid-level Full-Stack Developer</strong>. Every project I work on must be <strong>stable, scalable, and automated</strong>. By integrating <strong>AI</strong> and workflows with <strong>n8n and Zapier</strong>, I transform complex processes into seamless solutions that save time and resources.",
+                    about_p2: "My added value? I create <strong>vector graphics</strong> directly, without intermediaries: visual consistency, optimized performance, and total control over the final product. <strong>Concrete results, clean code, design that converts.</strong>",
+                    timeline_year1: "2013 - 2017",
+                    timeline_role1: "Warehouse Manager",
+                    timeline_company1: "Varese",
+                    timeline_year2: "2018 - 2020",
+                    timeline_role2: "Sales Assistant",
+                    timeline_company2: "Eurospin",
+                    timeline_year3: "2020 - 2023",
+                    timeline_role3: "Department Manager / Sales",
+                    timeline_company3: "GDO",
+                    timeline_year4: "2023 - 2024",
+                    timeline_role4: "Logistics Manager",
+                    timeline_company4: "Nieddu",
+                    timeline_year5: "2025 - Present",
+                    timeline_role5: "Department Manager",
+                    timeline_company5: "Gruppo Conad",
+                    edu_label: "Education & Tech",
+                    edu_title: "Studies & Freelance Projects",
+                    edu_year1: "2013 - 2017",
+                    edu_role1: "ERP & Web Development",
+                    edu_desc1: "Corporate systems & ERPs",
+                    edu_year2: "2015",
+                    edu_role2: "IT Diploma",
+                    edu_desc2: "Grade: 86/100",
+                    edu_year3: "2018",
+                    edu_role3: "Freelance Designer",
+                    edu_desc3: "Logos & Vector Graphics",
+                    edu_year4: "Since 2020",
+                    edu_role4: "Freelance Dev",
+                    edu_desc4: "Frontend & Backend Development",
+                    edu_year5: "2025",
+                    edu_role5: "AI & Automation",
+                    edu_desc5: "Workflow Development",
+                    services_label: "What I Do",
+                    services_title: "Services & Skills",
+                    service1_title: "Full-Stack Dev & Supabase",
+                    service1_desc: "Complete web applications with a robust back-end, authentication, and databases managed via Supabase.",
+                    service2_title: "AI Integration",
+                    service2_desc: "I integrate artificial intelligence models to automate analysis, content, and decisions.",
+                    service3_title: "Workflow Automation",
+                    service3_desc: "Advanced automations with n8n and Zapier to connect services and reduce manual work.",
+                    service4_title: "UI & Vector Design",
+                    service4_desc: "Clean interfaces and scalable vector assets, personally crafted for visual consistency.",
+                    portfolio_label: "Portfolio",
+                    portfolio_title: "Recent Projects",
+                    project1_graphic: "SaaS Dashboard",
+                    project1_title: "AI Analytics SaaS",
+                    project1_desc: "Full-stack dashboard with AI-generated insights and Supabase authentication.",
+                    project2_graphic: "Workflow Automator",
+                    project2_title: "CRM Automation",
+                    project2_desc: "Automated flows connecting CRM, email, and notifications using n8n and Zapier.",
+                    project3_graphic: "Brand Generator",
+                    project3_title: "Brand Kit Generator",
+                    project3_desc: "AI tool for vector logos and palettes, optimized SVG export.",
+                    project4_graphic: "EAN-13 Generator",
+                    project4_title: "EAN-13 Generator",
+                    project4_desc: "Tool for bulk generation of vector EAN-13 barcodes.",
+                    project5_title: "SmartAxle – Weight Distribution",
+                    project5_desc: "Axle load, centre-of-gravity and road-compliance calculator for LCV and HGV fleets.",
+                    project_link_case: "View Case Study",
+                    project_link_github: "View on GitHub",
+                    project_link_view: "Go to App",
+                    graphic_label: "UI & Vector Design",
+                    graphic_title: "Graphic Design",
+                    ring_hint: "Drag, scroll or use the arrows",
+                    gallery_prev: "Previous work",
+                    gallery_next: "Next work",
+                    contact_label: "Contact",
+                    contact_title: "Let's Discuss Your Project",
+                    contact_name: "Name",
+                    contact_name_ph: "Your name",
+                    contact_email: "Email",
+                    contact_email_ph: "Your email",
+                    contact_type: "Request Type",
+                    contact_type_ph: "Select...",
+                    contact_type_1: "Consultation",
+                    contact_type_2: "Web Project",
+                    contact_type_3: "Automation",
+                    contact_type_4: "Graphic Design",
+                    contact_type_5: "Other",
+                    contact_budget: "Estimated Budget",
+                    contact_budget_ph: "Select...",
+                    contact_budget_tbd: "To be defined",
+                    contact_referral: "How did you find me?",
+                    contact_referral_ph: "Select...",
+                    contact_referral_wom: "Word of mouth",
+                    contact_referral_other: "Other",
+                    contact_message: "Message",
+                    contact_message_ph: "Describe your project...",
+                    contact_link: "Project Link / Brief (optional)",
+                    contact_link_ph: "https://...",
+                    contact_gdpr: "I consent to the processing of my personal data under the GDPR to be contacted regarding my request.",
+                    contact_submit: "Send Request",
+                    location_title: "📍 Based in Sardinia, Italy",
+                    location_desc: "Available for collaborations across Italy and internationally.",
+                    location_remote: "Remote",
+                    location_hybrid: "Hybrid",
+                    location_onsite: "On-site (Sardinia)",
+                    exp_label: "Experience",
+                    exp_title: "Cross-Industry Experience",
+                    edu_year6: "Jan 2026 - May 2026",
+                    edu_role6: "Contractor Developer",
+                    edu_desc6: "MindLead LLC",
+                    footer_author: "Alessandro Cherchi — Full-Stack Developer AI & Automation",
+                    footer_built: "Built with care, oriented to",
+                    footer_results: "results",
+                    login_title: "Restricted Access",
+                    login_subtitle: "Portfolio administrative area",
+                    login_user_ph: "Username",
+                    login_pass_ph: "Password",
+                    login_submit: "Login"
+                }
+            };
+
+            const root = document.documentElement;
+            // La lingua è già stata scritta su <html lang> dallo script anti-FOUC nell'<head>
+            let currentLang = translations[root.getAttribute('lang')] ? root.getAttribute('lang') : 'it';
+
+            // Nodi tradotti raccolti UNA volta sola: prima si ri-facevano 2 querySelectorAll a ogni switch
+            const textNodes = Array.from(document.querySelectorAll('[data-i18n]'))
+                .map(el => ({ el, key: el.dataset.i18n }));
+            const phNodes = Array.from(document.querySelectorAll('[data-i18n-placeholder]'))
+                .map(el => ({ el, key: el.dataset.i18nPlaceholder }));
+            const labelNodes = Array.from(document.querySelectorAll('[data-i18n-label]'))
+                .map(el => ({ el, key: el.dataset.i18nLabel }));
+            const langBtns = document.querySelectorAll('#langToggle, #langToggleMobile');
+
+            function updateLanguage() {
+                const dict = translations[currentLang];
+                root.setAttribute('lang', currentLang);
+
+                for (const { el, key } of textNodes) {
+                    const val = dict[key];
+                    if (val === undefined) continue;
+                    // innerHTML solo dove la stringa contiene davvero markup (<strong>)
+                    if (val.indexOf('<') === -1) el.textContent = val;
+                    else el.innerHTML = val;
+                }
+                for (const { el, key } of phNodes) {
+                    const val = dict[key];
+                    if (val !== undefined) el.placeholder = val;
+                }
+                for (const { el, key } of labelNodes) {
+                    const val = dict[key];
+                    if (val !== undefined) el.setAttribute('aria-label', val);
+                }
+                const label = currentLang === 'it' ? 'EN' : 'IT';
+                langBtns.forEach(btn => {
+                    btn.textContent = label;
+                    btn.setAttribute('aria-label', currentLang === 'it' ? 'Switch to English' : 'Passa all\'italiano');
+                });
+            }
+
+            function toggleLanguage() {
+                currentLang = currentLang === 'it' ? 'en' : 'it';
+                try { localStorage.setItem('lang', currentLang); } catch (e) {}
+                updateLanguage();
+            }
+
+            langBtns.forEach(btn => btn.addEventListener('click', toggleLanguage));
+
+            updateLanguage();
+            window.getCurrentLang = () => currentLang;
+        })();
+
+        (function() {
+            const root = document.documentElement;
+            const navbar = document.getElementById('navbar');
+            const hamburger = document.getElementById('hamburger');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            const contactForm = document.getElementById('contactForm');
+            const formFeedback = document.getElementById('formFeedback');
+            const currentYearSpan = document.getElementById('currentYear');
+            const hiddenLoginTrigger = document.getElementById('hiddenLoginTrigger');
+            const loginModalOverlay = document.getElementById('loginModalOverlay');
+            const closeLoginModal = document.getElementById('closeLoginModal');
+            const loginForm = document.getElementById('loginForm');
+            const loginFeedback = document.getElementById('loginFeedback');
+
+            if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+
+            // ── Tema ──
+            // Il tema iniziale è già applicato dallo script inline nell'<head>: qui solo il toggle.
+            // Una sola funzione condivisa da desktop e mobile (prima era duplicata due volte).
+            function toggleTheme() {
+                const toLight = root.getAttribute('data-theme') !== 'light';
+                if (toLight) root.setAttribute('data-theme', 'light');
+                else root.removeAttribute('data-theme');
+                try { localStorage.setItem('theme', toLight ? 'light' : 'dark'); } catch (e) {}
+            }
+            document.querySelectorAll('#themeToggle, #themeToggleMobile')
+                .forEach(btn => btn.addEventListener('click', toggleTheme));
+
+            // ── Navbar: classe .scrolled letta in rAF, mai durante l'evento scroll ──
+            let navTicking = false;
+            function handleNavScroll() {
+                if (navTicking) return;
+                navTicking = true;
+                requestAnimationFrame(() => {
+                    navbar.classList.toggle('scrolled', window.scrollY > 20);
+                    navTicking = false;
+                });
+            }
+            window.addEventListener('scroll', handleNavScroll, { passive: true });
+            navbar.classList.toggle('scrolled', window.scrollY > 20);
+
+            // ── Nav Logo: animazione assembly/disassembly al hover e touch ──
+            (function() {
+                const navLogo = document.getElementById('navLogoLink');
+                const navSvg  = document.getElementById('navLogoSvg');
+                if (!navLogo || !navSvg) return;
+
+                let hoverTimer = null;
+
+                function setHover() {
+                    clearTimeout(hoverTimer);
+                    navSvg.classList.remove('nav-idle');
+                    navSvg.classList.add('nav-hover');
+                }
+                function setIdle(delay) {
+                    clearTimeout(hoverTimer);
+                    hoverTimer = setTimeout(() => {
+                        navSvg.classList.remove('nav-hover');
+                        navSvg.classList.add('nav-idle');
+                    }, delay || 30);
+                }
+
+                navLogo.addEventListener('mouseenter', setHover);
+                navLogo.addEventListener('mouseleave', () => setIdle(30));
+                navLogo.addEventListener('touchstart', setHover, { passive: true });
+                navLogo.addEventListener('touchend', () => setIdle(200), { passive: true });
+            })();
+
+            // ── Menu mobile ──
+            function setMenu(open) {
+                mobileOverlay.classList.toggle('active', open);
+                hamburger.classList.toggle('active', open);
+                hamburger.setAttribute('aria-expanded', String(open));
+                document.body.style.overflow = open ? 'hidden' : '';
+            }
+            hamburger.addEventListener('click', () => setMenu(!mobileOverlay.classList.contains('active')));
+            document.querySelectorAll('[data-mobile-link]')
+                .forEach(link => link.addEventListener('click', () => setMenu(false)));
+
+            // ── Scroll Animation Engine ──
+            (function() {
+                // Uno stagger parent NON deve essere osservato due volte: si usa un Set.
+                const targets = new Set(document.querySelectorAll('[data-anim], .reveal, [data-stagger]'));
+
+                const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                if (reduced || !('IntersectionObserver' in window)) {
+                    targets.forEach(el => {
+                        el.classList.add('anim-in', 'visible');
+                        Array.from(el.children).forEach(c => c.classList.add('anim-in'));
+                    });
+                    return;
+                }
+
+                const observer = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (!entry.isIntersecting) continue;
+                        const el = entry.target;
+                        el.classList.add('anim-in', 'visible');
+                        // I ritardi progressivi dei figli arrivano dalle regole CSS [data-stagger] > *:nth-child
+                        if (el.hasAttribute('data-stagger')) {
+                            for (const child of el.children) child.classList.add('anim-in');
+                        }
+                        observer.unobserve(el);
+                    }
+                }, { rootMargin: '0px 0px -60px 0px', threshold: 0.08 });
+
+                targets.forEach(el => observer.observe(el));
+            })();
+
+            // ── Escape: un solo listener per menu e modale login ──
+            document.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape') return;
+                if (loginModalOverlay.classList.contains('active')) { closeLogin(); return; }
+                if (mobileOverlay.classList.contains('active')) { setMenu(false); hamburger.focus(); }
+            });
+            // ── Contact form (Formspree) ──
+            // Un solo t() invece di richiamare window.getCurrentLang() otto volte.
+            const t = (it, en) => (window.getCurrentLang() === 'en' ? en : it);
+            function say(msg, kind) {
+                formFeedback.textContent = msg;
+                formFeedback.className = 'form-feedback' + (kind ? ' ' + kind : '');
+            }
+
+            contactForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                // FormData: niente 8 getElementById, e i nuovi campi vengono raccolti da soli
+                const data = Object.fromEntries(new FormData(contactForm).entries());
+                const name = (data.name || '').trim();
+                const email = (data.email || '').trim();
+                const message = (data.message || '').trim();
+
+                if (!name || !email || !message || !data.requestType) {
+                    return say(t('Compila tutti i campi obbligatori.', 'Please fill in all required fields.'), 'error');
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    return say(t('Inserisci un\'email valida.', 'Please enter a valid email.'), 'error');
+                }
+                if (!contactForm.gdprConsent.checked) {
+                    return say(t('Accetta l\'informativa sulla privacy.', 'Please accept the privacy policy.'), 'error');
+                }
+
+                const btn = contactForm.querySelector('.btn-submit');
+                const original = btn.textContent;
+                btn.textContent = t('Invio...', 'Sending...');
+                btn.disabled = true;
+                btn.style.opacity = '0.7';
+
+                fetch('https://formspree.io/f/mzdneyyd', {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Form submission failed');
+                    say(t('Messaggio inviato con successo!', 'Message sent successfully!'), 'success');
+                    contactForm.reset();
+                    setTimeout(() => say('', ''), 5000);
+                })
+                .catch(() => say(t('Errore nell\'invio. Riprova.', 'Error sending message. Please try again.'), 'error'))
+                .finally(() => {
+                    btn.textContent = original;
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                });
+            });
+
+            // ── Modale "area riservata" ──
+            // NOTA: è una demo puramente visiva. Qualunque controllo di credenziali lato client
+            // è leggibile nel sorgente e aggirabile: se un giorno serve un'area davvero protetta,
+            // l'autenticazione va fatta su server (es. Supabase Auth), mai qui.
+            const DEMO_USER = 'admin';
+            const DEMO_PASS = 'portfolio2026';
+            let lastFocused = null;
+
+            function openLogin() {
+                lastFocused = document.activeElement;
+                loginModalOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                requestAnimationFrame(() => document.getElementById('loginUser').focus());
+            }
+            function closeLogin() {
+                loginModalOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+                loginFeedback.textContent = '';
+                loginForm.reset();
+                if (lastFocused) lastFocused.focus();
+            }
+
+            hiddenLoginTrigger.addEventListener('click', openLogin);
+            hiddenLoginTrigger.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLogin(); }
+            });
+            closeLoginModal.addEventListener('click', closeLogin);
+            loginModalOverlay.addEventListener('click', (e) => { if (e.target === loginModalOverlay) closeLogin(); });
+
+            loginForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const user = document.getElementById('loginUser').value.trim();
+                const pass = document.getElementById('loginPass').value;
+                if (!user || !pass) {
+                    loginFeedback.textContent = t('Inserisci credenziali.', 'Enter credentials.');
+                    loginFeedback.style.color = '#fca5a5';
+                    return;
+                }
+                const ok = user === DEMO_USER && pass === DEMO_PASS;
+                loginFeedback.textContent = ok
+                    ? t('Accesso riuscito (simulazione).', 'Login successful (simulation).')
+                    : t('Credenziali non valide.', 'Invalid credentials.');
+                loginFeedback.style.color = ok ? '#86efac' : '#fca5a5';
+                if (ok) setTimeout(closeLogin, 1500);
+            });
+        })();
+
+        // ── Hero Animated Logo: Stroke draw + 3D assembly ──
+        (function() {
+            const svg = document.getElementById('heroAnimatedLogo');
+            if (!svg) return;
+
+            const paths = Array.from(svg.querySelectorAll('path'));
+            const staggerDelays = [0.3, 0.5, 0.7, 0.9]; // seconds, matching CSS animation delays
+            const drawDuration = 2; // seconds for stroke draw
+
+            // Con reduced-motion il logo appare e basta: niente 9 timer e niente glow infinito
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                svg.classList.add('animated');
+                paths.forEach(p => { p.style.fillOpacity = '1'; });
+                return;
+            }
+
+            // getTotalLength() è un reflow forzato: si misura UNA volta e si riusa
+            // (prima veniva chiamato due volte per path).
+            const lengths = paths.map(path => {
+                const length = path.getTotalLength();
+                path.style.strokeDasharray = length;
+                path.style.strokeDashoffset = length;
+                path.style.fillOpacity = '0';
+                return length;
+            });
+
+            requestAnimationFrame(() => {
+                svg.classList.add('animated');
+
+                paths.forEach((path, i) => {
+                    setTimeout(() => {
+                        path.style.transition = `stroke-dashoffset ${drawDuration}s cubic-bezier(0.22, 1, 0.36, 1), fill-opacity 0.8s ease`;
+                        path.style.strokeDashoffset = '0';
+                        setTimeout(() => { path.style.fillOpacity = '1'; }, (drawDuration - 0.4) * 1000);
+                    }, (staggerDelays[i] || 0.3) * 1000);
+                });
+
+                const totalAnimTime = (staggerDelays[staggerDelays.length - 1] + drawDuration + 0.5) * 1000;
+                setTimeout(() => svg.classList.add('glow-active'), totalAnimTime);
+            });
+
+            // Il glow è un drop-shadow animato a ciclo infinito: costa GPU anche fuori schermo.
+            // Lo si sospende quando l'hero non è visibile.
+            if ('IntersectionObserver' in window) {
+                new IntersectionObserver(([entry]) => {
+                    svg.style.animationPlayState = entry.isIntersecting ? '' : 'paused';
+                }, { threshold: 0 }).observe(svg);
+            }
+        })();
+
+        // ── Gallery Carousel: coverflow con snap, drag, wheel, tastiera e autoplay ──
+        (function () {
+            var stage = document.getElementById('galleryStage');
+            var track = document.getElementById('galleryTrack');
+            var dotsBox = document.getElementById('galleryDots');
+            var caption = document.getElementById('galleryCaption');
+            var counter = document.getElementById('galleryCounter');
+            var prevBtn = document.getElementById('galleryPrev');
+            var nextBtn = document.getElementById('galleryNext');
+            if (!stage || !track) return;
+
+            var ITEMS = [
+                { type: 'image', src: 'asset/opt/DESIGNGRAPHIC.webp', it: 'Graphic Design — Tunnel',  en: 'Graphic Design — Tunnel'  },
+                { type: 'image', src: 'asset/opt/D.svg',              it: 'Monogramma D',             en: 'Monogram D'               },
+                { type: 'image', src: 'asset/opt/SUPPLY.svg',         it: 'Supply — Identity',        en: 'Supply — Identity'        },
+                { type: 'video', src: 'asset/opt/prova2.mp4',         it: 'Motion Design',            en: 'Motion Design'            },
+                { type: 'image', src: 'asset/opt/maglietta.webp',     it: 'Design T-Shirt',           en: 'T-Shirt Design'           },
+                { type: 'image', src: 'asset/opt/risorsa-1.svg',      it: 'Poster vettoriale',        en: 'Vector Poster'            },
+                { type: 'image', src: 'asset/opt/GRAFICA.webp',       it: 'Grafica — Prospettiva',    en: 'Graphic — Perspective'    }
+            ];
+
+            // il titolo segue la lingua scelta nel selettore IT/EN
+            function titleOf(item) {
+                return item[window.getCurrentLang ? window.getCurrentLang() : 'it'] || item.it;
+            }
+
+            var N = ITEMS.length;
+
+            // Geometria del coverflow
+            var VISIBLE = 2;      // quante slide per lato restano a schermo
+            var GAP     = 0.54;   // spostamento orizzontale, in frazioni di larghezza slide
+            var ANGLE   = 32;     // gradi di rotazione Y per ogni passo
+            var DEPTH   = 150;    // px di allontanamento per ogni passo
+            var SHRINK  = 0.13;   // riduzione di scala per ogni passo
+            var AUTOPLAY_MS = 5500;   // metti 0 per disattivare l'avanzamento automatico
+
+            var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            var pos = 0;              // posizione corrente (frazionaria mentre si trascina)
+            var slides = [];
+            var dots = [];
+            var videos = [];
+            var slideW = 0;
+            var renderQueued = false;
+
+            // ── Costruzione slide ──
+            ITEMS.forEach(function (item, i) {
+                var slide = document.createElement('div');
+                slide.className = 'gallery-slide';
+                slide.dataset.index = i;
+
+                var media;
+                if (item.type === 'video') {
+                    media = document.createElement('video');
+                    media.src = item.src;
+                    media.loop = true;
+                    media.muted = true;
+                    media.defaultMuted = true;
+                    media.preload = 'none';    // scarica solo quando la slide diventa attiva
+                    media.setAttribute('playsinline', '');
+                    media.setAttribute('webkit-playsinline', '');
+                    videos.push({ el: media, index: i });
+                } else {
+                    media = document.createElement('img');
+                    media.src = item.src;
+                    media.alt = titleOf(item);
+                    media.loading = 'lazy';
+                    media.decoding = 'async';
+                }
+                slide.appendChild(media);
+                track.appendChild(slide);
+                slides.push(slide);
+
+                var dot = document.createElement('button');
+                dot.type = 'button';
+                dot.className = 'gallery-dot';
+                dot.setAttribute('role', 'tab');
+                dot.setAttribute('aria-label', titleOf(item));
+                dot.addEventListener('click', function () { goTo(i, true); });
+                dotsBox.appendChild(dot);
+                dots.push(dot);
+            });
+
+            function measure() {
+                var w = slides[0].getBoundingClientRect().width;
+                // --slide-w usa min(460px, 76vw): al primo giro il viewport può non essere
+                // ancora dimensionato e la misura torna ~0. Si tiene l'ultimo valore valido.
+                if (w > 10) slideW = w;
+                else if (!slideW) slideW = Math.min(460, stage.offsetWidth * 0.76) || 400;
+            }
+
+            // Distanza con segno da `pos` a `i`, sempre per la via più corta (l'anello è infinito)
+            function delta(i) {
+                var d = ((i - pos) % N + N) % N;
+                if (d > N / 2) d -= N;
+                return d;
+            }
+
+            function activeIndex() {
+                return ((Math.round(pos) % N) + N) % N;
+            }
+
+            function render() {
+                renderQueued = false;
+                var active = activeIndex();
+
+                for (var i = 0; i < N; i++) {
+                    var slide = slides[i];
+                    var d = delta(i);
+                    var ad = Math.abs(d);
+
+                    if (ad > VISIBLE + 0.6) {
+                        slide.style.visibility = 'hidden';
+                        continue;
+                    }
+                    slide.style.visibility = 'visible';
+                    slide.style.transform =
+                        'translate3d(' + (d * GAP * slideW).toFixed(2) + 'px, 0, ' + (-ad * DEPTH).toFixed(2) + 'px)' +
+                        ' rotateY(' + (-d * ANGLE).toFixed(2) + 'deg)' +
+                        ' scale(' + Math.max(0.4, 1 - ad * SHRINK).toFixed(3) + ')';
+                    slide.style.opacity = ad > VISIBLE ? '0' : '1';
+                    slide.style.zIndex = String(Math.round(100 - ad * 10));
+                    slide.style.setProperty('--dim', Math.min(0.6, ad * 0.32).toFixed(2));
+
+                    var isActive = i === active;
+                    slide.toggleAttribute('data-active', isActive);
+                    slide.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+                }
+
+                for (var k = 0; k < N; k++) {
+                    dots[k].setAttribute('aria-selected', k === active ? 'true' : 'false');
+                }
+                caption.textContent = titleOf(ITEMS[active]);
+                counter.textContent = String(active + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
+                syncVideos(active);
+            }
+
+            // Una sola scrittura di stile per frame, anche se il pointer emette 10 eventi
+            function scheduleRender() {
+                if (renderQueued) return;
+                renderQueued = true;
+                requestAnimationFrame(render);
+            }
+
+            function goTo(index, fromUser) {
+                // si muove verso l'indice richiesto passando dal lato più corto
+                pos = Math.round(pos) + delta(((index % N) + N) % N);
+                if (fromUser) stopAutoplay();
+                scheduleRender();
+            }
+            function step(dir, fromUser) {
+                pos = Math.round(pos) + dir;
+                if (fromUser) stopAutoplay();
+                scheduleRender();
+            }
+
+            // ── Video: decodifica solo la slide attiva, e solo se la sezione è a schermo ──
+            var sectionVisible = true;
+            function syncVideos(active) {
+                videos.forEach(function (v) {
+                    // si scarica già quando è adiacente: così al centro mostra subito il primo
+                    // fotogramma invece di un rettangolo nero
+                    if (v.el.preload === 'none' && Math.abs(delta(v.index)) <= 1) v.el.preload = 'auto';
+                    if (v.index === active && sectionVisible) v.el.play().catch(function () {});
+                    else v.el.pause();
+                });
+            }
+
+            // ── Drag / swipe con Pointer Events ──
+            var dragging = false, startX = 0, startPos = 0, lastX = 0, lastT = 0, vel = 0, moved = false;
+
+            stage.addEventListener('pointerdown', function (e) {
+                if (e.button !== undefined && e.button !== 0) return;
+                dragging = true;
+                moved = false;
+                startX = lastX = e.clientX;
+                startPos = pos;
+                vel = 0;
+                lastT = e.timeStamp;
+                track.classList.add('is-dragging');
+                stage.classList.add('is-grabbing');
+                stage.setPointerCapture(e.pointerId);
+                stopAutoplay();
+            });
+
+            stage.addEventListener('pointermove', function (e) {
+                if (!dragging) return;
+                var dx = e.clientX - startX;
+                if (Math.abs(dx) > 4) moved = true;
+                pos = startPos - dx / (GAP * slideW);
+
+                var dt = e.timeStamp - lastT;
+                if (dt > 0) vel = (e.clientX - lastX) / dt;   // px per ms
+                lastX = e.clientX;
+                lastT = e.timeStamp;
+                scheduleRender();
+            });
+
+            function endDrag(e) {
+                if (!dragging) return;
+                dragging = false;
+                track.classList.remove('is-dragging');
+                stage.classList.remove('is-grabbing');
+                if (e.pointerId !== undefined && stage.hasPointerCapture(e.pointerId)) {
+                    stage.releasePointerCapture(e.pointerId);
+                }
+                // lo slancio del gesto vale al massimo una slide in più
+                var flick = Math.max(-1, Math.min(1, Math.round(-vel * 2.2)));
+                pos = Math.round(pos + flick);
+                scheduleRender();
+            }
+            stage.addEventListener('pointerup', endDrag);
+            stage.addEventListener('pointercancel', endDrag);
+
+            // click su una slide laterale = portala al centro (ma non dopo un trascinamento)
+            stage.addEventListener('click', function (e) {
+                if (moved) return;
+                var slide = e.target.closest('.gallery-slide');
+                if (slide && !slide.hasAttribute('data-active')) goTo(Number(slide.dataset.index), true);
+            });
+
+            // ── Rotella / trackpad orizzontale ──
+            var wheelLock = false;
+            stage.addEventListener('wheel', function (e) {
+                var dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+                if (!dx) return;               // scroll verticale puro: lascialo alla pagina
+                e.preventDefault();
+                if (wheelLock) return;
+                wheelLock = true;
+                setTimeout(function () { wheelLock = false; }, 320);
+                step(dx > 0 ? 1 : -1, true);
+            }, { passive: false });
+
+            // ── Tastiera ──
+            stage.addEventListener('keydown', function (e) {
+                var handled = true;
+                if (e.key === 'ArrowRight') step(1, true);
+                else if (e.key === 'ArrowLeft') step(-1, true);
+                else if (e.key === 'Home') goTo(0, true);
+                else if (e.key === 'End') goTo(N - 1, true);
+                else handled = false;
+                if (handled) e.preventDefault();
+            });
+
+            prevBtn.addEventListener('click', function () { step(-1, true); });
+            nextBtn.addEventListener('click', function () { step(1, true); });
+
+            // ── Autoplay: si ferma su hover, focus, drag, fuori schermo o scheda in background ──
+            var autoTimer = null;
+            function startAutoplay() {
+                if (!AUTOPLAY_MS || reduced || autoTimer) return;
+                autoTimer = setInterval(function () { step(1, false); }, AUTOPLAY_MS);
+            }
+            function pauseAutoplay() {
+                if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+            }
+            var userStopped = false;
+            function stopAutoplay() { userStopped = true; pauseAutoplay(); }
+
+            stage.addEventListener('pointerenter', pauseAutoplay);
+            stage.addEventListener('pointerleave', function () { if (!userStopped && sectionVisible) startAutoplay(); });
+            stage.addEventListener('focusin', pauseAutoplay);
+            document.addEventListener('visibilitychange', function () {
+                if (document.hidden) pauseAutoplay();
+                else if (!userStopped && sectionVisible) startAutoplay();
+            });
+
+            // ── La larghezza slide entra nel calcolo delle posizioni: va riletta a ogni resize ──
+            // ResizeObserver scatta anche al primo layout, quindi copre pure il caso in cui
+            // la misura iniziale non fosse ancora disponibile.
+            measure();
+            render();
+
+            if ('ResizeObserver' in window) {
+                var lastW = 0;
+                new ResizeObserver(function () {
+                    measure();
+                    if (Math.abs(slideW - lastW) < 1) return;
+                    lastW = slideW;
+                    render();
+                }).observe(stage);
+            } else {
+                var resizeTimer = null;
+                window.addEventListener('resize', function () {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(function () { measure(); render(); }, 150);
+                }, { passive: true });
+            }
+
+            if ('IntersectionObserver' in window) {
+                new IntersectionObserver(function (entries) {
+                    sectionVisible = entries[0].isIntersecting;
+                    if (sectionVisible && !userStopped) startAutoplay();
+                    else pauseAutoplay();
+                    syncVideos(activeIndex());
+                }, { threshold: 0.25 }).observe(stage);
+            } else {
+                startAutoplay();
+            }
+
+            // al cambio lingua i testi della galleria non sono in [data-i18n]: vanno riscritti a mano
+            document.querySelectorAll('#langToggle, #langToggleMobile').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    ITEMS.forEach(function (item, i) {
+                        var t = titleOf(item);
+                        dots[i].setAttribute('aria-label', t);
+                        var img = slides[i].querySelector('img');
+                        if (img) img.alt = t;
+                    });
+                    caption.textContent = titleOf(ITEMS[activeIndex()]);
+                });
+            });
+        })();
+
+        // ── Sezione 3D: libreria (~300 KB) e modello (1.2 MB) caricati solo all'avvicinarsi ──
+        (function () {
+            var mv = document.getElementById('gamerModel');
+            if (!mv) return;
+
+            var MV_SRC = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js';
+            var started = false;
+
+            function start() {
+                if (started) return;
+                started = true;
+
+                var s = document.createElement('script');
+                s.type = 'module';
+                s.src = MV_SRC;
+                document.head.appendChild(s);
+
+                mv.src = mv.dataset.src;
+                mv.addEventListener('load', bindScrollScrub, { once: true });
+            }
+
+            // Scrub dell'animazione con lo scroll, ma:
+            //  - il valore si scrive in rAF, non a ogni evento scroll
+            //  - il listener resta attivo solo mentre il modello è in viewport
+            function bindScrollScrub() {
+                var duration = mv.duration || 0;
+                if (!duration) return;
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+                var ticking = false;
+                function update() {
+                    ticking = false;
+                    var rect = mv.getBoundingClientRect();
+                    var vh = window.innerHeight;
+                    var progress = (vh - rect.top) / (vh + rect.height);
+                    mv.currentTime = Math.max(0, Math.min(1, progress)) * duration;
+                }
+                function onScroll() {
+                    if (ticking) return;
+                    ticking = true;
+                    requestAnimationFrame(update);
+                }
+
+                if ('IntersectionObserver' in window) {
+                    new IntersectionObserver(function (entries) {
+                        if (entries[0].isIntersecting) window.addEventListener('scroll', onScroll, { passive: true });
+                        else window.removeEventListener('scroll', onScroll);
+                    }, { rootMargin: '100px' }).observe(mv);
+                } else {
+                    window.addEventListener('scroll', onScroll, { passive: true });
+                }
+                update();
+            }
+
+            if ('IntersectionObserver' in window) {
+                new IntersectionObserver(function (entries, obs) {
+                    if (!entries[0].isIntersecting) return;
+                    obs.disconnect();
+                    start();
+                }, { rootMargin: '400px' }).observe(mv);   // 400px di anticipo: pronto prima di arrivarci
+            } else {
+                start();
+            }
+        })();
+    </script>
+</body>
+</html>

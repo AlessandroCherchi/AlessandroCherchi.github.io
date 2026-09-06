@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Pizza d'Autore — Pizzeria artigianale di alta gamma. Impasto a 48h, forno a legna, ingredienti DOP.">
+  <meta name="theme-color" content="#0d0d0d">
+  <title>Pizza d'Autore | Pizzeria Artigianale di Alta Gamma</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+
+  <style>
+    :root {
+      --bg-deep: #0d0d0d;
+      --bg-surface: #141414;
+      --bg-card: #1a1a1a;
+      --bg-card-hover: #222;
+      --border-subtle: rgba(229, 193, 88, .08);
+      --border-gold: rgba(229, 193, 88, .20);
+      --gold: #E5C158;
+      --gold-soft: rgba(229, 193, 88, .12);
+      --gold-glow: rgba(229, 193, 88, .25);
+      --tomato: #C84B31;
+      --tomato-soft: rgba(200, 75, 49, .15);
+      --basil: #4a8c3f;
+      --basil-soft: rgba(74, 140, 63, .15);
+      --text-cream: #F4F1EA;
+      --text-muted: #b3ad9f;
+      --text-dim: #847d75;
+      --font-heading: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --radius-full: 9999px;
+      --transition-fast: .2s cubic-bezier(.4, 0, .2, 1);
+      --transition-smooth: .4s cubic-bezier(.4, 0, .2, 1);
+      --max-width: 1200px;
+      --nav-height: 72px;
+      --z-canvas: 0;
+      --z-story: 10;
+      --z-content: 20;
+      --z-nav: 50;
+      --z-overlay: 60;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text-cream);
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    img {
+      max-width: 100%;
+      display: block
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+      border-radius: var(--radius-sm)
+    }
+
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 1.8rem
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-heading);
+      font-weight: 500;
+      line-height: 1.1;
+      letter-spacing: -.01em
+    }
+
+    em {
+      font-style: italic;
+      color: var(--gold)
+    }
+
+    /* ── NAV ── */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: var(--nav-height);
+      z-index: var(--z-nav);
+      display: flex;
+      align-items: center;
+      transition: var(--transition-smooth);
+      background: transparent;
+      border-bottom: 1px solid transparent;
+    }
+
+    .navbar.scrolled {
+      background: rgba(13, 13, 13, .82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom-color: var(--border-subtle)
+    }
+
+    .navbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: .7rem
+    }
+
+    .nav-brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+      background: radial-gradient(circle at 35% 30%, var(--gold), #a8842f);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 18px var(--gold-glow);
+    }
+
+    .nav-brand-icon svg {
+      width: 20px;
+      height: 20px;
+      color: #0d0d0d
+    }
+
+    .nav-brand-text {
+      font-family: var(--font-heading);
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: .01em
+    }
+
+    .nav-brand-text span {
+      color: var(--gold);
+      font-style: italic
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2.2rem
+    }
+
+    .nav-links a {
+      font-size: .86rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color var(--transition-fast);
+      position: relative
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      width: 0;
+      height: 1px;
+      background: var(--gold);
+      transition: width var(--transition-fast)
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus-visible {
+      color: var(--text-cream)
+    }
+
+    .nav-links a:hover::after {
+      width: 100%
+    }
+
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .62rem 1.5rem;
+      background: var(--gold);
+      color: #0d0d0d;
+      font-weight: 700;
+      font-size: .82rem;
+      border-radius: var(--radius-full);
+      transition: var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .nav-cta:hover {
+      background: #f0d178;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--gold-glow)
+    }
+
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      min-width: 44px;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center
+    }
+
+    .nav-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text-cream);
+      border-radius: 2px;
+      transition: var(--transition-smooth)
+    }
+
+    .nav-toggle.active span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg)
+    }
+
+    .nav-toggle.active span:nth-child(2) {
+      opacity: 0
+    }
+
+    .nav-toggle.active span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg)
+    }
+
+    .mobile-menu {
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-overlay);
+      background: var(--bg-deep);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.6rem;
+      clip-path: circle(0% at calc(100% - 40px) 36px);
+      transition: clip-path .6s cubic-bezier(.22, 1, .36, 1);
+      pointer-events: none;
+    }
+
+    .mobile-menu.active {
+      clip-path: circle(150% at calc(100% - 40px) 36px);
+      pointer-events: all
+    }
+
+    .mobile-menu a {
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      color: var(--text-cream);
+      transition: color var(--transition-fast)
+    }
+
+    .mobile-menu a:hover {
+      color: var(--gold)
+    }
+
+    /* ── WEBGL STAGE ── */
+    #webgl {
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-canvas);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    #webgl.ready {
+      opacity: 1
+    }
+
+    #webgl canvas {
+      display: block;
+      width: 100%;
+      height: 100%
+    }
+
+    /* vignette + ambient warmth over canvas */
+    .stage-grade {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 55% at 50% 45%, rgba(229, 193, 88, .07) 0%, transparent 65%),
+        radial-gradient(ellipse 120% 90% at 50% 50%, transparent 40%, rgba(13, 13, 13, .75) 100%);
+    }
+
+    .stage-fire {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(200, 75, 49, .28) 0%, transparent 70%);
+      mix-blend-mode: screen;
+    }
+
+    /* ── SCROLLYTELLING ── */
+    #story {
+      position: relative;
+      z-index: var(--z-story);
+      height: 760vh
+    }
+
+    .story-panels {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: var(--z-story);
+      display: grid;
+      align-items: center;
+      justify-items: start;
+      padding-left: max(1.8rem, calc((100vw - var(--max-width))/2));
+    }
+
+    .panel {
+      grid-area: 1/1;
+      max-width: 30rem;
+      padding-right: 2rem;
+      text-align: left;
+      opacity: 0;
+      transform: translateY(28px);
+      will-change: opacity, transform;
+    }
+
+    .panel p {
+      margin: 0
+    }
+
+    .panel-step {
+      display: inline-block;
+      font-family: var(--font-body);
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      padding: .35rem .95rem;
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-full);
+      background: rgba(229, 193, 88, .06);
+      backdrop-filter: blur(6px);
+      margin-bottom: 1.2rem;
+    }
+
+    .panel h2 {
+      font-size: clamp(2.1rem, 4.4vw, 3.6rem);
+      margin-bottom: .8rem;
+      text-shadow: 0 4px 40px rgba(0, 0, 0, .8)
+    }
+
+    .panel p {
+      font-size: .96rem;
+      color: var(--text-muted);
+      max-width: 42ch;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, .95)
+    }
+
+    /* hero panel is bigger */
+    .panel-hero {
+      max-width: 34rem
+    }
+
+    .panel-hero h1 {
+      font-size: clamp(3rem, 7.5vw, 5.6rem);
+      line-height: .95;
+      margin-bottom: 1.2rem;
+      text-shadow: 0 6px 50px rgba(0, 0, 0, .85)
+    }
+
+    .panel-hero .kicker {
+      font-family: var(--font-body);
+      font-size: .72rem;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.4rem;
+      display: block;
+    }
+
+    .scroll-cue {
+      position: fixed;
+      bottom: 2.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: var(--z-story);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .6rem;
+      font-size: .68rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      transition: opacity .5s ease;
+    }
+
+    .scroll-mouse {
+      width: 22px;
+      height: 34px;
+      border: 1.5px solid var(--text-dim);
+      border-radius: var(--radius-full);
+      position: relative
+    }
+
+    .scroll-mouse::after {
+      content: '';
+      position: absolute;
+      top: 7px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 6px;
+      border-radius: 2px;
+      background: var(--gold);
+      animation: wheel 1.8s ease-in-out infinite;
+    }
+
+    @keyframes wheel {
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: translate(-50%, 0)
+      }
+
+      30% {
+        opacity: 1
+      }
+
+      60% {
+        opacity: 0;
+        transform: translate(-50%, 11px)
+      }
+    }
+
+    /* progress rail */
+    .story-rail {
+      position: fixed;
+      right: 1.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: var(--z-story);
+      display: flex;
+      flex-direction: column;
+      gap: .7rem;
+      pointer-events: none;
+    }
+
+    .rail-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(244, 241, 234, .18);
+      transition: var(--transition-smooth);
+    }
+
+    .rail-dot.on {
+      background: var(--gold);
+      box-shadow: 0 0 10px var(--gold-glow);
+      transform: scale(1.6)
+    }
+
+    /* ── CONTENT SECTIONS ── */
+    .content {
+      position: relative;
+      z-index: var(--z-content);
+      background: var(--bg-deep)
+    }
+
+    .content::before {
+      content: '';
+      position: absolute;
+      top: -160px;
+      left: 0;
+      right: 0;
+      height: 160px;
+      background: linear-gradient(to bottom, transparent, var(--bg-deep));
+      pointer-events: none;
+    }
+
+    .section {
+      padding: 7rem 0
+    }
+
+    .section-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: .9rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      margin-bottom: 1.2rem
+    }
+
+    .section-lead {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 56ch
+    }
+
+    .philosophy-grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 4rem;
+      align-items: center
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.7rem 1.4rem;
+      transition: var(--transition-smooth);
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-gold);
+      background: var(--bg-card-hover);
+      transform: translateY(-4px)
+    }
+
+    .stat-value {
+      font-family: var(--font-heading);
+      font-size: 2.6rem;
+      color: var(--gold);
+      line-height: 1
+    }
+
+    .stat-unit {
+      font-size: 1.2rem;
+      opacity: .7
+    }
+
+    .stat-label {
+      font-size: .76rem;
+      color: var(--text-dim);
+      margin-top: .4rem;
+      letter-spacing: .04em
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3.5rem
+    }
+
+    .menu-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.9rem;
+      transition: var(--transition-smooth);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-card:hover {
+      border-color: var(--border-gold);
+      background: var(--bg-card-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, .45)
+    }
+
+    .menu-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: .5rem
+    }
+
+    .menu-card h3 {
+      font-size: 1.45rem
+    }
+
+    .menu-price {
+      font-family: var(--font-heading);
+      font-size: 1.4rem;
+      color: var(--gold);
+      white-space: nowrap
+    }
+
+    .menu-desc {
+      font-size: .85rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      flex: 1;
+      margin-bottom: 1.1rem
+    }
+
+    .menu-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem
+    }
+
+    .menu-tag {
+      font-size: .68rem;
+      font-weight: 600;
+      padding: .24rem .7rem;
+      border-radius: var(--radius-full);
+      background: var(--gold-soft);
+      color: var(--gold);
+      border: 1px solid var(--border-gold);
+    }
+
+    .menu-tag.veg {
+      background: var(--basil-soft);
+      color: #7fc46f;
+      border-color: rgba(74, 140, 63, .3)
+    }
+
+    .menu-tag.hot {
+      background: var(--tomato-soft);
+      color: #e37a5f;
+      border-color: rgba(200, 75, 49, .3)
+    }
+
+    .reservation {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle)
+    }
+
+    .res-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start
+    }
+
+    .res-form {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 2.4rem
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem
+    }
+
+    .form-group {
+      margin-bottom: 1.15rem
+    }
+
+    .form-group label {
+      display: block;
+      font-size: .76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: .4rem;
+      letter-spacing: .03em
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: .75rem .9rem;
+      background: var(--bg-surface);
+      color: var(--text-cream);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: .9rem;
+      transition: var(--transition-fast);
+      outline: none;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-soft)
+    }
+
+    .form-group textarea {
+      min-height: 92px
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: .9rem;
+      background: var(--gold);
+      color: #0d0d0d;
+      border: none;
+      border-radius: var(--radius-full);
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: .92rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      letter-spacing: .02em;
+    }
+
+    .btn-submit:hover {
+      background: #f0d178;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px var(--gold-glow)
+    }
+
+    .btn-submit:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none
+    }
+
+    .form-feedback {
+      text-align: center;
+      font-size: .84rem;
+      margin-top: .8rem;
+      min-height: 1.4rem
+    }
+
+    .form-feedback.ok {
+      color: #8fd48a
+    }
+
+    .form-feedback.err {
+      color: #e88b73
+    }
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+      margin-top: 2rem
+    }
+
+    .info-item {
+      display: flex;
+      gap: 1.1rem;
+      align-items: flex-start
+    }
+
+    .info-icon {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      border-radius: var(--radius-md);
+      background: var(--gold-soft);
+      border: 1px solid var(--border-gold);
+      display: grid;
+      place-items: center;
+      color: var(--gold);
+    }
+
+    .info-icon svg {
+      width: 19px;
+      height: 19px
+    }
+
+    .info-item h4 {
+      font-family: var(--font-body);
+      font-size: .9rem;
+      font-weight: 700;
+      margin-bottom: .2rem
+    }
+
+    .info-item p {
+      font-size: .84rem;
+      color: var(--text-dim);
+      line-height: 1.55
+    }
+
+    .footer {
+      padding: 3.5rem 0 2.5rem;
+      text-align: center;
+      border-top: 1px solid var(--border-subtle)
+    }
+
+    .footer-brand {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      margin-bottom: .5rem
+    }
+
+    .footer-brand span {
+      color: var(--gold);
+      font-style: italic
+    }
+
+    .footer p {
+      font-size: .8rem;
+      color: var(--text-dim)
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.6rem;
+      margin: 1.4rem 0
+    }
+
+    .footer-links a {
+      font-size: .8rem;
+      color: var(--text-muted);
+      transition: color var(--transition-fast)
+    }
+
+    .footer-links a:hover {
+      color: var(--gold)
+    }
+
+    /* reveal on scroll */
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(34px);
+      transition: opacity .8s cubic-bezier(.22, 1, .36, 1), transform .8s cubic-bezier(.22, 1, .36, 1)
+    }
+
+    [data-reveal].in {
+      opacity: 1;
+      transform: none
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:900px) {
+
+      .philosophy-grid,
+      .res-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem
+      }
+    }
+
+    @media (max-width:768px) {
+      :root {
+        --nav-height: 62px
+      }
+
+      .nav-links,
+      .nav-cta.desktop {
+        display: none
+      }
+
+      .nav-toggle {
+        display: flex
+      }
+
+      .section {
+        padding: 5rem 0
+      }
+
+      #story {
+        height: 620vh
+      }
+
+      .story-rail {
+        right: .9rem
+      }
+
+      /* mobile: pizza centred, copy pinned to the lower third over a scrim */
+      .story-panels {
+        align-items: end;
+        justify-items: center;
+        padding: 0 1.4rem 5.5rem;
+        background: linear-gradient(to top, rgba(13, 13, 13, .92) 0%, rgba(13, 13, 13, .75) 28%, transparent 55%);
+      }
+
+      .panel {
+        text-align: center;
+        max-width: 34rem;
+        padding-right: 0
+      }
+
+      .panel p {
+        margin-left: auto;
+        margin-right: auto
+      }
+
+      .form-row {
+        grid-template-columns: 1fr
+      }
+
+      .panel p {
+        font-size: .9rem
+      }
+    }
+
+    @media (max-width:480px) {
+      .stat-grid {
+        grid-template-columns: 1fr
+      }
+
+      .container {
+        padding: 0 1.2rem
+      }
+    }
+
+    /* ── REDUCED MOTION / NO-WEBGL FALLBACK ── */
+    .static-fallback {
+      display: none
+    }
+
+    body.no-3d #webgl,
+    body.no-3d .stage-fire,
+    body.no-3d .scroll-cue,
+    body.no-3d .story-rail {
+      display: none
+    }
+
+    body.no-3d #story {
+      height: auto
+    }
+
+    body.no-3d .story-panels {
+      position: static;
+      display: block;
+      pointer-events: auto
+    }
+
+    body.no-3d .panel {
+      position: static;
+      opacity: 1;
+      transform: none;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 5rem 1.8rem;
+      text-align: left
+    }
+
+    body.no-3d .static-fallback {
+      display: block
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ WEBGL STAGE ══ -->
+  <div id="webgl" aria-hidden="true"></div>
+  <div class="stage-grade" aria-hidden="true"></div>
+  <div class="stage-fire" id="stageFire" aria-hidden="true"></div>
+
+  <!-- ══ NAV ══ -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="#hero" class="nav-brand" aria-label="Pizza d'Autore — home">
+        <span class="nav-brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2 22 20H2L12 2z" />
+            <circle cx="12" cy="14" r="1.2" fill="currentColor" />
+            <circle cx="9.5" cy="17.5" r="1" fill="currentColor" />
+            <circle cx="14.5" cy="17.5" r="1" fill="currentColor" />
+          </svg>
+        </span>
+        <span class="nav-brand-text">Pizza <span>d'Autore</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="#filosofia">Filosofia</a>
+        <a href="#menu">Menu</a>
+        <a href="#prenota">Contatti</a>
+      </div>
+      <a href="#prenota" class="nav-cta desktop">Prenota un tavolo</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Apri menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#filosofia" data-mob>Filosofia</a>
+    <a href="#menu" data-mob>Menu</a>
+    <a href="#prenota" data-mob>Contatti</a>
+    <a href="#prenota" class="nav-cta" data-mob>Prenota un tavolo</a>
+  </div>
+
+  <!-- ══ SCROLLYTELLING 3D ══ -->
+  <section id="story" aria-label="La composizione della pizza">
+    <div class="story-panels" id="storyPanels">
+
+      <div class="panel panel-hero" data-panel="0" id="hero">
+        <span class="kicker">Napoli · dal 1987</span>
+        <h1>Pizza <em>d'Autore</em></h1>
+        <p>Sette gesti, un impasto vivo, un forno a legna a 485°. Scorri e guardala nascere.</p>
+      </div>
+
+      <div class="panel" data-panel="1">
+        <span class="panel-step">01 — L'impasto</span>
+        <h2>48 ore di <em>respiro</em></h2>
+        <p>Farina tipo 0 macinata a pietra, lievito madre e una lievitazione lenta che rende il cornicione leggero come
+          aria.</p>
+      </div>
+
+      <div class="panel" data-panel="2">
+        <span class="panel-step">02 — Il pomodoro</span>
+        <h2>San Marzano <em>DOP</em></h2>
+        <p>Raccolto a mano nell'Agro Sarnese-Nocerino, passato a crudo. Solo pomodoro, sale marino e un filo di
+          basilico.</p>
+      </div>
+
+      <div class="panel" data-panel="3">
+        <span class="panel-step">03 — La mozzarella</span>
+        <h2>Fiordilatte di <em>Agerola</em></h2>
+        <p>Filata la mattina stessa, scolata dodici ore. Si scioglie senza rilasciare acqua, lasciando il disco
+          asciutto.</p>
+      </div>
+
+      <div class="panel" data-panel="4">
+        <span class="panel-step">04 — Il condimento</span>
+        <h2>Il carattere del <em>salame</em></h2>
+        <p>Salame di suino nero casertano, stagionato novanta giorni, affettato sottile perché in cottura diventi
+          croccante.</p>
+      </div>
+
+      <div class="panel" data-panel="5">
+        <span class="panel-step">05 — Il basilico</span>
+        <h2>Foglie <em>appena colte</em></h2>
+        <p>Basilico genovese dal nostro orto, aggiunto sempre a crudo prima dell'infornata per non bruciarne il profumo.
+        </p>
+      </div>
+
+      <div class="panel" data-panel="6">
+        <span class="panel-step">06 — Il forno</span>
+        <h2>Novanta secondi a <em>485°</em></h2>
+        <p>Legna di faggio, cupola rovente, un solo giro di pala. È il momento in cui l'impasto diventa cornicione.</p>
+      </div>
+
+      <div class="panel" data-panel="7">
+        <span class="panel-step">07 — Servita</span>
+        <h2>La <em>Regina</em></h2>
+        <p>Dal banco al tavolo in meno di un minuto. Perché una pizza d'autore si giudica nei primi trenta secondi.</p>
+      </div>
+
+    </div>
+
+    <div class="story-rail" id="storyRail" aria-hidden="true"></div>
+
+    <div class="scroll-cue" id="scrollCue">
+      <span class="scroll-mouse"></span>
+      <span>Scorri</span>
+    </div>
+  </section>
+
+  <!-- ══ CONTENT ══ -->
+  <div class="content">
+
+    <section class="section philosophy" id="filosofia">
+      <div class="container">
+        <div class="philosophy-grid">
+          <div data-reveal>
+            <div class="section-label">La nostra filosofia</div>
+            <h2 class="section-title">Dove la <em>tradizione</em> incontra l'eccellenza</h2>
+            <p class="section-lead">Non inseguiamo le mode. Selezioniamo pochi fornitori, tutti entro cento chilometri,
+              e lasciamo che siano gli ingredienti a decidere il menu della settimana. Il resto è tempo, temperatura e
+              mani esperte.</p>
+          </div>
+          <div class="stat-grid" data-reveal>
+            <div class="stat-card">
+              <div class="stat-value">48<span class="stat-unit">h</span></div>
+              <div class="stat-label">Lievitazione naturale</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">485<span class="stat-unit">°</span></div>
+              <div class="stat-label">Forno a legna</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">12</div>
+              <div class="stat-label">Fornitori locali</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">90<span class="stat-unit">s</span></div>
+              <div class="stat-label">Tempo di cottura</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section menu-section" id="menu">
+      <div class="container">
+        <div data-reveal>
+          <div class="section-label">Le nostre creazioni</div>
+          <h2 class="section-title">Il <em>menu</em></h2>
+          <p class="section-lead">Otto pizze fisse, due fuori carta ogni settimana. Impasto classico o integrale a 72
+            ore, senza sovrapprezzo.</p>
+        </div>
+        <div class="menu-grid">
+          <article class="menu-card" data-reveal>
+            <div class="menu-card-top">
+              <h3>La Regina</h3><span class="menu-price">€12</span>
+            </div>
+            <p class="menu-desc">San Marzano DOP, fiordilatte di Agerola, basilico genovese, olio EVO monocultivar.</p>
+            <div class="menu-tags"><span class="menu-tag">Classica</span><span class="menu-tag veg">Vegetariana</span>
+            </div>
+          </article>
+          <article class="menu-card" data-reveal>
+            <div class="menu-card-top">
+              <h3>Nero Casertano</h3><span class="menu-price">€16</span>
+            </div>
+            <p class="menu-desc">Salame di suino nero, provola affumicata, crema di friarielli, pepe nero di Sarawak.
+            </p>
+            <div class="menu-tags"><span class="menu-tag">Firma</span><span class="menu-tag hot">Saporita</span></div>
+          </article>
+          <article class="menu-card" data-reveal>
+            <div class="menu-card-top">
+              <h3>Orto d'Inverno</h3><span class="menu-price">€14</span>
+            </div>
+            <p class="menu-desc">Zucca arrostita, stracciatella pugliese, nocciole tostate, riduzione di aceto
+              balsamico.</p>
+            <div class="menu-tags"><span class="menu-tag veg">Vegetariana</span><span class="menu-tag">Stagionale</span>
+            </div>
+          </article>
+          <article class="menu-card" data-reveal>
+            <div class="menu-card-top">
+              <h3>Marinara Antica</h3><span class="menu-price">€9</span>
+            </div>
+            <p class="menu-desc">Pomodoro, aglio dell'Ufita in camicia, origano di montagna, olio EVO. Senza latticini.
+            </p>
+            <div class="menu-tags"><span class="menu-tag veg">Vegana</span><span class="menu-tag">Classica</span></div>
+          </article>
+          <article class="menu-card" data-reveal>
+            <div class="menu-card-top">
+              <h3>Mare Nostrum</h3><span class="menu-price">€18</span>
+            </div>
+            <p class="menu-desc">Alici di Cetara, burrata, scorza di limone di Amalfi, capperi di Pantelleria.</p>
+            <div class="menu-tags"><span class="menu-tag">Firma</span><span class="menu-tag hot">Intensa</span></div>
+          </article>
+          <article class="menu-card" data-reveal>
+            <div class="menu-card-top">
+              <h3>Diavola d'Autore</h3><span class="menu-price">€15</span>
+            </div>
+            <p class="menu-desc">Spianata piccante, 'nduja di Spilinga, fiordilatte, miele di castagno a crudo.</p>
+            <div class="menu-tags"><span class="menu-tag hot">Piccante</span><span class="menu-tag">Firma</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reservation" id="prenota">
+      <div class="container">
+        <div class="res-grid">
+          <div data-reveal>
+            <div class="section-label">Prenotazioni</div>
+            <h2 class="section-title">Un tavolo che vi <em>aspetta</em></h2>
+            <p class="section-lead">Trentadue coperti, due turni a sera. Consigliamo di prenotare con qualche giorno di
+              anticipo, soprattutto nel fine settimana.</p>
+            <div class="info-list">
+              <div class="info-item">
+                <span class="info-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg></span>
+                <div>
+                  <h4>Indirizzo</h4>
+                  <p>Vico dei Forni 14, 80138 Napoli</p>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="info-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 6v6l4 2" />
+                  </svg></span>
+                <div>
+                  <h4>Orari</h4>
+                  <p>Martedì – Domenica · 19:00 – 23:30<br>Lunedì chiuso</p>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="info-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                      d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" />
+                  </svg></span>
+                <div>
+                  <h4>Telefono</h4>
+                  <p>+39 081 555 0187</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="res-form" data-reveal>
+            <form id="resForm" novalidate>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="resName">Nome e cognome</label>
+                  <input type="text" id="resName" name="name" placeholder="Mario Rossi" required autocomplete="name">
+                </div>
+                <div class="form-group">
+                  <label for="resPhone">Telefono</label>
+                  <input type="tel" id="resPhone" name="phone" placeholder="+39 ..." required autocomplete="tel">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="resEmail">Email</label>
+                <input type="email" id="resEmail" name="email" placeholder="mario@email.it" required
+                  autocomplete="email">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="resDate">Data</label>
+                  <input type="date" id="resDate" name="date" required>
+                </div>
+                <div class="form-group">
+                  <label for="resTime">Turno</label>
+                  <select id="resTime" name="time" required>
+                    <option value="" disabled selected>Seleziona…</option>
+                    <option>19:00</option>
+                    <option>19:30</option>
+                    <option>21:00</option>
+                    <option>21:30</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="resGuests">Coperti</label>
+                <select id="resGuests" name="guests" required>
+                  <option value="" disabled selected>Seleziona…</option>
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7+</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="resNotes">Note (allergie, occasioni speciali)</label>
+                <textarea id="resNotes" name="notes" placeholder="Facoltativo…"></textarea>
+              </div>
+              <button type="submit" class="btn-submit">Richiedi prenotazione</button>
+              <div class="form-feedback" id="resFeedback" aria-live="polite"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-brand">Pizza <span>d'Autore</span></div>
+        <p>Vico dei Forni 14, Napoli · P.IVA 01234567890</p>
+        <div class="footer-links">
+          <a href="#filosofia">Filosofia</a>
+          <a href="#menu">Menu</a>
+          <a href="#prenota">Prenota</a>
+        </div>
+        <p>&copy; <span id="year"></span> Pizza d'Autore. Tutti i diritti riservati.</p>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ══ THREE.JS SCENE — real GLB scan, sliced ══ -->
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mount = document.getElementById('webgl');
+
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    } catch (e) { renderer = null; }
+
+    if (!renderer || reduced) {
+      document.body.classList.add('no-3d');
+    } else {
+      boot(renderer);
+    }
+
+    function boot(renderer) {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 200);
+
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      mount.appendChild(renderer.domElement);
+
+      /* ── LIGHTS ──
+         the scan ships as KHR_materials_unlit with baked lighting, so we
+         re-author it as MeshStandard and keep the rig ambient-heavy:
+         enough shaping to feel three-dimensional, not enough to double-light */
+      scene.add(new THREE.AmbientLight(0xfff4e2, 1.55));
+
+      const key = new THREE.DirectionalLight(0xfff2dc, 1.15);
+      key.position.set(5, 10, 6);
+      scene.add(key);
+
+      const rim = new THREE.DirectionalLight(0xE5C158, 0.75);
+      rim.position.set(-7, 4, -6);
+      scene.add(rim);
+
+      const fill = new THREE.PointLight(0xC84B31, 0.0, 40, 2);
+      fill.position.set(0, -3, 4);
+      scene.add(fill);
+
+      const ovenLight = new THREE.PointLight(0xff7a2f, 0.0, 30, 2);
+      ovenLight.position.set(0, 5, 0);
+      scene.add(ovenLight);
+
+      /* ── RIG: pizza (tilt + parallax) → spinner (own-axis) → slices ── */
+      const pizza = new THREE.Group();
+      pizza.rotation.x = Math.PI / 2.35;
+      scene.add(pizza);
+
+      const spinner = new THREE.Group();
+      pizza.add(spinner);
+
+      const glbGroup = new THREE.Group();
+      spinner.add(glbGroup);
+
+      const SLICES = [];          // one wrapper per scanned wedge
+      const glbMaterials = [];
+
+      const TARGET_SPAN = 8;      // world units across the finished pizza
+
+      /* ── LOAD + REBUILD THE SCAN AS INDEPENDENT SLICES ── */
+      new GLTFLoader().load('./broccoli_pizza_scan.glb', (gltf) => {
+        const model = gltf.scene;
+
+        // work detached so world matrices are just local matrices
+        const holder = new THREE.Group();
+        holder.add(model);
+        holder.updateMatrixWorld(true);
+
+        // the scan is authored Z-up; lay it flat if the thin axis isn't Y
+        let box = new THREE.Box3().setFromObject(model);
+        let size = box.getSize(new THREE.Vector3());
+        if (size.z < size.y && size.z < size.x) {
+          model.rotation.x = -Math.PI / 2;
+          holder.updateMatrixWorld(true);
+          box = new THREE.Box3().setFromObject(model);
+          size = box.getSize(new THREE.Vector3());
+        }
+
+        const centre = box.getCenter(new THREE.Vector3());
+        const k = TARGET_SPAN / Math.max(size.x, size.z);
+
+        // bake every transform into geometry, then regroup by material —
+        // each of the scan's 6 materials is one wedge (front + back shell)
+        const wedges = new Map();
+        model.traverse(o => {
+          if (!o.isMesh) return;
+          const geo = o.geometry.clone();
+          geo.applyMatrix4(o.matrixWorld);
+          geo.translate(-centre.x, -centre.y, -centre.z);
+          geo.scale(k, k, k);
+
+          const src = Array.isArray(o.material) ? o.material[0] : o.material;
+          const id = src.name || src.uuid;
+          if (!wedges.has(id)) wedges.set(id, { geos: [], src });
+          wedges.get(id).geos.push(geo);
+        });
+
+        [...wedges.values()].forEach(({ geos, src }) => {
+          // unlit → standard, so the oven beat can actually light it
+          const m = new THREE.MeshStandardMaterial({
+            map: src.map || null,
+            roughness: 0.78,
+            metalness: 0.0,
+            transparent: true,
+            opacity: 1,
+            side: THREE.DoubleSide
+          });
+          if (m.map) m.map.colorSpace = THREE.SRGBColorSpace;
+          glbMaterials.push(m);
+
+          const wrap = new THREE.Group();
+          const centroid = new THREE.Vector3();
+          geos.forEach(g => {
+            const mesh = new THREE.Mesh(g, m);
+            wrap.add(mesh);
+            g.computeBoundingBox();
+            centroid.add(g.boundingBox.getCenter(new THREE.Vector3()));
+          });
+          centroid.divideScalar(geos.length || 1);
+
+          // outward direction in the pizza plane — where the wedge flies from
+          const dir = new THREE.Vector3(centroid.x, 0, centroid.z);
+          if (dir.lengthSq() < 1e-6) dir.set(1, 0, 0);
+          dir.normalize();
+
+          glbGroup.add(wrap);
+          SLICES.push({ wrap, dir, mat: m });
+        });
+
+        // stable order: clockwise around the pie, so the fill reads as a sweep
+        SLICES.sort((a, b) =>
+          Math.atan2(a.dir.z, a.dir.x) - Math.atan2(b.dir.z, b.dir.x));
+
+        // opening state: deconstructed — every wedge pushed out and lifted
+        SLICES.forEach((s, i) => {
+          s.wrap.position.copy(s.dir).multiplyScalar(2.55).setY(2.0 + i * 0.34);
+          s.wrap.rotation.set(
+            (Math.random() - 0.5) * 0.55,
+            (Math.random() - 0.5) * 0.9,
+            (Math.random() - 0.5) * 0.55
+          );
+          s.mat.opacity = 0.9;
+        });
+
+        finaliseSetup();
+      }, undefined, (err) => {
+        console.warn('GLB load failed', err);
+        document.body.classList.add('no-3d');
+      });
+
+      /* ── FLOUR DUST ── */
+      const dustCount = 420;
+      const dustPos = new Float32Array(dustCount * 3);
+      for (let i = 0; i < dustCount; i++) {
+        dustPos[i * 3] = (Math.random() - 0.5) * 26;
+        dustPos[i * 3 + 1] = (Math.random() - 0.5) * 18;
+        dustPos[i * 3 + 2] = (Math.random() - 0.5) * 16;
+      }
+      const dustGeo = new THREE.BufferGeometry();
+      dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+      const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({
+        color: 0xE5C158, size: 0.055, transparent: true, opacity: 0.5,
+        depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true
+      }));
+      scene.add(dust);
+
+      /* ── FRAMING ── */
+      const isNarrow = () => innerWidth < 900;
+      const offsetX = () => isNarrow() ? 0 : 2.9;
+      const zMul = isNarrow() ? 1.5 : 1;
+      camera.position.set(0, 1.2, 22);
+      camera.lookAt(0, 0, 0);
+      pizza.position.x = offsetX();
+      pizza.position.y = isNarrow() ? 1.7 : 0;
+      pizza.scale.setScalar(isNarrow() ? 0.5 : 0.56);
+
+      addEventListener('resize', () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        pizza.position.x = offsetX();
+      });
+
+      /* ── LOOP ── */
+      const clock = new THREE.Clock();
+      let idleSpin = 0;
+      const state = { spin: 1 };
+      renderer.setAnimationLoop(() => {
+        const dt = clock.getDelta();
+        idleSpin += dt * 0.16 * state.spin;
+        spinner.rotation.y = idleSpin;
+        dust.rotation.y += dt * 0.02;
+        renderer.render(scene, camera);
+      });
+
+      mount.classList.add('ready');
+
+      function finaliseSetup() {
+        window.__PIZZA__ = {
+          THREE, scene, camera, pizza, spinner, glbGroup,
+          slices: SLICES, glbMaterials,
+          fill, ovenLight, key, rim, state, dust, zMul
+        };
+        document.dispatchEvent(new Event('pizza:ready'));
+      }
+    }
+  </script>
+
+  <!-- ══ GSAP SCROLL CHOREOGRAPHY ══ -->
+  <script>
+    (function () {
+      const boot = () => {
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        const nav = document.getElementById('navbar');
+        const onScroll = () => nav.classList.toggle('scrolled', scrollY > 40);
+        addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+        const toggle = document.getElementById('navToggle');
+        const menu = document.getElementById('mobileMenu');
+        const setMenu = open => {
+          toggle.classList.toggle('active', open);
+          menu.classList.toggle('active', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          document.body.style.overflow = open ? 'hidden' : '';
+        };
+        toggle.addEventListener('click', () => setMenu(!menu.classList.contains('active')));
+        menu.querySelectorAll('[data-mob]').forEach(a => a.addEventListener('click', () => setMenu(false)));
+        addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+
+        const io = new IntersectionObserver(entries => {
+          entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+        }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+        document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+
+        const form = document.getElementById('resForm');
+        const fb = document.getElementById('resFeedback');
+        const dateEl = document.getElementById('resDate');
+        dateEl.min = new Date().toISOString().split('T')[0];
+        form.addEventListener('submit', e => {
+          e.preventDefault();
+          fb.className = 'form-feedback';
+          if (!form.checkValidity()) {
+            fb.textContent = 'Completa tutti i campi obbligatori.';
+            fb.classList.add('err');
+            form.reportValidity();
+            return;
+          }
+          const btn = form.querySelector('.btn-submit');
+          btn.disabled = true; btn.textContent = 'Invio in corso…';
+          setTimeout(() => {
+            fb.textContent = 'Richiesta inviata. Vi confermiamo entro due ore.';
+            fb.classList.add('ok');
+            btn.disabled = false; btn.textContent = 'Richiedi prenotazione';
+            form.reset(); dateEl.min = new Date().toISOString().split('T')[0];
+          }, 900);
+        });
+
+        if (document.body.classList.contains('no-3d')) return;
+        if (!window.gsap || !window.ScrollTrigger) { document.body.classList.add('no-3d'); return; }
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        const run = () => choreograph(window.__PIZZA__);
+        if (window.__PIZZA__) run();
+        else document.addEventListener('pizza:ready', run, { once: true });
+      };
+
+      function choreograph(P) {
+        const { camera, pizza, slices, glbMaterials, fill, ovenLight, state, zMul } = P;
+        const Z = v => +(v * zMul).toFixed(2);
+
+        const X0 = pizza.position.x;
+        const S0 = pizza.scale.x;
+
+        const panels = gsap.utils.toArray('.panel');
+        const panelWrap = document.getElementById('storyPanels');
+        const rail = document.getElementById('storyRail');
+        const fire = document.getElementById('stageFire');
+        const cue = document.getElementById('scrollCue');
+
+        panels.forEach(() => {
+          const d = document.createElement('span');
+          d.className = 'rail-dot';
+          rail.appendChild(d);
+        });
+        const dots = rail.querySelectorAll('.rail-dot');
+        const setActive = i => dots.forEach((d, n) => d.classList.toggle('on', n === i));
+        setActive(0);
+
+        const fadePanel = (el, to) =>
+          gsap.to(el, { opacity: to, y: to ? 0 : 24, duration: 0.55, ease: 'power2.out', overwrite: true });
+        panels.forEach((p, i) => gsap.set(p, { opacity: i === 0 ? 1 : 0, y: i === 0 ? 0 : 28 }));
+
+        // one scrubbed trigger owns the whole stack: exactly one panel can be
+        // lit at a time, even when the user flings the scrollbar past several
+        let activeIdx = 0;
+        ScrollTrigger.create({
+          trigger: '#story', start: 'top top', end: 'bottom bottom', scrub: true,
+          onUpdate: self => {
+            const i = Math.max(0, Math.min(panels.length - 1,
+              Math.floor(self.progress * panels.length)));
+            if (i === activeIdx) return;
+            activeIdx = i;
+            panels.forEach((p, n) => fadePanel(p, n === i ? 1 : 0));
+            setActive(i);
+          }
+        });
+        ScrollTrigger.create({
+          trigger: '#story', start: 'top+=6% top',
+          onEnter: () => gsap.to(cue, { opacity: 0, duration: .4 }),
+          onLeaveBack: () => gsap.to(cue, { opacity: 1, duration: .4 })
+        });
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: '#story', start: 'top top', end: 'bottom bottom',
+            scrub: 1.1, invalidateOnRefresh: true
+          }
+        });
+
+        /* 0 → HERO: the scan hangs deconstructed, camera settles in */
+        tl.to(camera.position, { z: Z(16.5), y: 1.6, duration: 1, ease: 'power1.inOut' }, 0)
+          .to(pizza.rotation, { x: Math.PI / 2.9, duration: 1, ease: 'power1.inOut' }, 0);
+
+        /* 1..6 → one scanned wedge drops into place per beat.
+           Six wedges, six ingredient beats — the pie closes as you read. */
+        const N = slices.length || 1;
+        slices.forEach((s, i) => {
+          const t = 1 + i * (6 / N);          // spread evenly over beats 1→7
+          tl.to(s.wrap.position, { x: 0, y: 0, z: 0, duration: 0.85, ease: 'power3.out' }, t)
+            .to(s.wrap.rotation, { x: 0, y: 0, z: 0, duration: 0.85, ease: 'power2.out' }, t)
+            .to(s.mat, { opacity: 1, duration: 0.5, ease: 'power1.out' }, t)
+            .to(state, { spin: 2.6, duration: 0.25 }, t)
+            .to(state, { spin: 1.0, duration: 0.5 }, t + 0.3);
+        });
+
+        /* camera choreography threaded through the same beats */
+        tl.to(camera.position, { z: Z(13.0), duration: 1, ease: 'power1.inOut' }, 1)
+          .to(camera.position, { z: Z(11.0), y: 2.2, duration: 1, ease: 'power1.inOut' }, 2)
+          .to(pizza.rotation, { x: Math.PI / 2.15, duration: 1, ease: 'power1.inOut' }, 2)
+          .to(camera.position, { z: Z(9.4), duration: 1, ease: 'power1.inOut' }, 3)
+          .to(camera.position, { z: Z(10.4), y: 1.4, duration: 1, ease: 'power1.inOut' }, 4)
+          .to(pizza.rotation, { x: Math.PI / 2.6, duration: 1, ease: 'power1.inOut' }, 4)
+          .to(camera.position, { z: Z(8.6), y: 2.6, duration: 1, ease: 'power1.inOut' }, 5)
+          .to(pizza.position, { x: X0 * 0.5, duration: 1, ease: 'power1.inOut' }, 5);
+
+        /* 6 → FORNO: the scan warms, the fire light comes up, the pie speeds up */
+        glbMaterials.forEach(m => {
+          tl.to(m.color, { r: 1.0, g: 0.80, b: 0.62, duration: 1, ease: 'power2.in' }, 6);
+        });
+        tl.to(fill, { intensity: 9, duration: 0.6, ease: 'power2.out' }, 6)
+          .to(ovenLight, { intensity: 6, duration: 0.6, ease: 'power2.out' }, 6)
+          .to(fire, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 6)
+          .to(state, { spin: 3.2, duration: 0.5 }, 6)
+          .to(camera.position, { z: Z(9.1), y: 1.0, duration: 1, ease: 'power1.inOut' }, 6)
+          .to(pizza.position, { x: X0 * 0.42, duration: 1, ease: 'power1.inOut' }, 6)
+          .to(pizza.rotation, { x: Math.PI / 2.05, duration: 1, ease: 'power1.inOut' }, 6)
+          .to(fill, { intensity: 2.2, duration: 0.5 }, 6.6)
+          .to(ovenLight, { intensity: 1.2, duration: 0.5 }, 6.6)
+          .to(fire, { opacity: 0.32, duration: 0.5 }, 6.6)
+          .to(state, { spin: 1.0, duration: 0.5 }, 6.6);
+
+        /* 7 → SERVITA: whole pie, pulled back into the beauty framing */
+        tl.to(camera.position, { z: Z(11.6), y: 2.0, duration: 1, ease: 'power2.inOut' }, 7)
+          .to(pizza.position, { x: X0, duration: 1, ease: 'power2.inOut' }, 7)
+          .to(pizza.rotation, { x: Math.PI / 2.5, duration: 1, ease: 'power2.inOut' }, 7)
+          .to(pizza.scale, { x: S0 * 1.12, y: S0 * 1.12, z: S0 * 1.12, duration: 1, ease: 'power2.out' }, 7);
+
+        /* ── HAND OFF TO THE CONTENT ── */
+        ScrollTrigger.create({
+          trigger: '.content', start: 'top bottom', end: 'top top', scrub: true,
+          onUpdate: self => {
+            const o = 1 - self.progress;
+            document.getElementById('webgl').style.opacity = o;
+            fire.style.opacity = 0.32 * o;
+            rail.style.opacity = o;
+            panelWrap.style.opacity = o;
+            panelWrap.style.visibility = o < 0.02 ? 'hidden' : 'visible';
+          }
+        });
+
+        /* ── POINTER PARALLAX ── */
+        if (matchMedia('(pointer:fine)').matches) {
+          let tx = 0, ty = 0;
+          addEventListener('pointermove', e => {
+            tx = (e.clientX / innerWidth - 0.5) * 0.5;
+            ty = (e.clientY / innerHeight - 0.5) * 0.3;
+          }, { passive: true });
+          gsap.ticker.add(() => {
+            pizza.rotation.y += (tx * 0.55 - pizza.rotation.y) * 0.045;
+            camera.position.x += ((tx * 0.9) - camera.position.x) * 0.045;
+            camera.lookAt(0, ty * -0.5, 0);
+          });
+        } else {
+          gsap.ticker.add(() => camera.lookAt(0, 0, 0));
+        }
+
+        ScrollTrigger.refresh();
+      }
+
+      if (document.readyState === 'loading') addEventListener('DOMContentLoaded', boot);
+      else boot();
+    })();
+  </script>
+
+</body>
+
+</html>

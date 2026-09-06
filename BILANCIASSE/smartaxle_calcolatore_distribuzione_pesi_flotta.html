@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartAxle Pro - Middleware Distribuzione Pesi & Carico Assi</title>
+  
+  <!-- Tailwind CSS per styling moderno e reattivo -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- SheetJS per lettura e parsing client-side di file Excel e CSV -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------- Design tokens: quadro strumenti, grafite + segnaletica ---------- */
+    :root {
+      --ink:        #10151d;
+      --ink-2:      #38414f;
+      --ink-3:      #6b7686;
+      --line:       #dfe3ea;
+      --line-2:     #eef1f5;
+      --paper:      #ffffff;
+      --canvas:     #f4f5f7;
+      --panel:      #0d1219;
+      --panel-2:    #161d27;
+      --panel-line: #263040;
+      --accent:     #4338ca;
+      --accent-2:   #eef0ff;
+      --ok:         #047857;
+      --ok-bg:      #ecfdf5;
+      --warn:       #b45309;
+      --bad:        #be123c;
+      --bad-bg:     #fff1f2;
+      --r:          10px;
+      --shadow:     0 1px 2px rgba(16,21,29,.06), 0 1px 1px rgba(16,21,29,.04);
+    }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+      background: var(--canvas); color: var(--ink);
+    }
+    .num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+    .lbl { font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3); }
+
+    /* ---------- superfici ---------- */
+    .card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); }
+    .card-h { padding: 14px 16px; border-bottom: 1px solid var(--line-2); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .card-t { font-size: 13px; font-weight: 600; letter-spacing: -.01em; }
+    .card-s { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+
+    /* ---------- topbar ---------- */
+    .topbar { background: var(--panel); border-bottom: 1px solid var(--panel-line); }
+    .brand-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); display: flex; align-items: center; justify-content: center; }
+    .toolbar { display: flex; align-items: center; gap: 6px; }
+    .tbtn {
+      display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px;
+      font-size: 12px; font-weight: 500; color: #dbe1ea; background: transparent;
+      border: 1px solid var(--panel-line); border-radius: 8px; transition: background .12s, border-color .12s, color .12s;
+    }
+    .tbtn:hover { background: var(--panel-2); color: #fff; }
+    .tbtn:disabled { opacity: .35; }
+    .tbtn svg { width: 15px; height: 15px; stroke-width: 1.75; }
+    .tbtn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .tbtn-primary:hover { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+    .tbar-sep { width: 1px; height: 20px; background: var(--panel-line); margin: 0 2px; }
+
+    /* ---------- controlli ---------- */
+    .fld {
+      width: 100%; height: 34px; padding: 0 10px; font-size: 13px; color: var(--ink);
+      background: #fbfcfd; border: 1px solid var(--line); border-radius: 8px; outline: none;
+      transition: border-color .12s, box-shadow .12s;
+    }
+    .fld:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(67,56,202,.12); background: #fff; }
+    .fld::placeholder { color: #9aa3b0; }
+    .fld-sm { height: 28px; font-size: 12px; padding: 0 8px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 12px;
+      font-size: 12px; font-weight: 600; border-radius: 8px; border: 1px solid var(--line);
+      background: #fff; color: var(--ink-2); transition: background .12s, border-color .12s, color .12s;
+    }
+    .btn:hover { background: #f7f8fa; border-color: #cfd5de; color: var(--ink); }
+    .btn svg { width: 15px; height: 15px; stroke-width: 1.75; }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+    .btn-danger { color: var(--bad); border-color: #fbd0d8; background: var(--bad-bg); }
+    .btn-danger:hover { background: #ffe4e9; border-color: #f5a9b8; color: var(--bad); }
+    .btn-block { width: 100%; justify-content: space-between; }
+    .btn-xs { height: 30px; padding: 0 10px; font-size: 11.5px; }
+    .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 7px; color: #9aa3b0; transition: background .12s, color .12s; }
+    .icon-btn:hover { background: var(--line-2); color: var(--ink); }
+    .icon-btn.danger:hover { background: var(--bad-bg); color: var(--bad); }
+
+    /* ---------- badge / chip ---------- */
+    .chip { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 11px; font-weight: 600; background: var(--line-2); color: var(--ink-2); }
+    .chip-ok { background: var(--ok-bg); color: var(--ok); }
+    .chip-bad { background: var(--bad-bg); color: var(--bad); }
+    .chip-accent { background: var(--accent-2); color: var(--accent); }
+
+    /* ---------- banner conformita ---------- */
+    .banner { display: flex; gap: 14px; align-items: flex-start; padding: 16px; border-radius: var(--r); border: 1px solid; }
+    .banner-ok { background: var(--ok-bg); border-color: #a7f3d0; }
+    .banner-bad { background: var(--bad-bg); border-color: #fecdd3; }
+    .banner-dot { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #fff; flex: none; }
+    .banner-dot-ok { background: var(--ok); }
+    .banner-dot-bad { background: var(--bad); }
+
+    /* ---------- strumenti assi ---------- */
+    .gauge { background: var(--panel-2); border: 1px solid var(--panel-line); border-radius: 10px; padding: 10px 12px; }
+    .meter { position: relative; height: 6px; border-radius: 999px; background: #0b1017; overflow: hidden; margin: 8px 0 6px; }
+    .meter::after { content: ""; position: absolute; left: 90%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.28); }
+    .meter-fill { height: 100%; border-radius: 999px; transition: width .3s ease, background .2s; }
+    .fill-ok { background: #34d399; } .fill-warn { background: #fbbf24; } .fill-bad { background: #fb7185; }
+
+    /* ---------- KPI ---------- */
+    .kpi { padding: 14px 16px; }
+    .kpi + .kpi { border-left: 1px solid var(--line-2); }
+    .kpi-v { font-size: 20px; font-weight: 600; letter-spacing: -.02em; margin-top: 4px; }
+    .kpi-s { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+
+    /* ---------- tabella ---------- */
+    .tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12.5px; }
+    .tbl thead th {
+      position: sticky; top: 0; z-index: 5; background: #fbfcfd; text-align: left;
+      font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+      padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap;
+    }
+    .tbl tbody td { padding: 7px 12px; border-bottom: 1px solid var(--line-2); vertical-align: middle; }
+    .tbl tbody tr:hover { background: #fafbfc; }
+    .tbl tbody tr.is-sel { background: var(--accent-2); }
+    .tbl tbody tr.is-sel:hover { background: #e6e8ff; }
+
+    /* ---------- dropzone ---------- */
+    .zone { border: 1.5px dashed #c8cfda; border-radius: 10px; padding: 18px 14px; text-align: center; background: #fbfcfd; transition: border-color .12s, background .12s; }
+    .zone:hover, .zone.is-over { border-color: var(--accent); background: var(--accent-2); }
+
+    /* ---------- modali ---------- */
+    .modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(13,18,25,.55); backdrop-filter: blur(3px); }
+    .modal-card { background: #fff; border-radius: 14px; box-shadow: 0 24px 60px rgba(13,18,25,.28); width: 100%; display: flex; flex-direction: column; max-height: 90vh; }
+    .modal-h { padding: 16px 20px; border-bottom: 1px solid var(--line-2); display: flex; align-items: center; justify-content: space-between; }
+    .modal-b { padding: 20px; overflow-y: auto; }
+    .modal-f { padding: 14px 20px; border-top: 1px solid var(--line-2); display: flex; justify-content: flex-end; gap: 8px; }
+
+    .modal.hidden { display: none; }
+    /* ---------- accessibilità ---------- */
+    :where(a, button, select, input, [tabindex]):focus-visible {
+      outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px;
+    }
+    .topbar :where(button):focus-visible { outline-color: #a5b4fc; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+    .tbl tbody tr { cursor: pointer; }
+    input[type="range"] { cursor: grab; height: 24px; }
+    input[type="range"]:active { cursor: grabbing; }
+
+    /* target touch >= 44px su mobile/tablet */
+    @media (max-width: 900px) {
+      .btn, .tbtn { height: 44px; padding: 0 14px; font-size: 13px; }
+      .fld { height: 44px; } .fld-sm { height: 40px; font-size: 13px; }
+      .icon-btn { width: 44px; height: 44px; }
+      .btn-xs { height: 44px; font-size: 13px; }
+      input[type="range"] { height: 44px; }
+      .toolbar { gap: 8px; overflow-x: auto; scrollbar-width: none; }
+      .toolbar::-webkit-scrollbar { display: none; }
+      .kpi + .kpi { border-left: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+
+    .toast { z-index: 60; display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 9px; font-size: 12px; font-weight: 500; color: #fff; background: var(--ink); box-shadow: 0 8px 24px rgba(13,18,25,.25); pointer-events: auto; transition: all .3s; }
+    .toast-error { background: var(--bad); }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printable-report, #printable-report * { visibility: visible; }
+      #printable-report { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+    .custom-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #d3d8e0; border-radius: 999px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #b9c0cb; }
+    .cargo-draggable { cursor: grab; }
+    .cargo-draggable:active { cursor: grabbing; }
+  </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+  <!-- Header di navigazione principale -->
+  <header class="topbar sticky top-0 z-40">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3 min-w-0 shrink-0">
+        <div class="brand-mark">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+            <path stroke-linecap="round" d="M3 12h18M6 12a2.5 2.5 0 105 0 2.5 2.5 0 10-5 0M13 12a2.5 2.5 0 105 0 2.5 2.5 0 10-5 0"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="text-white font-semibold text-[15px] tracking-tight">SmartAxle</span>
+            <span class="chip chip-accent hidden sm:inline-flex whitespace-nowrap" style="background:rgba(67,56,202,.22);color:#c7cbff">LCV &amp; HGV</span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block leading-tight">Conformità assi e baricentro · CdS art. 62/167</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button onclick="loadSampleData()" class="tbtn" aria-label="Carica dati dimostrativi" title="Carica un carico dimostrativo">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span class="hidden lg:inline">Dati demo</span>
+        </button>
+
+        <button id="btn-undo" onclick="undo()" class="tbtn" aria-label="Annulla ultima modifica (Ctrl+Z)" title="Annulla (Ctrl+Z)">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a5 5 0 015 5v2M3 10l4-4M3 10l4 4"/></svg>
+          <span class="hidden lg:inline">Annulla</span>
+        </button>
+
+        <span class="tbar-sep"></span>
+
+        <button onclick="exportManifest()" class="tbtn" aria-label="Esporta il manifesto in Excel" title="Esporta il manifesto di carico in Excel">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+          <span class="hidden lg:inline">Manifesto</span>
+        </button>
+
+        <button onclick="exportExcelTemplate()" class="tbtn" aria-label="Scarica il template Excel" title="Scarica il template Excel di importazione">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.5L19 7.5V19a2 2 0 01-2 2z"/></svg>
+          <span class="hidden lg:inline">Template</span>
+        </button>
+
+        <span class="tbar-sep"></span>
+
+        <button onclick="openPrintModal()" class="tbtn tbtn-primary">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          Bollettino DDT
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Corpo applicativo principale -->
+  <main class="flex-1 max-w-[1400px] w-full mx-auto p-4 sm:p-6 space-y-5">
+
+    <!-- Barra selezione veicolo, conducente e stato conformità -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+      <!-- Mezzo e conducente assegnati -->
+      <div class="card flex flex-col">
+        <div class="card-h">
+          <div>
+            <div class="card-t">Mezzo e conducente</div>
+            <div class="card-s">Missione corrente</div>
+          </div>
+          <button onclick="openVehicleSpecsModal()" class="btn btn-xs">Sagoma</button>
+        </div>
+
+        <div class="p-4 space-y-3 flex-1">
+          <div>
+            <label for="vehicle-select" class="lbl block mb-1.5">Veicolo assegnato</label>
+            <select id="vehicle-select" onchange="changeVehicle(this.value)" class="fld font-medium"></select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="input-driver" class="lbl block mb-1.5">Autista</label>
+              <input id="input-driver" type="text" placeholder="Nome e cognome" oninput="updateMission('driver', this.value)" class="fld fld-sm">
+            </div>
+            <div>
+              <label for="input-license" class="lbl block mb-1.5">Patente / matricola</label>
+              <input id="input-license" type="text" placeholder="C+E · 4472" oninput="updateMission('license', this.value)" class="fld fld-sm">
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 border-t" style="border-color:var(--line-2)">
+          <div class="px-4 py-2.5">
+            <div class="lbl">Passo</div>
+            <div class="num text-[13px] font-semibold mt-0.5" id="spec-wheelbase">4.035 m</div>
+          </div>
+          <div class="px-4 py-2.5" style="border-left:1px solid var(--line-2)">
+            <div class="lbl">Portata</div>
+            <div class="num text-[13px] font-semibold mt-0.5" id="spec-payload">1.350 kg</div>
+          </div>
+          <div class="px-4 py-2.5" style="border-left:1px solid var(--line-2)">
+            <div class="lbl">PTT</div>
+            <div class="num text-[13px] font-semibold mt-0.5" id="spec-ptt">3.500 kg</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stato di conformità -->
+      <div id="compliance-banner" class="lg:col-span-2 banner banner-ok" role="status" aria-live="polite">
+        <div id="compliance-icon" class="banner-dot banner-dot-ok">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div class="min-w-0">
+          <h3 id="compliance-title" class="text-[15px] font-semibold leading-tight" style="color:var(--ok)">Piano di carico a norma</h3>
+          <p id="compliance-desc" class="text-[12px] mt-1 leading-relaxed" style="color:var(--ink-2)">Massa complessiva, carichi per asse e aderenza dell'avantreno entro i limiti.</p>
+          <div id="compliance-tags" class="flex flex-wrap gap-1.5 mt-2.5"></div>
+        </div>
+
+        <div class="ml-auto hidden md:grid grid-cols-3 gap-px rounded-lg overflow-hidden self-stretch" style="background:rgba(16,21,29,.08);min-width:372px">
+          <div class="px-3 py-2.5" style="background:rgba(255,255,255,.75)">
+            <div class="lbl">Asse ant.</div>
+            <div class="num text-[15px] font-semibold mt-1" id="mini-front">—</div>
+            <div class="num text-[10px] mt-0.5 whitespace-nowrap" style="color:var(--ink-3)" id="mini-front-lim">—</div>
+          </div>
+          <div class="px-3 py-2.5" style="background:rgba(255,255,255,.75)">
+            <div class="lbl">Asse post.</div>
+            <div class="num text-[15px] font-semibold mt-1" id="mini-rear">—</div>
+            <div class="num text-[10px] mt-0.5 whitespace-nowrap" style="color:var(--ink-3)" id="mini-rear-lim">—</div>
+          </div>
+          <div class="px-3 py-2.5" style="background:rgba(255,255,255,.75)">
+            <div class="lbl">Massa tot.</div>
+            <div class="num text-[15px] font-semibold mt-1" id="mini-total">—</div>
+            <div class="num text-[10px] mt-0.5 whitespace-nowrap" style="color:var(--ink-3)" id="mini-total-lim">—</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Vista pianale e strumenti degli assi -->
+    <div class="card overflow-hidden">
+      <div class="card-h">
+        <div>
+          <div class="card-t">Pianale di carico e distribuzione sugli assi</div>
+          <div class="card-s">Trascina i colli per redistribuire il peso · frecce ←/→ per il collo selezionato</div>
+        </div>
+        <div class="flex items-center gap-3 text-[11px]" style="color:var(--ink-3)">
+          <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background:#4f46e5"></span> Colli</span>
+          <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#f59e0b"></span> Baricentro</span>
+        </div>
+      </div>
+
+      <div class="p-4 sm:p-5 select-none" style="background:var(--panel)">
+        <div class="max-w-5xl mx-auto">
+
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 mb-3">
+            <div class="sm:col-span-3 gauge">
+              <div class="flex items-baseline justify-between">
+                <span class="lbl" style="color:#8b95a5">Asse anteriore</span>
+                <span class="num text-[11px]" style="color:#8b95a5" id="pct-front-axle"></span>
+              </div>
+              <div class="num text-[15px] font-semibold text-white mt-1" id="val-front-axle">1.350 kg</div>
+              <div class="meter"><div id="bar-front-axle" class="meter-fill fill-ok" style="width:50%"></div></div>
+              <span class="num text-[10px]" style="color:#8c96a5" id="limit-front-axle">Max 2.100 kg</span>
+            </div>
+
+            <div class="sm:col-span-6 flex flex-col items-center justify-center text-center px-4 py-2">
+              <span class="lbl" style="color:#8b95a5">Centro di gravità del carico</span>
+              <div class="num text-[18px] font-semibold mt-1" style="color:#fbbf24" id="val-cog">0.00 m</div>
+              <span class="text-[11px] mt-1" style="color:#9aa5b4" id="val-front-ratio">Aderenza avantreno 45.0% (min 20%)</span>
+            </div>
+
+            <div class="sm:col-span-3 gauge">
+              <div class="flex items-baseline justify-between">
+                <span class="lbl" style="color:#8b95a5">Asse posteriore</span>
+                <span class="num text-[11px]" style="color:#8b95a5" id="pct-rear-axle"></span>
+              </div>
+              <div class="num text-[15px] font-semibold text-white mt-1" id="val-rear-axle">800 kg</div>
+              <div class="meter"><div id="bar-rear-axle" class="meter-fill fill-ok" style="width:40%"></div></div>
+              <span class="num text-[10px]" style="color:#8c96a5" id="limit-rear-axle">Max 2.400 kg</span>
+            </div>
+          </div>
+
+          <div class="rounded-xl p-3 overflow-x-auto custom-scroll" style="background:#080c12;border:1px solid var(--panel-line)">
+            <svg id="truck-svg" style="min-width:680px" viewBox="0 0 900 340" class="w-full h-auto" role="img" aria-label="Vista laterale del veicolo con i colli posizionati sul pianale"></svg>
+          </div>
+
+          <div class="flex justify-between items-center text-[10.5px] mt-2 px-1" style="color:#8c96a5">
+            <span>◄ Cabina</span>
+            <span class="lbl" style="color:#8c96a5">Scala metrica reale</span>
+            <span>Sbalzo posteriore ►</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Riepilogo numerico -->
+      <div class="grid grid-cols-2 sm:grid-cols-4" style="border-top:1px solid var(--line-2);background:#fbfcfd">
+        <div class="kpi">
+          <div class="lbl">Massa totale</div>
+          <div class="kpi-v num" id="summary-total-weight">2.150 kg</div>
+          <div class="kpi-s num" id="summary-max-ptt">su 3.500 kg</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Carico utile</div>
+          <div class="kpi-v num" style="color:var(--accent)" id="summary-payload">0 kg</div>
+          <div class="kpi-s num" id="summary-remaining-payload">1.350 kg disponibili</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Aderenza sterzo</div>
+          <div class="kpi-v num" id="summary-steer-ratio">62.8%</div>
+          <div class="kpi-s" id="summary-steer-status">Aderenza ottimale</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Colli a bordo</div>
+          <div class="kpi-v num" id="summary-items-count">0</div>
+          <div class="kpi-s">spedizioni sul pianale</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Importazione, automazioni e manifesto -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+      <div class="lg:col-span-4 space-y-4">
+
+        <div class="card">
+          <div class="card-h">
+            <div>
+              <div class="card-t">Importa manifesto</div>
+              <div class="card-s">.xlsx · .xls · .csv dal gestionale</div>
+            </div>
+          </div>
+          <div class="p-4">
+            <div id="dropzone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event)" class="zone cursor-pointer">
+              <input type="file" id="file-input" accept=".xlsx, .xls, .csv" onchange="handleFileSelect(event)" class="hidden">
+              <label for="file-input" class="cursor-pointer block">
+                <svg class="w-7 h-7 mx-auto mb-2" style="color:#aab2be" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                <span class="text-[12px] font-semibold block" style="color:var(--accent)">Trascina il file o sfoglia</span>
+                <span class="text-[11px] block mt-1" style="color:var(--ink-3)">Riconosce intestazioni, unità di misura e autista</span>
+              </label>
+            </div>
+            <p class="text-[11px] mt-3" style="color:var(--ink-3)">
+              Colonne lette: <span class="num" style="color:var(--ink-2)">ID · Peso · Lunghezza · Q.tà · Destinazione · Consegnatario</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><div class="card-t">Automazioni di stiva</div></div>
+          <div class="p-4 space-y-2">
+            <button onclick="balanceEvenly()" class="btn btn-block btn-primary">
+              <span class="flex items-center gap-2">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18M5 8l7-4 7 4M4 12l3 6h-6zM17 12l3 6h-6z"/></svg>
+                Ottimizza carico
+              </span>
+              <span class="text-[10px] font-medium opacity-70">solver assi</span>
+            </button>
+
+            <button onclick="autoPackLIFO()" class="btn btn-block">
+              <span class="flex items-center gap-2">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h10M4 17h6"/></svg>
+                Sequenza LIFO
+              </span>
+              <span class="text-[10px] font-medium" style="color:var(--ink-3)">testa → coda</span>
+            </button>
+
+            <button onclick="clearAllCargo()" class="btn btn-block btn-danger">
+              <span class="flex items-center gap-2">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Svuota pianale
+              </span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="lg:col-span-8 card flex flex-col">
+        <div class="card-h">
+          <div>
+            <div class="card-t">Manifesto di carico</div>
+            <div class="card-s">Pesi, ingombri e posizioni · clic su una riga per selezionarla</div>
+          </div>
+          <button onclick="addNewManualItem()" class="btn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Aggiungi collo
+          </button>
+        </div>
+
+        <div class="overflow-auto max-h-[420px] custom-scroll">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th scope="col">Codice</th>
+                <th scope="col">Destinazione</th>
+                <th scope="col">Consegnatario</th>
+                <th scope="col" class="text-right">Ingombro m</th>
+                <th scope="col" class="text-right">Peso kg</th>
+                <th scope="col">Posizione nel vano</th>
+                <th scope="col" class="text-right">Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="cargo-table-body"></tbody>
+          </table>
+        </div>
+
+        <div id="table-empty-msg" class="text-center py-12" style="color:var(--ink-3)">
+          <svg class="w-9 h-9 mx-auto mb-2" style="color:#c8cfda" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          <p class="text-[12px] font-medium">Nessun collo caricato — importa un file Excel o carica i dati demo.</p>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Modal per Modifica Parametri Sagoma Veicolo -->
+  <div id="vehicle-modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Specifiche fisiche del mezzo">
+    <div class="modal-card max-w-lg">
+      <div class="modal-h">
+        <div>
+          <div class="card-t">Specifiche fisiche del mezzo</div>
+          <div class="card-s">Valori usati dal modello di ripartizione</div>
+        </div>
+        <button onclick="closeVehicleSpecsModal()" class="icon-btn" aria-label="Chiudi">&times;</button>
+      </div>
+
+      <div class="modal-b grid grid-cols-2 gap-3">
+        <div>
+          <label for="input-wheelbase" class="lbl block mb-1.5">Passo (Wheelbase, L) [m]</label>
+          <input type="number" step="0.01" id="input-wheelbase" class="fld fld-sm num">
+        </div>
+        <div>
+          <label for="input-frontToBulkhead" class="lbl block mb-1.5">Asse Ant. &#8594; Paratia [m]</label>
+          <input type="number" step="0.01" id="input-frontToBulkhead" class="fld fld-sm num">
+        </div>
+        <div>
+          <label for="input-bayLength" class="lbl block mb-1.5">Lunghezza Vano [m]</label>
+          <input type="number" step="0.01" id="input-bayLength" class="fld fld-sm num">
+        </div>
+        <div>
+          <label for="input-maxGross" class="lbl block mb-1.5">Massa Max Ammessa (PTT) [kg]</label>
+          <input type="number" id="input-maxGross" class="fld fld-sm num">
+        </div>
+        <div>
+          <label for="input-tareFront" class="lbl block mb-1.5">Tara Asse Anteriore [kg]</label>
+          <input type="number" id="input-tareFront" class="fld fld-sm num">
+        </div>
+        <div>
+          <label for="input-tareRear" class="lbl block mb-1.5">Tara Asse Posteriore [kg]</label>
+          <input type="number" id="input-tareRear" class="fld fld-sm num">
+        </div>
+        <div>
+          <label for="input-maxFront" class="lbl block mb-1.5">Portata Max Asse Ant. [kg]</label>
+          <input type="number" id="input-maxFront" class="fld fld-sm num">
+        </div>
+        <div>
+          <label for="input-maxRear" class="lbl block mb-1.5">Portata Max Asse Post. [kg]</label>
+          <input type="number" id="input-maxRear" class="fld fld-sm num">
+        </div>
+      </div>
+
+      <div class="modal-f">
+        <button onclick="closeVehicleSpecsModal()" class="btn">Annulla</button>
+        <button onclick="saveVehicleSpecs()" class="btn btn-primary">Salva e ricalcola</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Stampa Bollettino di Carico DDT per l'Autista -->
+  <div id="print-modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Bollettino di carico">
+    <div class="modal-card max-w-2xl">
+      <div class="modal-h print:hidden">
+        <div>
+          <div class="card-t">Bollettino di carico</div>
+          <div class="card-s">Documento di verifica pesi per asse</div>
+        </div>
+        <button onclick="closePrintModal()" class="icon-btn" aria-label="Chiudi">&times;</button>
+      </div>
+
+      <!-- Contenuto stampabile -->
+      <div id="printable-report" class="modal-b space-y-4 text-[12px]">
+        <div class="border-b-2 border-slate-900 pb-3 flex justify-between items-start">
+          <div>
+            <h1 class="text-[16px] font-bold tracking-tight">SmartAxle · Bollettino tecnico di carico</h1>
+            <p class="text-slate-500">Documento di Verifica Pesi per Asse (Codice della Strada Art. 62 e 167)</p>
+          </div>
+          <div class="text-right">
+            <span id="report-date" class="num font-medium"></span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <div>
+            <p><strong>Veicolo:</strong> <span id="report-vehicle-name"></span></p>
+            <p><strong>Targa:</strong> <span id="report-vehicle-plate"></span></p>
+            <p><strong>PTT Limite:</strong> <span id="report-ptt"></span> kg</p>
+            <p><strong>Autista:</strong> <span id="report-driver"></span></p>
+            <p><strong>Patente / Matricola:</strong> <span id="report-license"></span></p>
+          </div>
+          <div>
+            <p><strong>Peso Effettivo Totale:</strong> <span id="report-total-weight"></span> kg</p>
+            <p><strong>Carico Asse Anteriore:</strong> <span id="report-front-weight"></span> kg</p>
+            <p><strong>Carico Asse Posteriore:</strong> <span id="report-rear-weight"></span> kg</p>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="font-bold uppercase text-[11px] text-slate-600 mb-1">Esito dei Controlli di Sicurezza:</h4>
+          <div id="report-compliance-status" class="p-2.5 rounded font-bold"></div>
+        </div>
+
+        <div>
+          <h4 class="font-bold uppercase text-[11px] text-slate-600 mb-1">Distinta dei Colli Caricati:</h4>
+          <table class="w-full text-left border border-slate-200">
+            <thead class="bg-slate-100">
+              <tr>
+                <th class="p-1.5 border-b">ID Spedizione</th>
+                <th class="p-1.5 border-b">Destinazione</th>
+                <th class="p-1.5 border-b">Consegnatario</th>
+                <th class="p-1.5 border-b">Peso (kg)</th>
+                <th class="p-1.5 border-b">Distanza Paratia (m)</th>
+              </tr>
+            </thead>
+            <tbody id="report-items-table"></tbody>
+          </table>
+        </div>
+
+        <div class="pt-8 grid grid-cols-2 gap-8 text-center text-slate-500 text-[11px]">
+          <div class="border-t border-slate-300 pt-1">Firma Responsabile Logistica / Caricatore</div>
+          <div class="border-t border-slate-300 pt-1">Firma Conducente <span id="report-driver-sign" class="font-semibold text-slate-700"></span> per Ricevuta e Presa Visione</div>
+        </div>
+      </div>
+
+      <div class="modal-f print:hidden">
+        <button onclick="closePrintModal()" class="btn">Chiudi</button>
+        <button onclick="window.print()" class="btn btn-primary">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          Stampa PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifiche Fluttuanti -->
+  <div id="toast-container" role="status" aria-live="polite" class="fixed bottom-4 right-4 flex flex-col gap-2 pointer-events-none" style="z-index:60"></div>
+
+  <!-- JAVASCRIPT: LOGICA COMPLETA DELL'APPLICAZIONE -->
+  <script>
+    // 1. DATABASE VEICOLI PRECONFIGURATI (Specifiche reali flotte italiane)
+    const VEHICLE_CATALOG = {
+      "ducato_l3h2": {
+        id: "ducato_l3h2",
+        name: "Fiat Ducato Maxi L3H2 (Furgone)",
+        plate: "GE 942 KM",
+        category: "VAN_B",
+        wheelbase: 4.035,
+        frontToBulkhead: 1.400,
+        bayLength: 3.705,
+        bayWidth: 1.870,
+        tareFront: 1350,
+        tareRear: 800,
+        maxGross: 3500,
+        maxFront: 2100,
+        maxRear: 2400,
+        minFrontRatio: 0.20
+      },
+      "daily_35c": {
+        id: "daily_35c",
+        name: "Iveco Daily 35C16 Gemellato (Cabinato)",
+        plate: "FM 108 TR",
+        category: "VAN_B",
+        wheelbase: 3.750,
+        frontToBulkhead: 1.350,
+        bayLength: 4.200,
+        bayWidth: 2.100,
+        tareFront: 1420,
+        tareRear: 980,
+        maxGross: 3500,
+        maxFront: 1900,
+        maxRear: 2600,
+        minFrontRatio: 0.22
+      },
+      "sprinter_l2": {
+        id: "sprinter_l2",
+        name: "Mercedes-Benz Sprinter 317 CDI",
+        plate: "GN 773 BZ",
+        category: "VAN_B",
+        wheelbase: 3.665,
+        frontToBulkhead: 1.450,
+        bayLength: 3.270,
+        bayWidth: 1.780,
+        tareFront: 1380,
+        tareRear: 790,
+        maxGross: 3500,
+        maxFront: 1860,
+        maxRear: 2250,
+        minFrontRatio: 0.20
+      },
+      "eurocargo_180": {
+        id: "eurocargo_180",
+        name: "Iveco Eurocargo 180E (Patente C - 2 Assi)",
+        plate: "EW 330 DD",
+        category: "RIGID_C",
+        wheelbase: 5.670,
+        frontToBulkhead: 1.800,
+        bayLength: 7.200,
+        bayWidth: 2.480,
+        tareFront: 3800,
+        tareRear: 2900,
+        maxGross: 18000,
+        maxFront: 7100,
+        maxRear: 11500,
+        minFrontRatio: 0.25
+      }
+    };
+
+    // 2. STATO CORRENTE DELL'APPLICAZIONE
+    let currentVehicle = { ...VEHICLE_CATALOG["ducato_l3h2"] };
+    let cargoItems = [];
+    let draggedItemId = null;
+    let history = [];
+    let mission = { driver: "", license: "", note: "" };   // conducente assegnato al viaggio
+    const STORAGE_KEY = "smartaxle.session.v1";
+    const DEFAULT_LEN = 0.80;                     // ingombro longitudinale europallet [m]
+
+    function snapshot() {
+      history.push(JSON.stringify({ v: currentVehicle, c: cargoItems, m: mission }));
+      if (history.length > 40) history.shift();
+      const btn = document.getElementById("btn-undo");
+      if (btn) btn.disabled = history.length === 0;
+    }
+
+    function undo() {
+      if (!history.length) return showToast("Nessuna modifica da annullare", "error");
+      const st = JSON.parse(history.pop());
+      currentVehicle = st.v; cargoItems = st.c; mission = st.m || mission;
+      syncMissionInputs();
+      document.getElementById("vehicle-select").value = currentVehicle.id;
+      updateVehicleDisplaySpecs();
+      recalculateAndRender();
+      showToast("Ultima modifica annullata");
+    }
+
+    function persist() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ v: currentVehicle, c: cargoItems, m: mission })); } catch (e) {} 
+    }
+
+    function restore() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+        const st = JSON.parse(raw);
+        if (!st || !st.v) return false;
+        currentVehicle = st.v;
+        cargoItems = (st.c || []).map(c => ({ len: DEFAULT_LEN, consignee: "", ...c }));
+        mission = { driver: "", license: "", note: "", ...(st.m || {}) };
+        return true;
+      } catch (e) { return false; }
+    }
+
+    // 3. INIZIALIZZAZIONE AL CARICAMENTO DELLA PAGINA
+    window.onload = function () {
+      const restored = restore();
+      initVehicleDropdown();
+      if (restored) {
+        const sel = document.getElementById("vehicle-select");
+        if (!VEHICLE_CATALOG[currentVehicle.id]) {
+          const o = document.createElement("option");
+          o.value = currentVehicle.id; o.textContent = `${currentVehicle.name} [${currentVehicle.plate}]`;
+          sel.appendChild(o);
+        }
+        sel.value = currentVehicle.id;
+        showToast(`Sessione ripristinata: ${cargoItems.length} colli`);
+      }
+      document.addEventListener("keydown", onGlobalKey);
+      syncMissionInputs();
+      updateVehicleDisplaySpecs();
+      recalculateAndRender();
+    };
+
+    function initVehicleDropdown() {
+      const select = document.getElementById("vehicle-select");
+      select.innerHTML = "";
+      for (const key in VEHICLE_CATALOG) {
+        const v = VEHICLE_CATALOG[key];
+        const opt = document.createElement("option");
+        opt.value = v.id;
+        opt.textContent = `${v.name} [${v.plate}]`;
+        select.appendChild(opt);
+      }
+      select.value = currentVehicle.id;
+    }
+
+    function changeVehicle(vehicleId) {
+      snapshot();
+      currentVehicle = { ...VEHICLE_CATALOG[vehicleId] };
+      updateVehicleDisplaySpecs();
+      // Assicura che i colli non eccedano la lunghezza del nuovo vano
+      cargoItems.forEach(item => {
+        if (item.posX > currentVehicle.bayLength - 0.4) {
+          item.posX = Math.max(0, currentVehicle.bayLength - 0.8);
+        }
+      });
+      recalculateAndRender();
+      showToast(`Veicolo aggiornato: ${currentVehicle.name}`);
+    }
+
+    function updateVehicleDisplaySpecs() {
+      document.getElementById("spec-wheelbase").textContent = `${currentVehicle.wheelbase.toFixed(3)} m`;
+      const payloadCapacity = currentVehicle.maxGross - (currentVehicle.tareFront + currentVehicle.tareRear);
+      document.getElementById("spec-payload").textContent = `${payloadCapacity.toLocaleString("it-IT")} kg`;
+      document.getElementById("spec-ptt").textContent = `${currentVehicle.maxGross.toLocaleString("it-IT")} kg`;
+    }
+
+    // 4. MOTORE FISICO NEWTONIANO DI RIPARTIZIONE DEI PESI
+    function calculatePhysics() {
+      let totalPayload = 0;
+      let totalMomentFromFrontAxle = 0;
+      let addedFrontWeight = 0;
+      let addedRearWeight = 0;
+
+      cargoItems.forEach(item => {
+        const weight = Number(item.weight) || 0;
+        if (weight <= 0) return;
+
+        // Distanza dal perno dell'asse anteriore (x = 0): posX e' il bordo
+        // anteriore del collo, la massa agisce nel suo baricentro geometrico
+        const xAbsolute = currentVehicle.frontToBulkhead + Number(item.posX) + (Number(item.len) || DEFAULT_LEN) / 2;
+
+        // Regola della leva sul passo (L)
+        const rearShare = weight * (xAbsolute / currentVehicle.wheelbase);
+        const frontShare = weight * ((currentVehicle.wheelbase - xAbsolute) / currentVehicle.wheelbase);
+
+        totalPayload += weight;
+        totalMomentFromFrontAxle += weight * xAbsolute;
+        addedRearWeight += rearShare;
+        addedFrontWeight += frontShare;
+      });
+
+      const frontAxleWeight = currentVehicle.tareFront + addedFrontWeight;
+      const rearAxleWeight = currentVehicle.tareRear + addedRearWeight;
+      const totalGrossWeight = currentVehicle.tareFront + currentVehicle.tareRear + totalPayload;
+
+      const cargoCoG = totalPayload > 0 ? (totalMomentFromFrontAxle / totalPayload) : 0;
+      const targetCoG = optimalCoG(totalPayload) + currentVehicle.frontToBulkhead;  // riferito all asse anteriore, come cargoCoG
+      const frontRatio = totalGrossWeight > 0 ? (frontAxleWeight / totalGrossWeight) : 0;
+
+      // Validazione vincoli di legge
+      const violations = [];
+      if (totalGrossWeight > currentVehicle.maxGross) {
+        violations.push(`Sovraccarico totale PTT: +${(totalGrossWeight - currentVehicle.maxGross).toFixed(0)} kg`);
+      }
+      if (frontAxleWeight > currentVehicle.maxFront) {
+        violations.push(`Asse anteriore oltre il limite: +${(frontAxleWeight - currentVehicle.maxFront).toFixed(0)} kg`);
+      }
+      if (rearAxleWeight > currentVehicle.maxRear) {
+        violations.push(`Asse posteriore oltre il limite: +${(rearAxleWeight - currentVehicle.maxRear).toFixed(0)} kg`);
+      }
+      if (frontRatio < currentVehicle.minFrontRatio) {
+        violations.push(`Perdita aderenza avantreno: ${(frontRatio * 100).toFixed(1)}% < soglia ${(currentVehicle.minFrontRatio * 100).toFixed(0)}%`);
+      }
+      // colli sovrapposti o fuori sagoma del vano
+      const ordered = [...cargoItems].sort((a, b) => a.posX - b.posX);
+      for (let i = 0; i < ordered.length; i++) {
+        const it = ordered[i], L = Number(it.len) || DEFAULT_LEN;
+        if (it.posX < -0.001 || it.posX + L > currentVehicle.bayLength + 0.001) {
+          violations.push(`Collo ${it.id} fuori vano di carico`);
+        }
+        const nx = ordered[i + 1];
+        if (nx && it.posX + L > Number(nx.posX) + 0.001) {
+          violations.push(`Colli sovrapposti: ${it.id} / ${nx.id}`);
+        }
+      }
+      if (cargoItems.length && totalPayload > 0) {
+        const overhangShare = cargoItems
+          .filter(c => currentVehicle.frontToBulkhead + Number(c.posX) + (Number(c.len) || DEFAULT_LEN) / 2 > currentVehicle.wheelbase)
+          .reduce((a, c) => a + Number(c.weight), 0) / totalPayload;
+        if (overhangShare > 0.35) {
+          violations.push(`Carico a sbalzo posteriore: ${(overhangShare * 100).toFixed(0)}% oltre l asse`);
+        }
+      }
+
+      return {
+        totalGrossWeight,
+        totalPayload,
+        frontAxleWeight,
+        rearAxleWeight,
+        cargoCoG,
+        targetCoG,
+        frontRatio,
+        axleUse: Math.max(frontAxleWeight / currentVehicle.maxFront, rearAxleWeight / currentVehicle.maxRear),
+        isValid: violations.length === 0,
+        violations
+      };
+    }
+
+    // 5. RENDERING GRAFICO E AGGIORNAMENTO UI
+    function recalculateAndRender() {
+      const p = calculatePhysics();
+
+      // Aggiorna barre e valori asse anteriore
+      const frontValElem = document.getElementById("val-front-axle");
+      frontValElem.textContent = `${Math.round(p.frontAxleWeight).toLocaleString("it-IT")} kg`;
+      const frontPct = Math.min(100, (p.frontAxleWeight / currentVehicle.maxFront) * 100);
+      const frontBar = document.getElementById("bar-front-axle");
+      frontBar.style.width = `${frontPct}%`;
+      frontBar.className = `meter-fill ${p.frontAxleWeight > currentVehicle.maxFront ? 'fill-bad' : (frontPct > 90 ? 'fill-warn' : 'fill-ok')}`;
+      document.getElementById("limit-front-axle").textContent = `Max ${currentVehicle.maxFront.toLocaleString("it-IT")} kg`;
+      document.getElementById("pct-front-axle").textContent = `${frontPct.toFixed(0)}%`;
+
+      // Aggiorna barre e valori asse posteriore
+      const rearValElem = document.getElementById("val-rear-axle");
+      rearValElem.textContent = `${Math.round(p.rearAxleWeight).toLocaleString("it-IT")} kg`;
+      const rearPct = Math.min(100, (p.rearAxleWeight / currentVehicle.maxRear) * 100);
+      const rearBar = document.getElementById("bar-rear-axle");
+      rearBar.style.width = `${rearPct}%`;
+      rearBar.className = `meter-fill ${p.rearAxleWeight > currentVehicle.maxRear ? 'fill-bad' : (rearPct > 90 ? 'fill-warn' : 'fill-ok')}`;
+      document.getElementById("limit-rear-axle").textContent = `Max ${currentVehicle.maxRear.toLocaleString("it-IT")} kg`;
+      document.getElementById("pct-rear-axle").textContent = `${rearPct.toFixed(0)}%`;
+
+      // Aggiorna Baricentro e Aderenza
+      document.getElementById("val-cog").textContent = `${p.cargoCoG.toFixed(2)} m`;
+      document.getElementById("val-front-ratio").textContent =
+        `Aderenza avantreno ${(p.frontRatio * 100).toFixed(1)}% (min ${(currentVehicle.minFrontRatio * 100).toFixed(0)}%) · ottimale ${p.targetCoG.toFixed(2)} m`;
+
+      // Riepilogo footer
+      document.getElementById("summary-total-weight").textContent = `${Math.round(p.totalGrossWeight).toLocaleString("it-IT")} kg`;
+      document.getElementById("summary-max-ptt").textContent = `su ${currentVehicle.maxGross.toLocaleString("it-IT")} kg`;
+      document.getElementById("summary-payload").textContent = `${Math.round(p.totalPayload).toLocaleString("it-IT")} kg`;
+      
+      const payloadCap = currentVehicle.maxGross - (currentVehicle.tareFront + currentVehicle.tareRear);
+      const remainingPayload = payloadCap - p.totalPayload;
+      const remElem = document.getElementById("summary-remaining-payload");
+      remElem.textContent = remainingPayload >= 0
+        ? `${Math.round(remainingPayload).toLocaleString("it-IT")} kg disponibili`
+        : `${Math.round(Math.abs(remainingPayload)).toLocaleString("it-IT")} kg di eccedenza`;
+      remElem.className = "kpi-s num";
+      remElem.style.color = remainingPayload >= 0 ? "" : "var(--bad)";
+
+      document.getElementById("summary-steer-ratio").textContent = `${(p.frontRatio * 100).toFixed(1)}%`;
+      const steerBox = document.getElementById("summary-steer-status");
+      const steerOk = p.frontRatio >= currentVehicle.minFrontRatio;
+      steerBox.textContent = steerOk ? "Aderenza conforme" : "Avantreno alleggerito";
+      steerBox.className = "kpi-s";
+      steerBox.style.color = steerOk ? "var(--ok)" : "var(--bad)";
+      document.getElementById("summary-items-count").textContent = cargoItems.length;
+
+      // Sintesi nel banner
+      const kg = v => `${Math.round(v).toLocaleString("it-IT")} kg`;
+      const mini = (id, val, lim) => {
+        const e = document.getElementById(id);
+        if (!e) return;
+        e.textContent = kg(val);
+        e.style.color = val > lim ? "var(--bad)" : (val / lim > 0.9 ? "var(--warn)" : "var(--ink)");
+      };
+      mini("mini-front", p.frontAxleWeight, currentVehicle.maxFront);
+      mini("mini-rear", p.rearAxleWeight, currentVehicle.maxRear);
+      mini("mini-total", p.totalGrossWeight, currentVehicle.maxGross);
+      document.getElementById("mini-front-lim").textContent = `limite ${kg(currentVehicle.maxFront)}`;
+      document.getElementById("mini-rear-lim").textContent = `limite ${kg(currentVehicle.maxRear)}`;
+      document.getElementById("mini-total-lim").textContent = `PTT ${kg(currentVehicle.maxGross)}`;
+
+      // Aggiorna banner di conformità
+      updateComplianceBanner(p);
+
+      // Disegna il camion SVG
+      renderTruckSVG(p);
+
+      // Aggiorna tabella colli
+      renderCargoTable();
+
+      // Persistenza locale della sessione
+      persist();
+    }
+
+    function updateComplianceBanner(p) {
+      const banner = document.getElementById("compliance-banner");
+      const icon = document.getElementById("compliance-icon");
+      const title = document.getElementById("compliance-title");
+      const desc = document.getElementById("compliance-desc");
+      const tagsContainer = document.getElementById("compliance-tags");
+
+      tagsContainer.innerHTML = "";
+
+      if (p.isValid) {
+        banner.className = "lg:col-span-2 banner banner-ok";
+        icon.className = "banner-dot banner-dot-ok";
+        icon.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+        title.className = "text-[15px] font-semibold leading-tight";
+        title.style.color = "var(--ok)";
+        title.textContent = "Piano di carico a norma (CdS art. 62/167)";
+        desc.className = "text-[12px] mt-1 leading-relaxed";
+        desc.style.color = "var(--ink-2)";
+        desc.textContent = "Massa complessiva, carichi per asse e aderenza dell'avantreno entro i limiti.";
+
+        [
+          ["chip chip-ok", `Margine PTT ${Math.round(currentVehicle.maxGross - p.totalGrossWeight).toLocaleString("it-IT")} kg`],
+          ["chip chip-ok", `Utilizzo assi ${(p.axleUse * 100).toFixed(0)}%`],
+          ["chip", `CoG ${p.cargoCoG.toFixed(2)} m · ottimale ${p.targetCoG.toFixed(2)} m`]
+        ].forEach(([cls, txt]) => {
+          const t = document.createElement("span");
+          t.className = cls + " num";
+          t.textContent = txt;
+          tagsContainer.appendChild(t);
+        });
+      } else {
+        banner.className = "lg:col-span-2 banner banner-bad";
+        icon.className = "banner-dot banner-dot-bad";
+        icon.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`;
+        title.className = "text-[15px] font-semibold leading-tight";
+        title.style.color = "var(--bad)";
+        title.textContent = "Carico non conforme o sbilanciato";
+        desc.className = "text-[12px] mt-1 leading-relaxed";
+        desc.style.color = "var(--ink-2)";
+        desc.textContent = `Il veicolo rischia sanzioni o perdita di aderenza dello sterzo. ${correctionHint(p)}`;
+
+        p.violations.forEach(v => {
+          const tag = document.createElement("span");
+          tag.className = "chip chip-bad num";
+          tag.textContent = v;
+          tagsContainer.appendChild(tag);
+        });
+      }
+    }
+
+    // 6. RENDERING VETTORIALE SVG AD ALTA FEDELTA (VISTA LATERALE IN SCALA METRICA)
+    function el(tag, attrs) {
+      const e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    }
+
+    function injectDefs(svg) {
+      const defs = el("defs", {});
+      defs.innerHTML = `
+        <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="52%" stop-color="#eef2f7"/>
+          <stop offset="72%" stop-color="#cbd5e1"/>
+          <stop offset="100%" stop-color="#e2e8f0"/>
+        </linearGradient>
+        <linearGradient id="gGlass" x1="0" y1="0" x2="0.4" y2="1">
+          <stop offset="0%" stop-color="#7dd3fc"/>
+          <stop offset="45%" stop-color="#38bdf8"/>
+          <stop offset="100%" stop-color="#0369a1"/>
+        </linearGradient>
+        <linearGradient id="gBay" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0b1220"/>
+          <stop offset="100%" stop-color="#1e293b"/>
+        </linearGradient>
+        <linearGradient id="gTarp" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f1f5f9"/>
+          <stop offset="100%" stop-color="#cbd5e1"/>
+        </linearGradient>`;
+      svg.appendChild(defs);
+    }
+
+    function renderTruckSVG(physics) {
+      const svg = document.getElementById("truck-svg");
+      const V = currentVehicle;
+      const isVan = V.category === "VAN_B";
+      svg.innerHTML = "";
+
+      const VBW = 900, VBH = 340;
+      svg.setAttribute("viewBox", `0 0 ${VBW} ${VBH}`);
+      injectDefs(svg);
+
+      // --- geometria reale in metri -------------------------------------
+      const fo       = isVan ? 0.95 : 1.42;                                   // sbalzo anteriore
+      const bodyEnd  = V.frontToBulkhead + V.bayLength + (isVan ? 0.12 : 0.20);
+      const heightM  = isVan ? 2.62 : 3.75;
+      const scale    = Math.min(112, (VBW - 140) / (fo + bodyEnd), (VBH - 82) / heightM);
+      const groundY  = VBH - 54;
+      const originX  = 84 + fo * scale;
+      const mx = m => originX + m * scale;
+      const my = h => groundY - h * scale;
+
+      const floorH    = isVan ? 0.55 : 1.18;
+      const floorY    = my(floorH);
+      const bayHeight = (isVan ? 1.93 : 2.42) * scale;
+      const wheelR    = (isVan ? 0.345 : 0.52) * scale;
+
+      const frontAxleX = mx(0);
+      const rearAxleX  = mx(V.wheelbase);
+      const bulkheadX  = mx(V.frontToBulkhead);
+      const bayEndX    = mx(V.frontToBulkhead + V.bayLength);
+      const twinRear   = /gemell/i.test(V.name) || !isVan;
+
+      // ombra a terra
+      svg.appendChild(el("ellipse", {
+        cx: (mx(-fo) + mx(bodyEnd)) / 2, cy: groundY + 9,
+        rx: (fo + bodyEnd) * scale / 2, ry: 6.5, fill: "#0f172a", opacity: "0.15"
+      }));
+
+      const geo = { V, isVan, scale, mx, my, fo, bodyEnd, groundY, floorY, bayHeight, bulkheadX, bayEndX, wheelR };
+
+      if (isVan) drawVanBody(svg, geo); else drawRigidBody(svg, geo);
+
+      // --- vano di carico in sezione (cutaway parziale) -------------------
+      const cutH = isVan ? Math.min(bayHeight - 0.35 * scale, 1.05 * scale) : bayHeight;
+      svg.appendChild(el("rect", {
+        x: bulkheadX, y: floorY - cutH, width: bayEndX - bulkheadX, height: cutH,
+        fill: "url(#gBay)", stroke: "#0f172a", "stroke-width": 1.5, rx: 2
+      }));
+      if (isVan) {
+        svg.appendChild(el("line", {
+          x1: bulkheadX, y1: floorY - cutH, x2: bayEndX, y2: floorY - cutH,
+          stroke: "#e2e8f0", "stroke-width": 1.4, "stroke-dasharray": "6,4"
+        }));
+      }
+      // doghe del pianale
+      for (let i = 1; i * 0.5 < V.bayLength; i++) {
+        const lx = bulkheadX + i * 0.5 * scale;
+        svg.appendChild(el("line", { x1: lx, y1: floorY - 10, x2: lx, y2: floorY, stroke: "#334155", "stroke-width": 1 }));
+      }
+      // ancoraggi di stiva sul pianale
+      for (let i = 0; i * 1.0 < V.bayLength; i++) {
+        svg.appendChild(el("circle", { cx: bulkheadX + (i + 0.5) * scale, cy: floorY - 4, r: 2.2, fill: "#475569" }));
+      }
+      // paratia divisoria
+      svg.appendChild(el("line", {
+        x1: bulkheadX, y1: floorY - cutH, x2: bulkheadX, y2: floorY,
+        stroke: "#f59e0b", "stroke-width": 3, "stroke-dasharray": "5,3"
+      }));
+
+      // --- ruote ---------------------------------------------------------
+      createWheelSVG(svg, frontAxleX, groundY - wheelR, wheelR, "Asse Ant.", false);
+      createWheelSVG(svg, rearAxleX, groundY - wheelR, wheelR, "Asse Post.", twinRear);
+
+      // --- quota passo ----------------------------------------------------
+      const qy = groundY + 34;
+      svg.appendChild(el("line", { x1: frontAxleX, y1: qy, x2: rearAxleX, y2: qy, stroke: "#94a3b8", "stroke-width": 1 }));
+      [frontAxleX, rearAxleX].forEach(x => svg.appendChild(el("line", { x1: x, y1: qy - 5, x2: x, y2: qy + 5, stroke: "#94a3b8", "stroke-width": 1 })));
+      const qt = el("text", { x: (frontAxleX + rearAxleX) / 2, y: qy - 5, "text-anchor": "middle", fill: "#64748b", "font-size": 10 });
+      qt.textContent = `Passo ${V.wheelbase.toFixed(3)} m`;
+      svg.appendChild(qt);
+
+      // --- colli (interattivi e trascinabili) ------------------------------
+      cargoItems.forEach((item) => {
+        const itemX = bulkheadX + (item.posX * scale);
+        const itemW = Math.max(26, (Number(item.len) || DEFAULT_LEN) * scale);
+        const sel = item.id === selectedItemId;
+        const itemH = Math.min(cutH - 10, Math.max(32, (item.weight / 600) * 80));
+        const itemY = floorY - itemH;
+
+        const g = el("g", { class: "cargo-draggable", "data-id": item.id });
+        g.appendChild(el("rect", {
+          x: itemX, y: itemY, width: itemW, height: itemH,
+          fill: sel ? "#6366f1" : "#4f46e5", stroke: sel ? "#fbbf24" : "#818cf8",
+          "stroke-width": sel ? 3 : 2, rx: 4
+        }));
+        g.appendChild(el("rect", { x: itemX + 3, y: itemY + itemH - 9, width: itemW - 6, height: 6, fill: "#a16207", opacity: "0.85", rx: 1 }));
+
+        const txtId = el("text", { x: itemX + itemW / 2, y: itemY + 16, "text-anchor": "middle", fill: "#ffffff", "font-size": 10, "font-weight": "bold" });
+        txtId.textContent = item.id.substring(0, 7);
+        g.appendChild(txtId);
+
+        const txtKg = el("text", { x: itemX + itemW / 2, y: itemY + itemH - 14, "text-anchor": "middle", fill: "#e0e7ff", "font-size": 10, "font-weight": "bold" });
+        txtKg.textContent = `${item.weight}kg`;
+        g.appendChild(txtKg);
+
+        g.onclick = () => { selectedItemId = item.id; renderCargoTable(); };
+        g.onmousedown = (e) => startDragItem(e, item.id, bulkheadX, scale);
+        g.ontouchstart = (e) => startDragItemTouch(e, item.id, bulkheadX, scale);
+        svg.appendChild(g);
+      });
+
+      // --- baricentro ------------------------------------------------------
+      if (cargoItems.length > 0 && physics.totalPayload > 0) {
+        const cogX = originX + (physics.cargoCoG * scale);
+        svg.appendChild(el("line", { x1: cogX, y1: floorY - bayHeight - 16, x2: cogX, y2: groundY, stroke: "#f59e0b", "stroke-width": 2, "stroke-dasharray": "4,4" }));
+        svg.appendChild(el("circle", { cx: cogX, cy: floorY - bayHeight - 12, r: 7, fill: "#f59e0b", stroke: "#ffffff", "stroke-width": 2 }));
+      }
+    }
+
+    // 6b. SAGOMA FURGONE (panel van tetto alto - profilo tipo Ducato/Daily/Sprinter)
+    function drawVanBody(svg, g) {
+      const { V, scale, mx, my, fo, bodyEnd } = g;
+      const nose = -fo;
+      const cabBack = V.frontToBulkhead;
+      const ar = 0.54 * scale, ay = 0.40 * scale;   // raggi passaruota
+
+      // --- scocca ---
+      const d = `M ${mx(nose + 0.02)} ${my(0.52)}`
+        + ` L ${mx(nose)} ${my(0.86)}`
+        + ` Q ${mx(nose - 0.01)} ${my(1.06)} ${mx(nose + 0.22)} ${my(1.13)}`
+        + ` L ${mx(nose + 0.60)} ${my(1.21)}`
+        + ` L ${mx(nose + 1.26)} ${my(2.09)}`
+        + ` Q ${mx(nose + 1.31)} ${my(2.23)} ${mx(nose + 1.49)} ${my(2.25)}`
+        + ` L ${mx(nose + 1.95)} ${my(2.27)}`
+        + ` L ${mx(nose + 2.28)} ${my(2.54)}`
+        + ` Q ${mx(nose + 2.36)} ${my(2.58)} ${mx(nose + 2.52)} ${my(2.58)}`
+        + ` L ${mx(bodyEnd - 0.12)} ${my(2.58)}`
+        + ` Q ${mx(bodyEnd)} ${my(2.58)} ${mx(bodyEnd)} ${my(2.44)}`
+        + ` L ${mx(bodyEnd)} ${my(0.52)}`
+        + ` L ${mx(V.wheelbase + 0.54)} ${my(0.52)}`
+        + ` A ${ar} ${ay} 0 0 0 ${mx(V.wheelbase - 0.54)} ${my(0.52)}`
+        + ` L ${mx(0.54)} ${my(0.52)}`
+        + ` A ${ar} ${ay} 0 0 0 ${mx(-0.54)} ${my(0.52)}`
+        + ` Z`;
+      svg.appendChild(el("path", { d, fill: "url(#gBody)", stroke: "#64748b", "stroke-width": 2, "stroke-linejoin": "round" }));
+
+      // --- paraurti anteriore e posteriore ---
+      svg.appendChild(el("path", {
+        d: `M ${mx(nose + 0.02)} ${my(0.86)} L ${mx(nose + 0.40)} ${my(0.90)} L ${mx(nose + 0.40)} ${my(0.34)} L ${mx(nose + 0.12)} ${my(0.32)} Q ${mx(nose - 0.01)} ${my(0.34)} ${mx(nose)} ${my(0.52)} Z`,
+        fill: "#94a3b8", stroke: "#64748b", "stroke-width": 1.2
+      }));
+      svg.appendChild(el("rect", { x: mx(bodyEnd - 0.32), y: my(0.50), width: 0.32 * scale, height: 0.17 * scale, rx: 2, fill: "#94a3b8", stroke: "#64748b", "stroke-width": 1 }));
+
+      // --- gruppo ottico anteriore, calandra, presa aria ---
+      svg.appendChild(el("polygon", {
+        points: `${mx(nose + 0.03)},${my(1.11)} ${mx(nose + 0.34)},${my(1.17)} ${mx(nose + 0.36)},${my(0.99)} ${mx(nose + 0.04)},${my(0.95)}`,
+        fill: "#f8fafc", stroke: "#94a3b8", "stroke-width": 1
+      }));
+      svg.appendChild(el("line", { x1: mx(nose + 0.05), y1: my(0.90), x2: mx(nose + 0.38), y2: my(0.94), stroke: "#94a3b8", "stroke-width": 1.2 }));
+      svg.appendChild(el("rect", { x: mx(nose + 0.06), y: my(0.62), width: 0.26 * scale, height: 0.10 * scale, rx: 2, fill: "#64748b", opacity: "0.7" }));
+
+      // --- parabrezza + tergicristallo + montante A ---
+      svg.appendChild(el("polygon", {
+        points: `${mx(nose + 0.66)},${my(1.28)} ${mx(nose + 1.23)},${my(2.03)} ${mx(nose + 1.45)},${my(2.05)} ${mx(nose + 0.88)},${my(1.29)}`,
+        fill: "url(#gGlass)", stroke: "#475569", "stroke-width": 1
+      }));
+      svg.appendChild(el("line", { x1: mx(nose + 0.78), y1: my(1.34), x2: mx(nose + 1.10), y2: my(1.62), stroke: "#334155", "stroke-width": 1.6 }));
+      svg.appendChild(el("line", { x1: mx(nose + 1.23), y1: my(2.03), x2: mx(nose + 0.88), y2: my(1.29), stroke: "#94a3b8", "stroke-width": 2.2 }));
+
+      // --- porta cabina: bordo, finestrino, maniglia ---
+      svg.appendChild(el("path", {
+        d: `M ${mx(nose + 0.90)} ${my(1.28)} L ${mx(nose + 1.44)} ${my(2.04)} L ${mx(cabBack - 0.05)} ${my(2.06)} L ${mx(cabBack - 0.05)} ${my(0.58)}`,
+        fill: "none", stroke: "#94a3b8", "stroke-width": 1.4
+      }));
+      const w0 = nose + 1.52, w1 = Math.max(w0 + 0.30, cabBack - 0.15);
+      svg.appendChild(el("path", {
+        d: `M ${mx(w0)} ${my(1.36)} L ${mx(w0 - 0.03)} ${my(1.98)} Q ${mx(w0 - 0.02)} ${my(2.01)} ${mx(w0 + 0.06)} ${my(2.01)}`
+         + ` L ${mx(w1)} ${my(2.01)} Q ${mx(w1 + 0.04)} ${my(2.00)} ${mx(w1 + 0.04)} ${my(1.94)}`
+         + ` L ${mx(w1 + 0.04)} ${my(1.38)} Q ${mx(w1 + 0.03)} ${my(1.35)} ${mx(w1 - 0.05)} ${my(1.35)} Z`,
+        fill: "url(#gGlass)", stroke: "#475569", "stroke-width": 1
+      }));
+      svg.appendChild(el("rect", { x: mx(cabBack - 0.44), y: my(1.36), width: 0.20 * scale, height: 0.06 * scale, rx: 2, fill: "#94a3b8" }));
+
+      // --- specchio a due elementi ---
+      svg.appendChild(el("line", { x1: mx(nose + 1.42), y1: my(1.94), x2: mx(nose + 1.14), y2: my(1.92), stroke: "#334155", "stroke-width": 2.5 }));
+      svg.appendChild(el("rect", { x: mx(nose + 1.00), y: my(2.08), width: 0.16 * scale, height: 0.22 * scale, rx: 3, fill: "#334155" }));
+      svg.appendChild(el("rect", { x: mx(nose + 1.00), y: my(1.84), width: 0.16 * scale, height: 0.12 * scale, rx: 2, fill: "#475569" }));
+
+      // --- porta laterale scorrevole (seams + binario + maniglia) ---
+      const sd0 = cabBack + 0.06, sd1 = Math.min(cabBack + 1.35, bodyEnd - 1.30);
+      if (sd1 > sd0 + 0.6) {
+        svg.appendChild(el("path", {
+          d: `M ${mx(sd0)} ${my(0.62)} L ${mx(sd0)} ${my(2.20)} L ${mx(sd1)} ${my(2.20)} L ${mx(sd1)} ${my(0.62)}`,
+          fill: "none", stroke: "#94a3b8", "stroke-width": 1.3
+        }));
+        svg.appendChild(el("line", { x1: mx(sd0), y1: my(1.28), x2: mx(sd1 + 1.10), y2: my(1.28), stroke: "#94a3b8", "stroke-width": 1.6, opacity: "0.8" }));
+        svg.appendChild(el("rect", { x: mx(sd1 - 0.30), y: my(1.44), width: 0.22 * scale, height: 0.06 * scale, rx: 2, fill: "#94a3b8" }));
+      }
+
+      // --- nervature laterali del pannello ---
+      for (let h of [1.80, 2.05]) {
+        svg.appendChild(el("line", { x1: mx(cabBack + 0.10), y1: my(h), x2: mx(bodyEnd - 0.10), y2: my(h), stroke: "#cbd5e1", "stroke-width": 1.1 }));
+      }
+
+      // --- montante e porte posteriori ---
+      svg.appendChild(el("line", { x1: g.bayEndX, y1: my(2.45), x2: g.bayEndX, y2: my(0.58), stroke: "#94a3b8", "stroke-width": 1.4 }));
+      svg.appendChild(el("rect", { x: mx(bodyEnd - 0.11), y: my(1.66), width: 0.09 * scale, height: 0.62 * scale, rx: 2, fill: "#dc2626", opacity: "0.9" }));
+      [1.05, 1.95].forEach(h => svg.appendChild(el("rect", { x: mx(bodyEnd - 0.05), y: my(h), width: 0.05 * scale, height: 0.10 * scale, fill: "#64748b" })));
+
+      // --- grondaia tetto + nervature tetto alto ---
+      svg.appendChild(el("line", { x1: mx(nose + 2.40), y1: my(2.50), x2: mx(bodyEnd - 0.10), y2: my(2.50), stroke: "#cbd5e1", "stroke-width": 1.2 }));
+      for (let i = 1; i <= 3; i++) {
+        const rx0 = mx(nose + 2.55 + i * ((bodyEnd - nose - 3.0) / 4));
+        svg.appendChild(el("line", { x1: rx0, y1: my(2.58), x2: rx0, y2: my(2.42), stroke: "#cbd5e1", "stroke-width": 1.2 }));
+      }
+
+      // --- passaruota in plastica nera ---
+      [0, V.wheelbase].forEach(ax => {
+        svg.appendChild(el("path", {
+          d: `M ${mx(ax + 0.56)} ${my(0.52)} A ${0.56 * scale} ${0.42 * scale} 0 0 0 ${mx(ax - 0.56)} ${my(0.52)}`,
+          fill: "none", stroke: "#334155", "stroke-width": 4.5, "stroke-linecap": "round"
+        }));
+      });
+      // minigonna
+      svg.appendChild(el("line", { x1: mx(0.60), y1: my(0.58), x2: mx(V.wheelbase - 0.60), y2: my(0.58), stroke: "#94a3b8", "stroke-width": 2 }));
+      // tappo carburante + catarifrangente
+      svg.appendChild(el("circle", { cx: mx(V.wheelbase - 1.00), cy: my(0.98), r: 0.09 * scale, fill: "none", stroke: "#94a3b8", "stroke-width": 1.2 }));
+      svg.appendChild(el("rect", { x: mx(cabBack + 0.15), y: my(1.02), width: 0.14 * scale, height: 0.05 * scale, rx: 1, fill: "#f59e0b", opacity: "0.8" }));
+
+      const pl = el("text", { x: mx(nose + 0.62), y: my(0.62), fill: "#475569", "font-size": 9, "font-weight": "bold" });
+      pl.textContent = V.plate || "";
+      svg.appendChild(pl);
+    }
+
+    // 6c. SAGOMA MOTRICE RIGIDA (cabina + cassone centinato)
+    function drawRigidBody(svg, g) {
+      const { V, scale, mx, my, fo, bodyEnd, floorY, bayHeight } = g;
+      const nose = -fo, cabBack = V.frontToBulkhead - 0.10;
+
+      // telaio
+      svg.appendChild(el("rect", { x: mx(nose + 0.30), y: my(1.06), width: (bodyEnd - nose - 0.4) * scale, height: 0.16 * scale, fill: "#334155" }));
+
+      // cabina
+      svg.appendChild(el("path", {
+        d: `M ${mx(nose)} ${my(0.75)} L ${mx(nose)} ${my(2.10)}`
+         + ` L ${mx(nose + 0.30)} ${my(3.05)} Q ${mx(nose + 0.34)} ${my(3.22)} ${mx(nose + 0.55)} ${my(3.24)}`
+         + ` L ${mx(cabBack)} ${my(3.24)} L ${mx(cabBack)} ${my(0.75)} Z`,
+        fill: "url(#gBody)", stroke: "#64748b", "stroke-width": 2, "stroke-linejoin": "round"
+      }));
+      // parabrezza cabina
+      svg.appendChild(el("polygon", {
+        points: `${mx(nose + 0.16)},${my(2.32)} ${mx(nose + 0.36)},${my(3.06)} ${mx(cabBack - 0.12)},${my(3.06)} ${mx(cabBack - 0.12)},${my(2.36)}`,
+        fill: "url(#gGlass)", stroke: "#475569", "stroke-width": 1
+      }));
+      // porta + maniglia + specchio
+      svg.appendChild(el("path", { d: `M ${mx(nose + 0.50)} ${my(1.30)} L ${mx(nose + 0.50)} ${my(2.30)} L ${mx(cabBack - 0.08)} ${my(2.34)} L ${mx(cabBack - 0.08)} ${my(1.30)} Z`, fill: "none", stroke: "#94a3b8", "stroke-width": 1.4 }));
+      svg.appendChild(el("rect", { x: mx(cabBack - 0.40), y: my(1.86), width: 0.20 * scale, height: 0.07 * scale, rx: 2, fill: "#94a3b8" }));
+      svg.appendChild(el("rect", { x: mx(nose + 0.02), y: my(3.00), width: 0.14 * scale, height: 0.44 * scale, rx: 3, fill: "#334155" }));
+      // gradini
+      svg.appendChild(el("rect", { x: mx(nose + 0.55), y: my(0.95), width: 0.34 * scale, height: 0.07 * scale, fill: "#475569" }));
+      svg.appendChild(el("rect", { x: mx(nose + 0.55), y: my(0.62), width: 0.34 * scale, height: 0.07 * scale, fill: "#475569" }));
+      // paraurti e fari
+      svg.appendChild(el("rect", { x: mx(nose - 0.02), y: my(1.05), width: 0.36 * scale, height: 0.40 * scale, rx: 3, fill: "#475569" }));
+      svg.appendChild(el("rect", { x: mx(nose + 0.02), y: my(1.32), width: 0.26 * scale, height: 0.18 * scale, rx: 2, fill: "#e2e8f0", stroke: "#94a3b8" }));
+
+      // struttura cassone (montanti + centina superiore)
+      svg.appendChild(el("rect", {
+        x: g.bulkheadX, y: floorY - bayHeight - 0.12 * scale,
+        width: g.bayEndX - g.bulkheadX, height: 0.12 * scale, fill: "url(#gTarp)", stroke: "#94a3b8", "stroke-width": 1
+      }));
+      svg.appendChild(el("rect", { x: g.bulkheadX, y: floorY, width: g.bayEndX - g.bulkheadX, height: 0.10 * scale, fill: "#475569" }));
+      for (let i = 1; i * 1.2 < V.bayLength; i++) {
+        const px = g.bulkheadX + i * 1.2 * scale;
+        svg.appendChild(el("line", { x1: px, y1: floorY, x2: px, y2: floorY - bayHeight, stroke: "#94a3b8", "stroke-width": 2, opacity: "0.55" }));
+      }
+      // sponda posteriore
+      svg.appendChild(el("rect", { x: g.bayEndX, y: floorY - bayHeight, width: 0.14 * scale, height: bayHeight + 0.10 * scale, fill: "url(#gBody)", stroke: "#64748b", "stroke-width": 1.5 }));
+      // barra antincastro laterale
+      svg.appendChild(el("line", { x1: mx(0.9), y1: my(0.60), x2: mx(V.wheelbase - 0.9), y2: my(0.60), stroke: "#64748b", "stroke-width": 3 }));
+
+      const pl = el("text", { x: mx(nose + 0.55), y: my(0.42), fill: "#64748b", "font-size": 9, "font-weight": "bold" });
+      pl.textContent = V.plate || "";
+      svg.appendChild(pl);
+    }
+
+    // 6d. RUOTA REALISTICA (battistrada, spalla, cerchio a 5 razze, gemellaggio)
+    function createWheelSVG(svg, cx, cy, r, label, twin) {
+      const g = el("g", {});
+
+      if (twin) {
+        g.appendChild(el("circle", { cx: cx + r * 0.34, cy, r, fill: "#0b1220", stroke: "#020617", "stroke-width": 2 }));
+        g.appendChild(el("circle", { cx: cx + r * 0.34, cy, r: r * 0.55, fill: "#334155" }));
+      }
+
+      g.appendChild(el("circle", { cx, cy, r, fill: "#111827", stroke: "#020617", "stroke-width": Math.max(2, r * 0.09) }));
+      for (let i = 0; i < 24; i++) {
+        const a = (i / 24) * Math.PI * 2;
+        g.appendChild(el("line", {
+          x1: cx + Math.cos(a) * r * 0.90, y1: cy + Math.sin(a) * r * 0.90,
+          x2: cx + Math.cos(a) * r, y2: cy + Math.sin(a) * r,
+          stroke: "#0b1220", "stroke-width": 1.5
+        }));
+      }
+      g.appendChild(el("circle", { cx, cy, r: r * 0.66, fill: "#1f2937" }));
+      g.appendChild(el("circle", { cx, cy, r: r * 0.56, fill: "#cbd5e1", stroke: "#94a3b8", "stroke-width": 1.5 }));
+      for (let i = 0; i < 5; i++) {
+        const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
+        g.appendChild(el("circle", { cx: cx + Math.cos(a) * r * 0.34, cy: cy + Math.sin(a) * r * 0.34, r: Math.max(1.6, r * 0.07), fill: "#64748b" }));
+      }
+      g.appendChild(el("circle", { cx, cy, r: r * 0.18, fill: "#94a3b8", stroke: "#64748b", "stroke-width": 1 }));
+
+      const text = el("text", { x: cx, y: cy + r + 16, "text-anchor": "middle", fill: "#94a3b8", "font-size": 10 });
+      text.textContent = label;
+      g.appendChild(text);
+      svg.appendChild(g);
+    }
+
+    // 7. GESTIONE DRAG & DROP DEI COLLI SUL PIANALE
+    function startDragItem(e, id, bulkheadX, scale) {
+      e.preventDefault();
+      snapshot();
+      selectedItemId = id;
+      draggedItemId = id;
+
+      function onMouseMove(moveEvent) {
+        if (!draggedItemId) return;
+        const svg = document.getElementById("truck-svg");
+        const rect = svg.getBoundingClientRect();
+        const svgWidth = 900;
+        const clickXInSvg = (moveEvent.clientX - rect.left) * (svgWidth / rect.width);
+        
+        let newPosXMeters = (clickXInSvg - bulkheadX) / scale;
+        // Limita il movimento entro la lunghezza del vano
+        newPosXMeters = Math.max(0, Math.min(currentVehicle.bayLength - (Number((cargoItems.find(c => c.id === draggedItemId) || {}).len) || DEFAULT_LEN), newPosXMeters));
+
+        const target = cargoItems.find(c => c.id === draggedItemId);
+        if (target) {
+          target.posX = Number(newPosXMeters.toFixed(2));
+          recalculateAndRender();
+        }
+      }
+
+      function onMouseUp() {
+        draggedItemId = null;
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+      }
+
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
+    }
+
+    function startDragItemTouch(e, id, bulkheadX, scale) {
+      snapshot();
+      selectedItemId = id;
+      draggedItemId = id;
+
+      function onTouchMove(moveEvent) {
+        if (!draggedItemId) return;
+        const touch = moveEvent.touches[0];
+        const svg = document.getElementById("truck-svg");
+        const rect = svg.getBoundingClientRect();
+        const svgWidth = 900;
+        const touchXInSvg = (touch.clientX - rect.left) * (svgWidth / rect.width);
+
+        let newPosXMeters = (touchXInSvg - bulkheadX) / scale;
+        newPosXMeters = Math.max(0, Math.min(currentVehicle.bayLength - (Number((cargoItems.find(c => c.id === draggedItemId) || {}).len) || DEFAULT_LEN), newPosXMeters));
+
+        const target = cargoItems.find(c => c.id === draggedItemId);
+        if (target) {
+          target.posX = Number(newPosXMeters.toFixed(2));
+          recalculateAndRender();
+        }
+      }
+
+      function onTouchEnd() {
+        draggedItemId = null;
+        window.removeEventListener("touchmove", onTouchMove);
+        window.removeEventListener("touchend", onTouchEnd);
+      }
+
+      window.addEventListener("touchmove", onTouchMove);
+      window.addEventListener("touchend", onTouchEnd);
+    }
+
+    // 8. GESTIONE TABELLA COLLI
+    function renderCargoTable() {
+      const tbody = document.getElementById("cargo-table-body");
+      const emptyMsg = document.getElementById("table-empty-msg");
+      tbody.innerHTML = "";
+
+      if (cargoItems.length === 0) {
+        emptyMsg.classList.remove("hidden");
+        return;
+      }
+      emptyMsg.classList.add("hidden");
+
+      cargoItems.forEach((item) => {
+        const tr = document.createElement("tr");
+        tr.className = item.id === selectedItemId ? "is-sel" : "";
+        tr.onclick = (ev) => {
+          if (ev.target.tagName === "INPUT" || ev.target.closest("button")) return;
+          selectedItemId = item.id; renderCargoTable(); renderTruckSVG(calculatePhysics());
+        };
+
+        const esc = v => String(v || "").replace(/"/g, "&quot;");
+        tr.innerHTML = `
+          <td class="num font-semibold">${item.id}</td>
+          <td><input type="text" value="${esc(item.destination)}" placeholder="Destinazione"
+                onchange="updateItemDestination('${item.id}', this.value)" aria-label="Destinazione ${item.id}" class="fld fld-sm" style="width:108px"></td>
+          <td><input type="text" value="${esc(item.consignee)}" placeholder="Chi firma"
+                onchange="updateItemConsignee('${item.id}', this.value)" aria-label="Consegnatario ${item.id}" class="fld fld-sm" style="width:118px"></td>
+          <td class="text-right"><input type="number" min="0.2" step="0.05" value="${itemLen(item)}"
+                onchange="updateItemLen('${item.id}', this.value)" aria-label="Ingombro in metri ${item.id}" class="fld fld-sm num text-right" style="width:74px"></td>
+          <td class="text-right"><input type="number" min="1" step="1" value="${item.weight}"
+                onchange="updateItemWeight('${item.id}', this.value)" aria-label="Peso in kg ${item.id}" class="fld fld-sm num text-right font-semibold" style="width:86px"></td>
+          <td>
+            <div class="flex items-center gap-2">
+              <input type="range" min="0" max="${(currentVehicle.bayLength - itemLen(item)).toFixed(2)}" step="0.05" value="${item.posX}"
+                oninput="updateItemPosition('${item.id}', this.value)" aria-label="Posizione nel vano ${item.id}" class="w-24 accent-indigo-700">
+              <span class="num text-[11px] w-12 text-right" style="color:var(--ink-2)">${Number(item.posX).toFixed(2)} m</span>
+            </div>
+          </td>
+          <td class="text-right whitespace-nowrap">
+            <button onclick="duplicateCargoItem('${item.id}')" title="Duplica" aria-label="Duplica collo ${item.id}" class="icon-btn">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            </button>
+            <button onclick="removeCargoItem('${item.id}')" title="Rimuovi" aria-label="Rimuovi collo ${item.id}" class="icon-btn danger">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateItemLen(id, v) {
+      const item = cargoItems.find(c => c.id === id);
+      if (item) {
+        snapshot();
+        item.len = Math.max(0.2, Number(v) || DEFAULT_LEN);
+        recalculateAndRender();
+      }
+    }
+
+    function updateItemWeight(id, newWeight) {
+      const item = cargoItems.find(c => c.id === id);
+      if (item) {
+        snapshot();
+        item.weight = Math.max(1, Number(newWeight));
+        recalculateAndRender();
+      }
+    }
+
+    function updateItemPosition(id, newPos) {
+      const item = cargoItems.find(c => c.id === id);
+      if (item) {
+        item.posX = Number(newPos);
+        recalculateAndRender();
+      }
+    }
+
+    function removeCargoItem(id) {
+      snapshot();
+      cargoItems = cargoItems.filter(c => c.id !== id);
+      recalculateAndRender();
+      showToast("Collo rimosso");
+    }
+
+    function addNewManualItem() {
+      snapshot();
+      const newId = `COLLO_${cargoItems.length + 1}`;
+      cargoItems.push({
+        id: newId,
+        weight: 250,
+        len: DEFAULT_LEN,
+        consignee: "",
+        posX: Math.min(currentVehicle.bayLength - 0.5, cargoItems.length * 0.7),
+        destination: "Hub Locale"
+      });
+      recalculateAndRender();
+      showToast("Nuovo collo aggiunto");
+    }
+
+    function clearAllCargo() {
+      if (cargoItems.length === 0) return;
+      snapshot();
+      cargoItems = [];
+      recalculateAndRender();
+      showToast("Pianale svuotato completamente");
+    }
+
+    // 9. AUTOMAZIONI DI BILANCIAMENTO CARICO (SOLVER ANALITICO)
+    // Baricentro utile ottimale x* (dal fronte del vano): equalizza l utilizzo
+    // percentuale dei due assi e rispetta la soglia minima di aderenza sterzo.
+    function optimalCoG(P) {
+      const V = currentVehicle, L = V.wheelbase, W = V.tareFront + V.tareRear + P;
+      if (P <= 0) return V.frontToBulkhead;
+      // equalizzazione utilizzo assi
+      let a = L * (V.tareFront * V.maxRear + P * V.maxRear - V.tareRear * V.maxFront) / (P * (V.maxFront + V.maxRear));
+      // vincolo di aderenza avantreno
+      const aMax = L * (V.tareFront + P - V.minFrontRatio * W) / P;
+      a = Math.min(a, aMax);
+      // dentro i limiti fisici del vano
+      a = Math.max(V.frontToBulkhead, Math.min(V.frontToBulkhead + V.bayLength, a));
+      return a - V.frontToBulkhead;   // riferito al fronte del vano
+    }
+
+    function itemLen(it) { return Number(it.len) || DEFAULT_LEN; }
+
+    // Conducente / dati viaggio
+    function syncMissionInputs() {
+      const d = document.getElementById("input-driver");
+      const l = document.getElementById("input-license");
+      if (d) d.value = mission.driver || "";
+      if (l) l.value = mission.license || "";
+    }
+
+    function updateMission(field, value) {
+      mission[field] = String(value || "").trim();
+      persist();
+    }
+
+    function updateItemConsignee(id, v) {
+      const it = cargoItems.find(c => c.id === id);
+      if (!it) return;
+      it.consignee = String(v || "").trim();
+      persist();
+    }
+
+    function updateItemDestination(id, v) {
+      const it = cargoItems.find(c => c.id === id);
+      if (!it) return;
+      it.destination = String(v || "").trim();
+      persist();
+    }
+
+    // Impacchetta i colli in blocco contiguo e trasla il blocco sul CoG obiettivo
+    function packBlock(order, targetRel) {
+      const total = order.reduce((a, it) => a + itemLen(it), 0);
+      const P = order.reduce((a, it) => a + Number(it.weight), 0);
+      let cum = 0, mom = 0;
+      const rel = order.map(it => { const c = cum + itemLen(it) / 2; cum += itemLen(it); mom += Number(it.weight) * c; return c; });
+      const cogRel = P > 0 ? mom / P : total / 2;
+      let s = targetRel - cogRel;
+      s = Math.max(0, Math.min(currentVehicle.bayLength - total, s));
+      order.forEach((it, i) => { it.posX = Number((s + rel[i] - itemLen(it) / 2).toFixed(2)); });
+      return total <= currentVehicle.bayLength;
+    }
+
+    function autoPackLIFO() {
+      if (!cargoItems.length) return;
+      snapshot();
+      let cur = 0;
+      cargoItems.forEach(item => {
+        item.posX = Number(Math.min(currentVehicle.bayLength - itemLen(item), cur).toFixed(2));
+        cur += itemLen(item) + 0.05;
+      });
+      recalculateAndRender();
+      showToast("Colli allineati in sequenza LIFO senza sovrapposizioni");
+    }
+
+    function balanceEvenly() {
+      if (!cargoItems.length) return;
+      snapshot();
+      const P = cargoItems.reduce((a, c) => a + Number(c.weight), 0);
+      const target = optimalCoG(P);
+      // colli pesanti al centro del blocco, leggeri alle estremità (piramide)
+      const heavy = [...cargoItems].sort((a, b) => b.weight - a.weight);
+      const left = [], right = [];
+      heavy.forEach((it, i) => (i % 2 ? left : right).push(it));
+      const order = left.reverse().concat(right);
+      const fits = packBlock(order, target);
+      cargoItems = order;
+      recalculateAndRender();
+      const p = calculatePhysics();
+      showToast(fits
+        ? `Ottimizzato: CoG ${p.cargoCoG.toFixed(2)} m, assi al ${(p.axleUse * 100).toFixed(0)}%`
+        : "Attenzione: ingombro colli superiore alla lunghezza del vano", fits ? "success" : "error");
+    }
+
+    // Suggerimento correttivo: di quanto spostare il baricentro per rientrare
+    function correctionHint(p) {
+      if (p.isValid || p.totalPayload <= 0) return "";
+      const d = p.targetCoG - p.cargoCoG;
+      if (Math.abs(d) < 0.05) return "";
+      return `Sposta il baricentro di ${Math.abs(d).toFixed(2)} m verso ${d > 0 ? "la coda" : "la cabina"} (premi Ottimizza).`;
+    }
+
+    function duplicateCargoItem(id) {
+      const src = cargoItems.find(c => c.id === id);
+      if (!src) return;
+      snapshot();
+      const copy = { ...src, id: `${src.id}_C${cargoItems.length + 1}` };
+      copy.posX = Math.min(currentVehicle.bayLength - itemLen(copy), src.posX + itemLen(src) + 0.05);
+      cargoItems.push(copy);
+      recalculateAndRender();
+      showToast("Collo duplicato");
+    }
+
+    function exportManifest() {
+      if (!cargoItems.length) return showToast("Nessun collo da esportare", "error");
+      const p = calculatePhysics();
+      const rows = [["ID_Collo", "Peso_Kg", "Lunghezza_m", "Posizione_m", "Destinazione", "Consegnatario"]];
+      cargoItems.forEach(c => rows.push([c.id, Number(c.weight), itemLen(c), Number(c.posX), c.destination || "", c.consignee || ""]));
+      rows.push([], ["Veicolo", currentVehicle.name], ["Targa", currentVehicle.plate],
+        ["Autista", mission.driver || "-"], ["Patente / Matricola", mission.license || "-"],
+        ["Massa totale kg", Number(p.totalGrossWeight.toFixed(0))], ["PTT kg", currentVehicle.maxGross],
+        ["Asse anteriore kg", Number(p.frontAxleWeight.toFixed(0))], ["Limite ant. kg", currentVehicle.maxFront],
+        ["Asse posteriore kg", Number(p.rearAxleWeight.toFixed(0))], ["Limite post. kg", currentVehicle.maxRear],
+        ["Aderenza avantreno %", Number((p.frontRatio * 100).toFixed(1))],
+        ["CoG utile m", Number(p.cargoCoG.toFixed(2))],
+        ["Esito", p.isValid ? "CONFORME" : "NON CONFORME"],
+        ["Anomalie", p.violations.join(" | ")]);
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Manifesto");
+      XLSX.writeFile(wb, `Manifesto_${currentVehicle.plate.replace(/\s/g, "")}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      showToast("Manifesto esportato in Excel");
+    }
+
+    // Scorciatoie: Ctrl+Z annulla, frecce spostano il collo selezionato
+    let selectedItemId = null;
+    function onGlobalKey(e) {
+      if (e.key === "Escape") {
+        document.getElementById("print-modal").classList.add("hidden");
+        document.getElementById("vehicle-modal").classList.add("hidden");
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); return undo(); }
+      if (!selectedItemId || !["ArrowLeft", "ArrowRight"].includes(e.key)) return;
+      const it = cargoItems.find(c => c.id === selectedItemId);
+      if (!it) return;
+      e.preventDefault();
+      const step = e.shiftKey ? 0.25 : 0.05;
+      it.posX = Number(Math.max(0, Math.min(currentVehicle.bayLength - itemLen(it), it.posX + (e.key === "ArrowRight" ? step : -step))).toFixed(2));
+      recalculateAndRender();
+    }
+
+    // 10. PARSING EXCEL / CSV CON SHEETJS
+    function handleDragOver(e) {
+      e.preventDefault();
+      document.getElementById("dropzone").classList.add("is-over");
+    }
+
+    function handleDragLeave(e) {
+      e.preventDefault();
+      document.getElementById("dropzone").classList.remove("is-over");
+    }
+
+    function handleFileDrop(e) {
+      e.preventDefault();
+      handleDragLeave(e);
+      const files = e.dataTransfer.files;
+      if (files.length > 0) parseExcelFile(files[0]);
+    }
+
+    function handleFileSelect(e) {
+      const files = e.target.files;
+      if (files.length > 0) parseExcelFile(files[0]);
+    }
+
+    // Parser intelligente: trova la riga di intestazione ovunque sia, riconosce
+    // sinonimi IT/EN, numeri con virgola, pesi in t/q/g ed estrae i metadati
+    // (autista, targa, veicolo) anche se scritti come coppie "etichetta: valore".
+    const COL_RULES = [
+      { key: "id",   pats: ["id", "codice", "collo", "barcode", "sscc", "ldv", "spedizione", "rif", "articolo", "pallet"] },
+      { key: "w",    pats: ["peso", "kg", "weight", "massa", "lordo", "tara"] },
+      { key: "len",  pats: ["lungh", "len", "ingombro", "profond", "dim", "base"] },
+      { key: "pos",  pats: ["posizione", "pos", "metro", "distanza", "stiva"] },
+      { key: "dest", pats: ["destinaz", "citt", "city", "localit", "indirizzo", "scarico", "tappa", "dest"] },
+      { key: "cons", pats: ["consegnatario", "ricevente", "cliente", "consignee", "destinatario", "ragione"] },
+      { key: "qty",  pats: ["quantit", "colli", "pezzi", "qta", "q.ta", "qty", "n."] }
+    ];
+    const META_RULES = [
+      { key: "driver",  pats: ["autista", "conducente", "driver", "guidatore"] },
+      { key: "license", pats: ["patente", "matricola", "badge", "cqc"] },
+      { key: "plate",   pats: ["targa", "plate", "veicolo", "mezzo", "automezzo"] }
+    ];
+
+    function norm(v) { return String(v == null ? "" : v).trim().toLowerCase().replace(/\s+/g, " "); }
+
+    // "1.234,56 kg" / "0,8 m" / "1,2 t" -> numero in unita base (kg o m)
+    function parseNum(v, asWeight) {
+      if (typeof v === "number") return v;
+      let t = norm(v).replace(/[^0-9,.\-]+/g, m => " " + m + " ");
+      const raw = norm(v);
+      let num = raw.replace(/[^0-9,.\-]/g, "");
+      if (num.includes(",") && num.includes(".")) num = num.replace(/\./g, "").replace(",", ".");
+      else if (num.includes(",")) num = num.replace(",", ".");
+      let n = parseFloat(num);
+      if (isNaN(n)) return NaN;
+      if (asWeight) {
+        if (/\bt\b|tonn/.test(raw)) n *= 1000;
+        else if (/\bq\b|quintal/.test(raw)) n *= 100;
+        else if (/\bg\b|grammi/.test(raw) && !/kg/.test(raw)) n /= 1000;
+      }
+      return n;
+    }
+
+    function matchCol(header) {
+      const h = norm(header);
+      if (!h) return null;
+      for (const r of COL_RULES) if (r.pats.some(x => h.includes(x))) return r.key;
+      return null;
+    }
+
+    // Trova la riga con piu intestazioni riconosciute (entro le prime 15 righe)
+    function detectHeader(rows) {
+      let best = { row: -1, score: 0, map: {} };
+      for (let i = 0; i < Math.min(rows.length, 15); i++) {
+        const r = rows[i] || [];
+        const map = {}; let score = 0;
+        r.forEach((cell, j) => {
+          const k = matchCol(cell);
+          if (k && map[k] === undefined) { map[k] = j; score++; }
+        });
+        if (map.w !== undefined) score += 2;          // il peso e' indispensabile
+        if (score > best.score) best = { row: i, score, map };
+      }
+      return best;
+    }
+
+    // Metadati sparsi nel foglio: "Autista: Mario Rossi" oppure celle adiacenti
+    function extractMeta(rows, headerRow) {
+      const found = {};
+      const limit = headerRow >= 0 ? headerRow : Math.min(rows.length, 12);
+      for (let i = 0; i < Math.min(rows.length, Math.max(limit, 12)); i++) {
+        const r = rows[i] || [];
+        for (let j = 0; j < r.length; j++) {
+          const cell = norm(r[j]);
+          if (!cell) continue;
+          for (const m of META_RULES) {
+            if (found[m.key]) continue;
+            if (!m.pats.some(x => cell.includes(x))) continue;
+            let val = "";
+            const inline = String(r[j]).split(/[:\-]\s*/).slice(1).join(" ").trim();
+            if (inline) val = inline;
+            else for (let k = j + 1; k < r.length; k++) { if (String(r[k] || "").trim()) { val = String(r[k]).trim(); break; } }
+            if (val) found[m.key] = val;
+          }
+        }
+      }
+      return found;
+    }
+
+    function parseExcelFile(file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, blankrows: false, defval: "" });
+          if (!rows || rows.length < 2) return showToast("File vuoto o non leggibile", "error");
+
+          const hdr = detectHeader(rows);
+          const meta = extractMeta(rows, hdr.row);
+
+          // Fallback: nessuna intestazione riconosciuta -> prima colonna testo, prima colonna numerica
+          let map = hdr.map, startRow = hdr.row + 1;
+          if (hdr.row === -1 || map.w === undefined) {
+            const probe = rows.find(r => r.some(c => !isNaN(parseNum(c, true)) && parseNum(c, true) > 0)) || [];
+            map = { id: 0, w: probe.findIndex(c => !isNaN(parseNum(c, true)) && parseNum(c, true) > 0) };
+            if (map.w < 0) return showToast("Nessuna colonna peso riconosciuta nel file", "error");
+            startRow = 0;
+          }
+
+          const imported = [];
+          let skipped = 0;
+          for (let i = startRow; i < rows.length; i++) {
+            const r = rows[i] || [];
+            if (!r.length) continue;
+            const joined = norm(r.join(" "));
+            if (!joined) continue;
+            if (/^(totale|total|somma|tot\.)/.test(joined)) continue;      // riga dei totali
+
+            const w = parseNum(r[map.w], true);
+            if (isNaN(w) || w <= 0) { skipped++; continue; }
+
+            const qty = map.qty !== undefined ? Math.max(1, Math.round(parseNum(r[map.qty]) || 1)) : 1;
+            const len = map.len !== undefined ? parseNum(r[map.len]) : NaN;
+            const pos = map.pos !== undefined ? parseNum(r[map.pos]) : NaN;
+            const baseId = map.id !== undefined && String(r[map.id] || "").trim()
+              ? String(r[map.id]).trim() : `COLLO_${imported.length + 1}`;
+
+            for (let q = 0; q < qty; q++) {
+              imported.push({
+                id: qty > 1 ? `${baseId}-${q + 1}` : baseId,
+                weight: Math.round((qty > 1 ? w / qty : w) * 10) / 10,
+                len: (!isNaN(len) && len > 0 && len < 20) ? len : DEFAULT_LEN,
+                posX: (!isNaN(pos) && pos >= 0) ? pos : 0,
+                destination: map.dest !== undefined ? String(r[map.dest] || "").trim() : "",
+                consignee: map.cons !== undefined ? String(r[map.cons] || "").trim() : ""
+              });
+            }
+          }
+
+          if (!imported.length) return showToast("Nessuna riga con peso valido trovata", "error");
+
+          snapshot();
+          cargoItems = imported;
+
+          // Autista e targa dal foglio, se presenti
+          if (meta.driver) mission.driver = meta.driver;
+          if (meta.license) mission.license = meta.license;
+          syncMissionInputs();
+          if (meta.plate) {
+            const key = Object.keys(VEHICLE_CATALOG).find(k =>
+              norm(VEHICLE_CATALOG[k].plate) === norm(meta.plate) || norm(VEHICLE_CATALOG[k].name).includes(norm(meta.plate)));
+            if (key && key !== currentVehicle.id) {
+              currentVehicle = { ...VEHICLE_CATALOG[key] };
+              document.getElementById("vehicle-select").value = key;
+              updateVehicleDisplaySpecs();
+            }
+          }
+
+          // Se il file non porta le posizioni, ottimizza subito il piano di carico
+          const hasPos = map.pos !== undefined && imported.some(i => i.posX > 0);
+          if (hasPos) recalculateAndRender(); else balanceEvenly();
+
+          const p = calculatePhysics();
+          showToast(`${imported.length} colli importati${meta.driver ? " - autista " + meta.driver : ""}`
+            + `${skipped ? " (" + skipped + " righe ignorate)" : ""} - ${p.isValid ? "carico conforme" : "verifica anomalie"}`,
+            p.isValid ? "success" : "error");
+        } catch (err) {
+          console.error(err);
+          showToast("Errore durante la lettura del file: " + err.message, "error");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // 11. DATI DEMO E DOWNLOAD TEMPLATE EXCEL
+    function loadSampleData() {
+      snapshot();
+      cargoItems = [
+        { id: "PALLET_MILANO", weight: 400, posX: 0.30, len: 0.80, destination: "Milano Nord", consignee: "Rossi Logistica Srl" },
+        { id: "PALLET_BRESCIA", weight: 500, posX: 1.30, len: 1.20, destination: "Brescia Centro", consignee: "Ferramenta Bianchi" },
+        { id: "PALLET_BERGAMO", weight: 350, posX: 2.60, len: 0.80, destination: "Bergamo Ovest", consignee: "Cash & Carry Verdi" }
+      ];
+      recalculateAndRender();
+      showToast("Caricati 3 Europallet di esempio su Fiat Ducato");
+    }
+
+    function exportExcelTemplate() {
+      const templateData = [
+        ["Autista:", "Mario Rossi", "", "Targa:", "GE 942 KM"],
+        [],
+        ["ID_Collo", "Peso_Kg", "Lunghezza_m", "Destinazione", "Consegnatario"],
+        ["PLT_101", 350, 0.80, "Torino Centro", "Bar Centrale Snc"],
+        ["PLT_102", 420, 1.20, "Novara Hub", "Magazzini Riuniti Spa"],
+        ["PLT_103", 280, 0.80, "Vercelli Zona Ind.", "Off. Meccanica Gallo"],
+        ["PLT_104", 190, 0.60, "Alessandria", "Edil Piemonte Srl"]
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(templateData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "ManifestoSpedizione");
+      XLSX.writeFile(wb, "Template_Carico_SmartAxle.xlsx");
+      showToast("Template Excel scaricato!");
+    }
+
+    // 12. MODAL MODIFICA SAGOMA VEICOLO
+    function openVehicleSpecsModal() {
+      document.getElementById("input-wheelbase").value = currentVehicle.wheelbase;
+      document.getElementById("input-frontToBulkhead").value = currentVehicle.frontToBulkhead;
+      document.getElementById("input-bayLength").value = currentVehicle.bayLength;
+      document.getElementById("input-maxGross").value = currentVehicle.maxGross;
+      document.getElementById("input-tareFront").value = currentVehicle.tareFront;
+      document.getElementById("input-tareRear").value = currentVehicle.tareRear;
+      document.getElementById("input-maxFront").value = currentVehicle.maxFront;
+      document.getElementById("input-maxRear").value = currentVehicle.maxRear;
+      document.getElementById("vehicle-modal").classList.remove("hidden");
+    }
+
+    function closeVehicleSpecsModal() {
+      document.getElementById("vehicle-modal").classList.add("hidden");
+    }
+
+    function saveVehicleSpecs() {
+      snapshot();
+      currentVehicle.wheelbase = parseFloat(document.getElementById("input-wheelbase").value) || currentVehicle.wheelbase;
+      currentVehicle.frontToBulkhead = parseFloat(document.getElementById("input-frontToBulkhead").value) || currentVehicle.frontToBulkhead;
+      currentVehicle.bayLength = parseFloat(document.getElementById("input-bayLength").value) || currentVehicle.bayLength;
+      currentVehicle.maxGross = parseFloat(document.getElementById("input-maxGross").value) || currentVehicle.maxGross;
+      currentVehicle.tareFront = parseFloat(document.getElementById("input-tareFront").value) || currentVehicle.tareFront;
+      currentVehicle.tareRear = parseFloat(document.getElementById("input-tareRear").value) || currentVehicle.tareRear;
+      currentVehicle.maxFront = parseFloat(document.getElementById("input-maxFront").value) || currentVehicle.maxFront;
+      currentVehicle.maxRear = parseFloat(document.getElementById("input-maxRear").value) || currentVehicle.maxRear;
+
+      closeVehicleSpecsModal();
+      updateVehicleDisplaySpecs();
+      recalculateAndRender();
+      showToast("Parametri sagoma aggiornati");
+    }
+
+    // 13. STAMPA E BOLLETTINO DI CONFORMITÀ
+    function openPrintModal() {
+      const p = calculatePhysics();
+      document.getElementById("report-date").textContent = new Date().toLocaleDateString("it-IT", {
+        day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+      });
+      document.getElementById("report-vehicle-name").textContent = currentVehicle.name;
+      document.getElementById("report-vehicle-plate").textContent = currentVehicle.plate;
+      document.getElementById("report-driver").textContent = mission.driver || "-";
+      document.getElementById("report-license").textContent = mission.license || "-";
+      document.getElementById("report-driver-sign").textContent = mission.driver ? `(${mission.driver})` : "";
+      document.getElementById("report-ptt").textContent = currentVehicle.maxGross.toLocaleString("it-IT");
+      document.getElementById("report-total-weight").textContent = p.totalGrossWeight.toFixed(0);
+      document.getElementById("report-front-weight").textContent = `${p.frontAxleWeight.toFixed(0)} / ${currentVehicle.maxFront}`;
+      document.getElementById("report-rear-weight").textContent = `${p.rearAxleWeight.toFixed(0)} / ${currentVehicle.maxRear}`;
+
+      const statusBox = document.getElementById("report-compliance-status");
+      if (p.isValid) {
+        statusBox.className = "p-2.5 rounded font-bold bg-emerald-100 text-emerald-900 border border-emerald-300";
+        statusBox.textContent = "CONFORME: Il carico rispetta tutti i limiti di sagoma e massa per asse di cui agli artt. 62 e 167 CdS.";
+      } else {
+        statusBox.className = "p-2.5 rounded font-bold bg-rose-100 text-rose-900 border border-rose-300";
+        statusBox.textContent = `NON CONFORME: Riscontrate anomalie: ${p.violations.join(", ")}`;
+      }
+
+      const tableBody = document.getElementById("report-items-table");
+      tableBody.innerHTML = "";
+      cargoItems.forEach(c => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="p-1 border-b font-mono font-bold">${c.id}</td>
+          <td class="p-1 border-b">${c.destination || '-'}</td>
+          <td class="p-1 border-b">${c.consignee || '-'}</td>
+          <td class="p-1 border-b">${c.weight} kg</td>
+          <td class="p-1 border-b">${Number(c.posX).toFixed(2)} m</td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      document.getElementById("print-modal").classList.remove("hidden");
+    }
+
+    function closePrintModal() {
+      document.getElementById("print-modal").classList.add("hidden");
+    }
+
+    // 14. SISTEMA DI NOTIFICHE TOAST NATIVE
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = `toast ${type === 'error' ? 'toast-error' : ''} translate-y-2 opacity-0`;
+      toast.innerHTML = `<span>${message}</span>`;
+      
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove("translate-y-2", "opacity-0");
+      });
+
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "translate-y-2");
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

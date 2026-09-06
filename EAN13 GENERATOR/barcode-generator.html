@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GEN-BARCODE • Generatore Codici a Barre GDO</title>
+  <meta name="google" content="notranslate">
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #141416;
+      --surf: #1e1e22;
+      --surf2: #26262b;
+      --border: #35353b;
+      --amber: #f59e0b;
+      --amber2: #fbbf24;
+      --text: #e8e8e8;
+      --muted: #777;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --r: 6px;
+    }
+
+    html {
+      height: 100%;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--surf) 0%, var(--surf2) 100%);
+      border-bottom: 2px solid var(--amber);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--amber);
+    }
+
+    header .sub {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    header .formats {
+      margin-left: auto;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .header-actions .btn {
+      padding: 7px 11px;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    header .fmt-badge {
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: .5px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      height: calc(100vh - 54px);
+      height: calc(100svh - 54px);
+      height: calc(100dvh - 54px);
+    }
+
+    .sidebar {
+      background: var(--surf);
+      border-right: 1px solid var(--border);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    .panel {
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 15px;
+    }
+
+    .panel-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 13px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    label {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 11px;
+      transition: border-color .15s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--amber);
+    }
+
+    .code-inp {
+      font-family: 'Courier New', monospace !important;
+      font-size: 18px !important;
+      letter-spacing: 4px !important;
+    }
+
+    .digit-hint {
+      font-size: 10px;
+      color: var(--muted);
+      text-align: right;
+      margin-top: -9px;
+      margin-bottom: 12px;
+    }
+
+    .digit-hint span {
+      color: var(--amber);
+      font-weight: 700;
+    }
+
+    select {
+      width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-bottom: 11px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--amber);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: all .15s;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--amber);
+      color: #111;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: var(--amber2);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--danger);
+      padding: 7px 12px;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, .1);
+      border-color: var(--danger);
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--r);
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 12px;
+      transition: all .2s;
+      user-select: none;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.over {
+      border-color: var(--amber);
+      color: var(--amber);
+      background: rgba(245, 158, 11, .05);
+    }
+
+    .drop-zone input {
+      display: none;
+    }
+
+    .drop-zone .dz-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .msg {
+      font-size: 12px;
+      margin-top: 8px;
+      padding: 8px 11px;
+      border-radius: 4px;
+    }
+
+    .msg-ok {
+      background: rgba(34, 197, 94, .1);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+
+    .msg-err {
+      background: rgba(239, 68, 68, .1);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+
+    .content {
+      padding: 20px;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .count-badge {
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      padding: 5px 13px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .count-badge b {
+      color: var(--amber);
+    }
+
+    .toolbar-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 15px 15px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      transition: border-color .15s, box-shadow .2s;
+    }
+
+    .card:hover {
+      border-color: var(--amber);
+      box-shadow: 0 0 20px rgba(245, 158, 11, .08);
+    }
+
+    .card-type {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--amber);
+      background: rgba(245, 158, 11, .1);
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+
+    .card-name {
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.4;
+      word-break: break-word;
+      max-width: 100%;
+      margin-top: 16px;
+    }
+
+    .card-svg {
+      background: #fff;
+      border-radius: 3px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .card-svg:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 16px rgba(245, 158, 11, .18);
+    }
+
+    .card-svg svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .card-code {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: var(--amber);
+      letter-spacing: 2px;
+    }
+
+    .del-btn {
+      position: absolute;
+      top: 5px;
+      right: 7px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1;
+      padding: 2px 5px;
+      border-radius: 3px;
+      transition: color .15s;
+    }
+
+    .del-btn:hover {
+      color: var(--danger);
+    }
+
+    /* Textarea multi-code */
+    textarea.code-area {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+      transition: border-color .15s;
+      resize: vertical;
+      min-height: 40px;
+      line-height: 1.6;
+    }
+
+    textarea.code-area:focus {
+      outline: none;
+      border-color: var(--amber);
+    }
+
+    .paste-hint {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .paste-hint span {
+      color: var(--amber);
+      font-weight: 700;
+    }
+
+    /* Lightbox */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .85);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+      backdrop-filter: blur(6px);
+    }
+
+    .lightbox-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .lightbox-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px 50px 30px;
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, .6);
+      transform: scale(.9);
+      transition: transform .25s;
+    }
+
+    .lightbox-overlay.active .lightbox-box {
+      transform: scale(1);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 10px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 26px;
+      cursor: pointer;
+      color: #555;
+      transition: color .15s;
+      line-height: 1;
+      padding: 4px;
+    }
+
+    .lightbox-close:hover {
+      color: #000;
+    }
+
+    .lightbox-svg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-svg svg {
+      max-width: 70vw;
+      max-height: 55vh;
+      height: auto;
+    }
+
+    .lightbox-info {
+      text-align: center;
+      color: #333;
+    }
+
+    .lightbox-info .lb-name {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .lightbox-info .lb-code {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #666;
+      letter-spacing: 2px;
+    }
+
+    .lightbox-info .lb-type {
+      font-size: 11px;
+      color: #999;
+      margin-top: 2px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .lightbox-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .lightbox-actions .btn-lb {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: all .15s;
+      font-family: inherit;
+    }
+
+    .btn-lb-print {
+      background: var(--amber);
+      color: #111;
+    }
+
+    .btn-lb-print:hover {
+      background: var(--amber2);
+    }
+
+    .btn-lb-close-fixed {
+      background: #e5e7eb;
+      color: #333;
+      padding: 10px 22px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: all .15s;
+      font-family: inherit;
+    }
+
+    .btn-lb-close-fixed:hover {
+      background: #d1d5db;
+    }
+
+    .empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 70px 20px;
+      color: var(--muted);
+    }
+
+    .empty .e-icon {
+      font-size: 52px;
+      opacity: .25;
+      margin-bottom: 14px;
+    }
+
+    .empty h3 {
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+
+    .empty p {
+      font-size: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      background: var(--success);
+      color: #111;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 1px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    body.app-locked header,
+    body.app-locked .layout,
+    body.app-locked .toast,
+    body.app-locked .lightbox-overlay {
+      display: none !important;
+    }
+
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(80% 120% at 10% 10%, rgba(245, 158, 11, .16), transparent 60%),
+        radial-gradient(120% 120% at 100% 0%, rgba(251, 191, 36, .12), transparent 62%),
+        linear-gradient(135deg, #111217 0%, #1a1b22 100%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 20000;
+      overflow: auto;
+    }
+
+    body.app-locked .login-overlay {
+      display: flex;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(145deg, rgba(38, 38, 43, .95) 0%, rgba(30, 30, 34, .95) 100%);
+      border: 1px solid rgba(245, 158, 11, .35);
+      border-radius: 16px;
+      padding: 26px 22px 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .05);
+      backdrop-filter: blur(8px);
+      animation: loginPop .28s ease-out;
+    }
+
+    @keyframes loginPop {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(.985);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .login-badge {
+      margin: 0 auto 14px;
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: linear-gradient(145deg, rgba(245, 158, 11, .2), rgba(251, 191, 36, .1));
+      border: 1px solid rgba(245, 158, 11, .45);
+      box-shadow: 0 10px 20px rgba(245, 158, 11, .2), inset 0 1px 0 rgba(255, 255, 255, .15);
+    }
+
+    .login-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--amber);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .login-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 18px;
+    }
+
+    .login-field {
+      margin-bottom: 10px;
+    }
+
+    .login-field label {
+      margin-bottom: 6px;
+    }
+
+    .login-input-wrap {
+      position: relative;
+    }
+
+    .login-input-wrap .login-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .login-input-wrap input {
+      width: 100%;
+      background: rgba(20, 20, 22, .85);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px 10px 34px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color .18s, box-shadow .18s;
+    }
+
+    .login-input-wrap input:focus {
+      outline: none;
+      border-color: var(--amber);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, .12);
+    }
+
+    .login-card .btn {
+      width: 100%;
+      margin-top: 8px;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 12px;
+      letter-spacing: 1.6px;
+    }
+
+    .login-note {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .login-err {
+      display: none;
+      margin-top: 10px;
+      font-size: 12px;
+      background: rgba(239, 68, 68, .1);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      border-radius: 6px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+    @media (max-width: 1100px) {
+      header {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 14px;
+      }
+
+      header .formats {
+        margin-left: 0;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: calc(100vh - 54px);
+        min-height: calc(100svh - 54px);
+        min-height: calc(100dvh - 54px);
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 12px;
+        gap: 10px;
+      }
+
+      .content {
+        padding: 12px;
+      }
+
+      .toolbar {
+        align-items: stretch;
+      }
+
+      .toolbar-btns {
+        width: 100%;
+      }
+
+      .toolbar-btns .btn {
+        flex: 1;
+      }
+
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 10px;
+      }
+
+      .card {
+        padding: 12px 10px 10px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        font-size: 13px;
+      }
+
+      header h1 {
+        font-size: 16px;
+        letter-spacing: 2px;
+      }
+
+      header .sub {
+        font-size: 11px;
+      }
+
+      .fmt-badge {
+        font-size: 9px;
+        padding: 2px 6px;
+      }
+
+      .sidebar {
+        padding: 10px;
+      }
+
+      .panel {
+        padding: 11px;
+      }
+
+      .panel-title {
+        letter-spacing: 1.8px;
+        font-size: 9px;
+      }
+
+      textarea.code-area,
+      input[type="text"],
+      select {
+        font-size: 16px;
+      }
+
+      textarea.code-area {
+        letter-spacing: 1px;
+        min-height: 90px;
+      }
+
+      .btn {
+        padding: 11px 12px;
+        font-size: 11px;
+        letter-spacing: 1px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-name {
+        font-size: 11px;
+      }
+
+      .lightbox-box {
+        padding: 24px 14px 16px;
+        max-width: 96vw;
+      }
+
+      .lightbox-close {
+        top: -42px;
+        right: 0;
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .96);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, .28);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .lightbox-actions {
+        width: 100%;
+        flex-direction: column;
+      }
+
+      .lightbox-actions .btn-lb,
+      .btn-lb-close-fixed {
+        width: 100%;
+      }
+
+      .toast {
+        right: 12px;
+        left: 12px;
+        bottom: 12px;
+        text-align: center;
+      }
+
+      .login-card {
+        padding: 22px 14px 16px;
+      }
+
+      .login-title {
+        font-size: 19px;
+      }
+
+      .login-sub {
+        margin-bottom: 14px;
+      }
+    }
+
+    @media print {
+
+      body,
+      .layout {
+        background: #fff !important;
+        color: #000 !important;
+      }
+
+      header,
+      .sidebar,
+      .toolbar,
+      .del-btn {
+        display: none !important;
+      }
+
+      .layout {
+        display: block;
+      }
+
+      .content {
+        padding: 10px;
+        overflow: visible;
+      }
+
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .card {
+        background: #fff;
+        border: 1px solid #ccc;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .card-name {
+        color: #000;
+      }
+
+      .card-code {
+        color: #333;
+      }
+
+      .card-type {
+        color: #555;
+        background: #eee;
+      }
+
+      .card-svg {
+        cursor: default;
+      }
+
+      .card-svg:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .empty {
+        display: none !important;
+      }
+
+      /* Print All mode: hide lightbox */
+      body:not(.print-single) .lightbox-overlay {
+        display: none !important;
+      }
+
+      /* Print Single mode: hide layout, static lightbox */
+      body.print-single .layout {
+        display: none !important;
+      }
+
+      body.print-single .lightbox-overlay {
+        position: static;
+        background: transparent;
+        display: flex !important;
+        opacity: 1;
+        pointer-events: none;
+      }
+
+      body.print-single .lightbox-box {
+        box-shadow: none;
+        transform: none;
+        padding: 0;
+        max-width: 100vw;
+        max-height: 100vh;
+      }
+
+      body.print-single .lightbox-close,
+      body.print-single .lightbox-actions {
+        display: none !important;
+      }
+
+      body.print-single .lightbox-svg svg {
+        max-width: 90vw;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body class="app-locked">
+
+  <div class="login-overlay" id="login-overlay">
+    <form class="login-card" id="login-form" autocomplete="off">
+      <div class="login-badge">🔐</div>
+      <div class="login-title">GEN-BARCODE</div>
+      <div class="login-sub">Accesso riservato</div>
+      <div class="login-field">
+        <label>Username</label>
+        <div class="login-input-wrap">
+          <span class="login-icon">👤</span>
+          <input type="text" id="login-user" placeholder="Inserisci username" autocapitalize="off" spellcheck="false">
+        </div>
+      </div>
+      <div class="login-field">
+        <label>Password</label>
+        <div class="login-input-wrap">
+          <span class="login-icon">🔑</span>
+          <input type="password" id="login-pass" placeholder="Inserisci password">
+        </div>
+      </div>
+      <button class="btn btn-primary" type="submit">Accedi</button>
+      <div class="login-note">Area protetta • accesso consentito al personale autorizzato</div>
+      <div class="login-err" id="login-err"></div>
+    </form>
+  </div>
+
+  <header>
+    <h1>▦ GEN-BARCODE</h1>
+    <span class="sub">Generatore Codici a Barre — GDO</span>
+    <div class="formats">
+      <span class="fmt-badge">EAN-13</span><span class="fmt-badge">EAN-8</span>
+      <span class="fmt-badge">UPC-A</span><span class="fmt-badge">Code 128</span>
+      <span class="fmt-badge">ITF-14</span><span class="fmt-badge">Code 39</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" id="btn-logout">🔒 Logout</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+
+      <div class="panel">
+        <div class="panel-title">➕ Inserimento Manuale</div>
+
+        <label>Formato Barcode</label>
+        <select id="sel-format">
+          <option value="ean13" selected>EAN-13 — Prodotto singolo (13 cifre)</option>
+          <option value="ean8">EAN-8 — Prodotto piccolo (8 cifre)</option>
+          <option value="upca">UPC-A — Standard USA (12 cifre)</option>
+          <option value="code128">Code 128 — Testo/Numerico libero</option>
+          <option value="itf14">ITF-14 — Cartoni/Imballi (14 cifre)</option>
+          <option value="code39">Code 39 — Alfanumerico</option>
+        </select>
+
+        <label>Nome / Referenza <span
+            style="font-weight:400;color:var(--muted);font-size:9px;text-transform:none">(opzionale se
+            multi-codice)</span></label>
+        <input type="text" id="inp-name" placeholder="es. Pasta Barilla Fusilli 500g" />
+
+        <label id="lbl-code">Codici (uno per riga)</label>
+        <textarea id="inp-code" class="code-area" rows="3"
+          placeholder="8001234567890&#10;8007890123456&#10;8005678901234" autocomplete="off"
+          spellcheck="false"></textarea>
+        <div class="paste-hint">📋 Incolla direttamente una <span>colonna Excel</span> · un codice per riga · <span
+            id="line-count">0</span> codici rilevati</div>
+
+        <div id="merr" style="display:none" class="msg msg-err"></div>
+        <button class="btn btn-primary" id="btn-add">Genera Barcode ↵</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">📂 Importa File</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+          Trascina o seleziona un file.<br>Rileva automaticamente le colonne.
+        </p>
+        <div class="drop-zone" id="gb-drop">
+          <input type="file" id="file-inp" accept=".csv,.xml,.txt,.pdf,.xlsx,.xls">
+          <div class="dz-icon">📁</div>
+          <div style="font-weight:600">Clicca o trascina qui</div>
+          <div style="margin-top:4px;font-size:11px">CSV · XML · TXT · PDF · XLSX · XLS</div>
+        </div>
+        <div id="fmsg" style="display:none" class="msg"></div>
+      </div>
+
+      <div class="panel" id="map-panel" style="display:none">
+        <div class="panel-title">🔧 Abbina Colonne CSV/Excel</div>
+        <label>Colonna — Nome prodotto</label>
+        <select id="col-name"></select>
+        <label>Colonna — Codice numerico</label>
+        <select id="col-code"></select>
+        <button class="btn btn-primary" id="btn-import-csv">Importa Righe</button>
+      </div>
+
+    </aside>
+
+    <main class="content">
+      <div class="toolbar">
+        <div class="count-badge">Barcode: <b id="cnt">0</b></div>
+        <div class="toolbar-btns">
+          <button class="btn btn-danger" id="btn-clear" disabled>🗑 Svuota</button>
+          <button class="btn btn-outline" id="btn-print" disabled>🖨 Stampa Tutto</button>
+        </div>
+      </div>
+      <div class="grid" id="grid">
+        <div class="empty">
+          <div class="e-icon">▦</div>
+          <h3>Nessun barcode generato</h3>
+          <p>Seleziona un formato e inserisci un codice, oppure importa un file.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="gb-toast"></div>
+
+
+  <!-- Lightbox Modal -->
+  <div class="lightbox-overlay" id="gb-lightbox">
+    <div class="lightbox-box">
+      <button class="lightbox-close" id="lb-close" title="Chiudi">✕</button>
+      <div class="lightbox-svg" id="lb-svg"></div>
+      <div class="lightbox-info">
+        <div class="lb-name" id="lb-name"></div>
+        <div class="lb-code" id="lb-code"></div>
+        <div class="lb-type" id="lb-type"></div>
+      </div>
+      <div class="lightbox-actions">
+        <button class="btn-lb btn-lb-print" id="lb-print">🖨 Stampa Questo</button>
+        <button class="btn-lb btn-lb-close-fixed" id="lb-close-bottom">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    // Anti-Frame check per errori di sicurezza file://
+    try {
+      if (window.self !== window.top) { window.top.location.href = window.self.location.href; }
+    } catch (e) {
+      // Ignora errore blocco cross-origin/file://
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  LOGIN GATE
+    // ══════════════════════════════════════════════════════════════
+    const AUTH_USER = 'admin';
+    const AUTH_PASS = 'admin123';
+    const AUTH_KEY = 'gb_logged_in_v1';
+    const loginOverlay = document.getElementById('login-overlay');
+    const loginForm = document.getElementById('login-form');
+    const loginUser = document.getElementById('login-user');
+    const loginPass = document.getElementById('login-pass');
+    const loginErr = document.getElementById('login-err');
+
+    function isAuthenticated() {
+      try { 
+        if (new URLSearchParams(window.location.search).get('demo') === '1') return true;
+        return localStorage.getItem(AUTH_KEY) === '1'; 
+      } catch (e) { return false; }
+    }
+
+    function setAuthenticated(ok) {
+      try { localStorage.setItem(AUTH_KEY, ok ? '1' : '0'); } catch (e) { }
+      document.body.classList.toggle('app-locked', !ok);
+      if (ok) {
+        loginErr.style.display = 'none';
+        loginPass.value = '';
+        setTimeout(() => {
+          const nameInput = document.getElementById('inp-name');
+          if (nameInput) nameInput.focus();
+        }, 0);
+      } else {
+        setTimeout(() => loginUser.focus(), 0);
+      }
+    }
+
+    if (loginForm) {
+      loginForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const u = loginUser.value.trim();
+        const p = loginPass.value;
+        if (u === AUTH_USER && p === AUTH_PASS) {
+          setAuthenticated(true);
+        } else {
+          loginErr.textContent = 'Credenziali non valide';
+          loginErr.style.display = 'block';
+          loginPass.focus();
+          loginPass.select();
+        }
+      });
+    }
+
+    setAuthenticated(isAuthenticated());
+
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+      btnLogout.addEventListener('click', () => {
+        setAuthenticated(false);
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  BARCODE ENGINES — Zero dependencies, pure JS + SVG
+    // ══════════════════════════════════════════════════════════════
+
+    // ── Common check digit (GTIN / EAN / UPC) ────────────────────
+    function gtinCheck(digits) {
+      let s = 0, n = digits.length;
+      for (let i = 0; i < n; i++) s += +digits[i] * ((n - 1 - i) % 2 === 0 ? 3 : 1);
+      return (10 - s % 10) % 10;
+    }
+
+    // ── EAN lookup tables ────────────────────────────────────────
+    const L = ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'];
+    const G = ['0100111', '0110011', '0011011', '0100001', '0011101', '0111001', '0000101', '0010001', '0001001', '0010111'];
+    const R = ['1110010', '1100110', '1101100', '1000010', '1011100', '1001110', '1010000', '1000100', '1001000', '1110100'];
+    const PAR = ['LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG', 'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL'];
+
+    // ── EAN-13 ───────────────────────────────────────────────────
+    const EAN13 = {
+      name: 'EAN-13', maxLen: 13, inputMode: 'numeric',
+      hint: '12 cifre (o 13 con check digit)',
+      validate(raw) {
+        const d = raw.replace(/\D/g, '');
+        if (!d.length || d.length > 13) return null;
+        if (d.length === 13) { return +d[12] === gtinCheck(d.slice(0, 12)) ? d : null; }
+        const s = d.padStart(12, '0');
+        return s + gtinCheck(s);
+      },
+      toSVG(code) {
+        const d = code.split('').map(Number), p = PAR[d[0]];
+        let bits = '101';
+        for (let i = 0; i < 6; i++) bits += p[i] === 'L' ? L[d[i + 1]] : G[d[i + 1]];
+        bits += '01010';
+        for (let i = 0; i < 6; i++) bits += R[d[i + 7]];
+        bits += '101';
+        const mW = 2, bH = 70, gE = 5, qL = 11, qR = 7;
+        const guards = new Set([0, 1, 2, 45, 46, 47, 48, 49, 92, 93, 94]);
+        const W = (qL + 95 + qR) * mW, H = bH + gE + 18;
+        let r = '';
+        for (let i = 0; i < 95; i++) if (bits[i] === '1') { const h = guards.has(i) ? bH + gE : bH; r += `<rect x="${(qL + i) * mW}" y="0" width="${mW}" height="${h}"/>`; }
+        const tY = bH + gE + 13;
+        let t = `<text x="${(qL - 4) * mW}" y="${tY}" font-size="12" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle">${d[0]}</text>`;
+        t += `<text x="${(qL + 27.5) * mW}" y="${tY}" font-size="12" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle" letter-spacing="1.5">${code.slice(1, 7)}</text>`;
+        t += `<text x="${(qL + 67.5) * mW}" y="${tY}" font-size="12" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle" letter-spacing="1.5">${code.slice(7)}</text>`;
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><rect width="100%" height="100%" fill="white"/><g fill="black">${r}</g>${t}</svg>`;
+      }
+    };
+
+    // ── EAN-8 ────────────────────────────────────────────────────
+    const EAN8 = {
+      name: 'EAN-8', maxLen: 8, inputMode: 'numeric',
+      hint: '7 cifre (o 8 con check digit)',
+      validate(raw) {
+        const d = raw.replace(/\D/g, '');
+        if (!d.length || d.length > 8) return null;
+        if (d.length === 8) { return +d[7] === gtinCheck(d.slice(0, 7)) ? d : null; }
+        const s = d.padStart(7, '0');
+        return s + gtinCheck(s);
+      },
+      toSVG(code) {
+        const d = code.split('').map(Number);
+        let bits = '101';
+        for (let i = 0; i < 4; i++) bits += L[d[i]];
+        bits += '01010';
+        for (let i = 0; i < 4; i++) bits += R[d[i + 4]];
+        bits += '101';
+        const mW = 2, bH = 60, gE = 5, q = 7;
+        const guards = new Set([0, 1, 2, 31, 32, 33, 34, 35, 64, 65, 66]);
+        const W = (q + 67 + q) * mW, H = bH + gE + 18;
+        let r = '';
+        for (let i = 0; i < 67; i++) if (bits[i] === '1') { const h = guards.has(i) ? bH + gE : bH; r += `<rect x="${(q + i) * mW}" y="0" width="${mW}" height="${h}"/>`; }
+        const tY = bH + gE + 13;
+        let t = `<text x="${(q + 17) * mW}" y="${tY}" font-size="12" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle" letter-spacing="1.5">${code.slice(0, 4)}</text>`;
+        t += `<text x="${(q + 50) * mW}" y="${tY}" font-size="12" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle" letter-spacing="1.5">${code.slice(4)}</text>`;
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><rect width="100%" height="100%" fill="white"/><g fill="black">${r}</g>${t}</svg>`;
+      }
+    };
+
+    // ── UPC-A (rendered as EAN-13 with leading 0) ────────────────
+    const UPCA = {
+      name: 'UPC-A', maxLen: 12, inputMode: 'numeric',
+      hint: '11 cifre (o 12 con check digit)',
+      validate(raw) {
+        const d = raw.replace(/\D/g, '');
+        if (!d.length || d.length > 12) return null;
+        if (d.length === 12) { return +d[11] === gtinCheck(d.slice(0, 11)) ? d : null; }
+        const s = d.padStart(11, '0');
+        return s + gtinCheck(s);
+      },
+      toSVG(code) {
+        const ean = '0' + code;
+        return EAN13.toSVG(ean).replace(/<text[^>]*>[^<]*<\/text>/g, '') +
+          ''; // Actually let me rebuild with UPC-A text layout
+      }
+    };
+    // Fix UPC-A SVG to use proper text layout
+    UPCA.toSVG = function (code) {
+      const ean = '0' + code;
+      const d = ean.split('').map(Number), p = PAR[d[0]];
+      let bits = '101';
+      for (let i = 0; i < 6; i++) bits += p[i] === 'L' ? L[d[i + 1]] : G[d[i + 1]];
+      bits += '01010';
+      for (let i = 0; i < 6; i++) bits += R[d[i + 7]];
+      bits += '101';
+      const mW = 2, bH = 70, gE = 5, qL = 11, qR = 7;
+      const guards = new Set([0, 1, 2, 45, 46, 47, 48, 49, 92, 93, 94]);
+      const W = (qL + 95 + qR) * mW, H = bH + gE + 18;
+      let r = '';
+      for (let i = 0; i < 95; i++) if (bits[i] === '1') { const h = guards.has(i) ? bH + gE : bH; r += `<rect x="${(qL + i) * mW}" y="0" width="${mW}" height="${h}"/>`; }
+      const tY = bH + gE + 13;
+      let t = `<text x="${(qL - 4) * mW}" y="${tY}" font-size="10" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle">${code[0]}</text>`;
+      t += `<text x="${(qL + 25) * mW}" y="${tY}" font-size="11" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle" letter-spacing="1.5">${code.slice(1, 6)}</text>`;
+      t += `<text x="${(qL + 70) * mW}" y="${tY}" font-size="11" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle" letter-spacing="1.5">${code.slice(6, 11)}</text>`;
+      t += `<text x="${(qL + 99) * mW}" y="${tY}" font-size="10" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle">${code[11]}</text>`;
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><rect width="100%" height="100%" fill="white"/><g fill="black">${r}</g>${t}</svg>`;
+    };
+
+    // ── Code 128 ─────────────────────────────────────────────────
+    const CODE128 = (() => {
+      const P = [
+        '11011001100', '11001101100', '11001100110', '10010011000', '10010001100',
+        '10001001100', '10011001000', '10011000100', '10001100100', '11001001000',
+        '11001000100', '11000100100', '10110011100', '10011011100', '10011001110',
+        '10111001100', '10011101100', '10011100110', '11001110010', '11001011100',
+        '11001001110', '11011100100', '11001110100', '11101101110', '11101001100',
+        '11100101100', '11100100110', '11101100100', '11100110100', '11100110010',
+        '11011011000', '11011000110', '11000110110', '10100011000', '10001011000',
+        '10001000110', '10110001000', '10001101000', '10001100010', '11010001000',
+        '11000101000', '11000100010', '10110111000', '10110001110', '10001101110',
+        '10111011000', '10111000110', '10001110110', '11101110110', '11010001110',
+        '11000101110', '11011101000', '11011100010', '11011101110', '11101011000',
+        '11101000110', '11100010110', '11101101000', '11101100010', '11100011010',
+        '11101111010', '11001000010', '11110001010', '10100110000', '10100001100',
+        '10010110000', '10010000110', '10000101100', '10000100110', '10110010000',
+        '10110000100', '10011010000', '10011000010', '10000110100', '10000110010',
+        '11000010010', '11001010000', '11110111010', '11000010100', '10001111010',
+        '10100111100', '10010111100', '10010011110', '10111100100', '10011110100',
+        '10011110010', '11110100100', '11110010100', '11110010010', '11011011110',
+        '11011110110', '11110110110', '10101111000', '10100011110', '10001011110',
+        '10111101000', '10111100010', '11110101000', '11110100010', '10111011110',
+        '10111101110', '11101011110', '11110101110', '11010000100', '11010010000',
+        '11010011100', '1100011101011'
+      ];
+      return {
+        name: 'Code 128', maxLen: 48, inputMode: 'text',
+        hint: 'Testo o numeri — max 48 caratteri',
+        validate(raw) {
+          if (!raw.length || raw.length > 48) return null;
+          for (let i = 0; i < raw.length; i++) { const c = raw.charCodeAt(i); if (c < 32 || c > 126) return null; }
+          return raw;
+        },
+        toSVG(text) {
+          // Use Code B for general ASCII, switch to C for long numeric runs
+          const vals = [];
+          let isAllNum = /^\d+$/.test(text) && text.length >= 4 && text.length % 2 === 0;
+          if (isAllNum) {
+            vals.push(105); // START C
+            for (let i = 0; i < text.length; i += 2) vals.push(parseInt(text.substr(i, 2), 10));
+          } else {
+            vals.push(104); // START B
+            for (let i = 0; i < text.length; i++) vals.push(text.charCodeAt(i) - 32);
+          }
+          let chk = vals[0];
+          for (let i = 1; i < vals.length; i++) chk += vals[i] * i;
+          vals.push(chk % 103);
+          vals.push(106); // STOP
+          let bits = '';
+          vals.forEach(v => bits += P[v]);
+          const mW = 2, bH = 70, q = 10;
+          const W = (q * 2 + bits.length) * mW, H = bH + 20;
+          let r = '';
+          for (let i = 0; i < bits.length; i++) if (bits[i] === '1') r += `<rect x="${(q + i) * mW}" y="0" width="${mW}" height="${bH}"/>`;
+          const t = `<text x="${W / 2}" y="${bH + 15}" font-size="12" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle">${text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</text>`;
+          return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><rect width="100%" height="100%" fill="white"/><g fill="black">${r}</g>${t}</svg>`;
+        }
+      };
+    })();
+
+    // ── ITF-14 ───────────────────────────────────────────────────
+    const ITF14 = (() => {
+      const DIG = ['00110', '10001', '01001', '11000', '00101', '10100', '01100', '00011', '10010', '01010'];
+      return {
+        name: 'ITF-14', maxLen: 14, inputMode: 'numeric',
+        hint: '13 cifre (o 14 con check digit)',
+        validate(raw) {
+          const d = raw.replace(/\D/g, '');
+          if (!d.length || d.length > 14) return null;
+          if (d.length === 14) { return +d[13] === gtinCheck(d.slice(0, 13)) ? d : null; }
+          const s = d.padStart(13, '0');
+          return s + gtinCheck(s);
+        },
+        toSVG(code) {
+          const nW = 2, wW = 5; // narrow/wide module widths in px
+          const bH = 64, bearer = 4, q = 20, textH = 18;
+          // Build element widths: start + pairs + stop
+          const elems = []; // {bar:bool, w:px}
+          // Start: nnnn
+          elems.push({ bar: true, w: nW }, { bar: false, w: nW }, { bar: true, w: nW }, { bar: false, w: nW });
+          for (let p = 0; p < 7; p++) {
+            const a = DIG[+code[p * 2]], b = DIG[+code[p * 2 + 1]];
+            for (let i = 0; i < 5; i++) {
+              elems.push({ bar: true, w: a[i] === '1' ? wW : nW });
+              elems.push({ bar: false, w: b[i] === '1' ? wW : nW });
+            }
+          }
+          // Stop: Wn N
+          elems.push({ bar: true, w: wW }, { bar: false, w: nW }, { bar: true, w: nW });
+          let totalBW = 0; elems.forEach(e => totalBW += e.w);
+          const W = q * 2 + totalBW, H = bH + bearer * 2 + textH + 4;
+          let r = `<rect x="0" y="0" width="${W}" height="${bearer}" fill="black"/>`;
+          r += `<rect x="0" y="${bearer + bH}" width="${W}" height="${bearer}" fill="black"/>`;
+          r += `<rect x="0" y="0" width="${bearer}" height="${bearer * 2 + bH}" fill="black"/>`;
+          r += `<rect x="${W - bearer}" y="0" width="${bearer}" height="${bearer * 2 + bH}" fill="black"/>`;
+          let x = q;
+          elems.forEach(e => { if (e.bar) r += `<rect x="${x}" y="${bearer}" width="${e.w}" height="${bH}"/>`; x += e.w; });
+          const t = `<text x="${W / 2}" y="${bearer * 2 + bH + textH}" font-size="14" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle" letter-spacing="3">${code}</text>`;
+          return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><rect width="100%" height="100%" fill="white"/><g fill="black">${r}</g>${t}</svg>`;
+        }
+      };
+    })();
+
+    // ── Code 39 ──────────────────────────────────────────────────
+    const CODE39 = (() => {
+      const MAP = {
+        '0': '000110100', '1': '100100001', '2': '001100001', '3': '101100000',
+        '4': '000110001', '5': '100110000', '6': '001110000', '7': '000100101',
+        '8': '100100100', '9': '001100100', 'A': '100001001', 'B': '001001001',
+        'C': '101001000', 'D': '000011001', 'E': '100011000', 'F': '001011000',
+        'G': '000001101', 'H': '100001100', 'I': '001001100', 'J': '000011100',
+        'K': '100000011', 'L': '001000011', 'M': '101000010', 'N': '000010011',
+        'O': '100010010', 'P': '001010010', 'Q': '000000111', 'R': '100000110',
+        'S': '001000110', 'T': '000010110', 'U': '110000001', 'V': '011000001',
+        'W': '111000000', 'X': '010010001', 'Y': '110010000', 'Z': '011010000',
+        '-': '010000101', '.': '110000100', ' ': '011000100',
+        '$': '010101000', '/': '010100010', '+': '010001010', '%': '000101010',
+        '*': '010010100'
+      };
+      const VALID = /^[A-Z0-9\-. $/+%]*$/;
+      return {
+        name: 'Code 39', maxLen: 30, inputMode: 'text',
+        hint: 'A-Z, 0-9, spazio, - . $ / + %',
+        validate(raw) {
+          const u = raw.toUpperCase().trim();
+          if (!u.length || u.length > 30) return null;
+          return VALID.test(u) ? u : null;
+        },
+        toSVG(text) {
+          const chars = ('*' + text + '*').split('');
+          const nW = 2, wW = 5, gap = nW;
+          let elems = [];
+          chars.forEach((ch, ci) => {
+            if (ci > 0) elems.push({ bar: false, w: gap });
+            const pat = MAP[ch];
+            for (let i = 0; i < 9; i++) {
+              const wide = pat[i] === '1';
+              elems.push({ bar: i % 2 === 0, w: wide ? wW : nW });
+            }
+          });
+          let totalW = 0; elems.forEach(e => totalW += e.w);
+          const q = 20, bH = 60, H = bH + 20;
+          const W = q * 2 + totalW;
+          let r = '', x = q;
+          elems.forEach(e => { if (e.bar) r += `<rect x="${x}" y="0" width="${e.w}" height="${bH}"/>`; x += e.w; });
+          const t = `<text x="${W / 2}" y="${bH + 15}" font-size="12" font-family="'Courier New',monospace" font-weight="bold" text-anchor="middle" letter-spacing="2">${text}</text>`;
+          return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><rect width="100%" height="100%" fill="white"/><g fill="black">${r}</g>${t}</svg>`;
+        }
+      };
+    })();
+
+    // ══════════════════════════════════════════════════════════════
+    //  FORMAT MAP
+    // ══════════════════════════════════════════════════════════════
+    const FORMATS = { ean13: EAN13, ean8: EAN8, upca: UPCA, code128: CODE128, itf14: ITF14, code39: CODE39 };
+
+    // ══════════════════════════════════════════════════════════════
+    //  STATE & HELPERS
+    // ══════════════════════════════════════════════════════════════
+    let items = [], uid = 0, csvCache = null;
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function toast(msg, ok = true) { const t = document.getElementById('gb-toast'); t.textContent = msg; t.style.background = ok ? 'var(--success)' : 'var(--danger)'; t.classList.add('show'); clearTimeout(t._tid); t._tid = setTimeout(() => t.classList.remove('show'), 2800); }
+    function setMsg(id, msg, type) { const el = document.getElementById(id); if (!msg) { el.style.display = 'none'; return; } el.className = 'msg ' + (type === 'ok' ? 'msg-ok' : 'msg-err'); el.textContent = msg; el.style.display = 'block'; }
+
+    // ══════════════════════════════════════════════════════════════
+    //  FORMAT SELECTOR
+    // ══════════════════════════════════════════════════════════════
+    const selFormat = document.getElementById('sel-format');
+    const inpCode = document.getElementById('inp-code');
+    const inpName = document.getElementById('inp-name');
+
+    selFormat.addEventListener('change', updateFormatUI);
+    function updateFormatUI() {
+      const f = FORMATS[selFormat.value];
+      document.getElementById('lbl-code').textContent = 'Codici — ' + f.hint + ' (uno per riga)';
+      inpCode.placeholder = f.inputMode === 'numeric'
+        ? '8001234567890\n8007890123456\n8005678901234'
+        : 'ABC-123\nDEF-456\nGHI-789';
+      if (typeof updateLineCount === 'function') updateLineCount();
+    }
+    updateFormatUI();
+
+    // ══════════════════════════════════════════════════════════════
+    //  RENDER
+    // ══════════════════════════════════════════════════════════════
+    function render() {
+      const grid = document.getElementById('grid'), count = items.length;
+      document.getElementById('cnt').textContent = count;
+      document.getElementById('btn-clear').disabled = !count;
+      document.getElementById('btn-print').disabled = !count;
+      if (!count) { grid.innerHTML = `<div class="empty"><div class="e-icon">▦</div><h3>Nessun barcode generato</h3><p>Seleziona un formato e inserisci un codice, oppure importa un file.</p></div>`; return; }
+      grid.innerHTML = '';
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card'; card.dataset.id = item.id;
+        card.innerHTML = `
+      <span class="card-type">${esc(item.typeName)}</span>
+      <button class="del-btn" data-id="${item.id}" title="Rimuovi">✕</button>
+      <div class="card-name">${esc(item.name)}</div>
+      <div class="card-svg" data-id="${item.id}" title="Clicca per ingrandire">${item.svg}</div>
+      <div class="card-code">${esc(item.code)}</div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  LIGHTBOX
+    // ══════════════════════════════════════════════════════════════
+    const lightboxEl = document.getElementById('gb-lightbox');
+    let lightboxItem = null;
+
+    function openLightbox(item) {
+      lightboxItem = item;
+      document.getElementById('lb-svg').innerHTML = item.svg;
+      document.getElementById('lb-name').textContent = item.name;
+      document.getElementById('lb-code').textContent = item.code;
+      document.getElementById('lb-type').textContent = item.typeName;
+      lightboxEl.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      lightboxEl.classList.remove('active');
+      document.body.style.overflow = '';
+      lightboxItem = null;
+    }
+
+    document.getElementById('lb-close').addEventListener('click', closeLightbox);
+    document.getElementById('lb-close-bottom').addEventListener('click', closeLightbox);
+    lightboxEl.addEventListener('click', e => { if (e.target === lightboxEl) closeLightbox(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && lightboxEl.classList.contains('active')) closeLightbox(); });
+
+    document.getElementById('lb-print').addEventListener('click', () => {
+      if (!lightboxItem) return;
+      document.body.classList.add('print-single');
+      window.print();
+      document.body.classList.remove('print-single');
+    });
+
+    // ══════════════════════════════════════════════════════════════
+    //  ADD / REMOVE / EVENTS
+    // ══════════════════════════════════════════════════════════════
+    function addItem(name, code, formatKey, skipRender = false) {
+      const fmt = FORMATS[formatKey];
+      const svg = fmt.toSVG(code);
+      items.push({ id: ++uid, name: name || 'Prodotto', code, formatKey, typeName: fmt.name, svg });
+      if (!skipRender) render();
+    }
+
+    document.getElementById('grid').addEventListener('click', e => {
+      const del = e.target.closest('.del-btn');
+      if (del) { items = items.filter(i => i.id !== +del.dataset.id); render(); return; }
+      const svgCard = e.target.closest('.card-svg');
+      if (svgCard && svgCard.dataset.id) {
+        const item = items.find(i => i.id === +svgCard.dataset.id);
+        if (item) openLightbox(item);
+        return;
+      }
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => { if (items.length && confirm('Svuotare tutta la lista?')) { items = []; render(); } });
+    document.getElementById('btn-print').addEventListener('click', () => window.print());
+
+    // ══════════════════════════════════════════════════════════════
+    //  MANUAL INPUT — Multi-code paste from Excel
+    // ══════════════════════════════════════════════════════════════
+
+    // Parse codes from textarea: handles Excel column paste (\r\n, \n, \t)
+    function parseCodesFromText(text) {
+      // Normalizza newlines e rimuove caratteri di controllo comuni in Excel/Windows
+      let normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\t/g, '\t');
+      return normalized.split('\n')
+        .map(line => line.trim().replace(/[\u200B-\u200D\uFEFF]/g, '')) // Rimuove zero-width spaces
+        .filter(line => line.length > 0);
+    }
+
+    function extractValidNumericChunks(digits, fmt) {
+      const lengths = [fmt.maxLen];
+      if (fmt.maxLen > 1) lengths.push(fmt.maxLen - 1);
+
+      function solveWithLen(chunkLen) {
+        const n = digits.length;
+        const bestCount = new Array(n + 1).fill(0);
+        const bestSkip = new Array(n + 1).fill(0);
+        const action = new Array(n + 1).fill('end');
+
+        for (let i = n - 1; i >= 0; i--) {
+          let cSkip = bestCount[i + 1];
+          let sSkip = bestSkip[i + 1] + 1;
+          let cTake = -1;
+          let sTake = Number.MAX_SAFE_INTEGER;
+
+          if (i + chunkLen <= n) {
+            const candidate = digits.substring(i, i + chunkLen);
+            if (fmt.validate(candidate)) {
+              cTake = 1 + bestCount[i + chunkLen];
+              sTake = bestSkip[i + chunkLen];
+            }
+          }
+
+          if (cTake > cSkip || (cTake === cSkip && sTake <= sSkip)) {
+            bestCount[i] = cTake;
+            bestSkip[i] = sTake;
+            action[i] = 'take';
+          } else {
+            bestCount[i] = cSkip;
+            bestSkip[i] = sSkip;
+            action[i] = 'skip';
+          }
+        }
+
+        const valid = [];
+        const rejected = [];
+        let i = 0;
+        let pending = '';
+        while (i < n) {
+          if (action[i] === 'take' && i + chunkLen <= n) {
+            const chunk = digits.substring(i, i + chunkLen);
+            const vc = fmt.validate(chunk);
+            if (vc) {
+              if (pending) { rejected.push(pending); pending = ''; }
+              valid.push(vc);
+              i += chunkLen;
+              continue;
+            }
+          }
+          pending += digits[i];
+          i++;
+        }
+        if (pending) rejected.push(pending);
+        return { valid, rejected, skippedChars: bestSkip[0], chunkLen };
+      }
+
+      let best = null;
+      lengths.forEach(len => {
+        const candidate = solveWithLen(len);
+        if (!best) { best = candidate; return; }
+        if (candidate.valid.length > best.valid.length) { best = candidate; return; }
+        if (candidate.valid.length === best.valid.length && candidate.skippedChars < best.skippedChars) { best = candidate; }
+      });
+      return best || { valid: [], rejected: [], skippedChars: 0, chunkLen: fmt.maxLen };
+    }
+
+    function isLikelyStructuredNumericLines(lines, fmt) {
+      const lens = lines
+        .map(line => line.replace(/\D/g, '').length)
+        .filter(len => len > 0);
+      if (!lens.length) return false;
+      const validSized = lens.filter(len => len === fmt.maxLen || len === (fmt.maxLen - 1)).length;
+      return validSized >= Math.ceil(lens.length * 0.6);
+    }
+
+    function updateLineCount() {
+      let raw = inpCode.value.trim().replace(/[\u200B-\u200D\uFEFF]/g, '');
+      if (!raw) {
+        document.getElementById('line-count').textContent = 0;
+        return;
+      }
+      const lines = parseCodesFromText(raw);
+      const fk = selFormat.value, fmt = FORMATS[fk];
+      let count = 0;
+      
+      let isPureNumeric = /^[\d\s]+$/.test(raw);
+      let hasOversizedLines = fmt && fmt.inputMode === 'numeric' && lines.some(l => l.replace(/\D/g, '').length > fmt.maxLen);
+
+      const structuredNumeric = fmt && fmt.inputMode === 'numeric' && isLikelyStructuredNumericLines(lines, fmt);
+      if (fmt && fmt.inputMode === 'numeric' && isPureNumeric && hasOversizedLines && !structuredNumeric) {
+        let digits = raw.replace(/\D/g, '');
+        count = extractValidNumericChunks(digits, fmt).valid.length;
+      } else if (fmt && fmt.inputMode === 'numeric') {
+        lines.forEach(line => {
+          const tabSplit = line.split(/\t|;/);
+          const codeStr = tabSplit.length >= 2 ? tabSplit[tabSplit.length - 1] : line;
+          const parts = codeStr.split(/\s+/).filter(p => p);
+          if (parts.length > 1) {
+            count += parts.length;
+          } else {
+            const d = codeStr.replace(/\D/g, '');
+            if (d.length > fmt.maxLen) {
+              let chunkSize = fmt.maxLen;
+              if (d.length % fmt.maxLen !== 0 && d.length % (fmt.maxLen - 1) === 0) chunkSize = fmt.maxLen - 1;
+              count += Math.ceil(d.length / chunkSize);
+            } else {
+              count++;
+            }
+          }
+        });
+      } else {
+        count = lines.length;
+      }
+      document.getElementById('line-count').textContent = count;
+    }
+
+    inpCode.addEventListener('input', updateLineCount);
+    inpCode.addEventListener('paste', (e) => {
+      // Defer to after paste content is applied
+      setTimeout(updateLineCount, 0);
+    });
+    inpName.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); inpCode.focus(); } });
+    document.getElementById('btn-add').addEventListener('click', addManual);
+    // Ctrl+Enter to submit from textarea
+    inpCode.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) addManual(); });
+
+    function addManual() {
+      const name = inpName.value.trim();
+      const raw = inpCode.value.trim().replace(/[\u200B-\u200D\uFEFF]/g, '');
+      const fk = selFormat.value, fmt = FORMATS[fk];
+      setMsg('merr', '');
+
+      if (!raw) return setMsg('merr', '⚠ Inserisci almeno un codice', 'err');
+
+      let codes = parseCodesFromText(raw);
+      let isPureNumeric = /^[\d\s]+$/.test(raw);
+      let hasOversizedLines = codes.some(l => l.replace(/\D/g, '').length > fmt.maxLen);
+      let preSkipped = 0;
+      let preErrors = [];
+
+      const structuredNumeric = fmt.inputMode === 'numeric' && isLikelyStructuredNumericLines(codes, fmt);
+      if (fmt.inputMode === 'numeric' && isPureNumeric && hasOversizedLines && !structuredNumeric) {
+        let digits = raw.replace(/\D/g, '');
+        const parsed = extractValidNumericChunks(digits, fmt);
+        codes = parsed.valid;
+        const rejected = parsed.rejected.filter(x => x && x.length);
+        preSkipped = rejected.length;
+        preErrors = rejected.slice(0, 3).map(x => x.substring(0, 20));
+      }
+
+      let added = 0, skipped = preSkipped, errors = [...preErrors];
+
+      codes.forEach((line, idx) => {
+        // Each line can optionally be "name<tab>code" or "name;code" or just "code"
+        let lineName = name;
+        let lineCode = line;
+
+        // Check for tab or semicolon separated name+code on same line
+        const tabSplit = line.split(/\t|;/);
+        if (tabSplit.length >= 2) {
+          // If 2+ parts: first is name candidate, last is code candidate
+          const candidateCode = tabSplit[tabSplit.length - 1].trim();
+          const candidateName = tabSplit.slice(0, -1).join(' ').trim();
+          if (fmt.validate(candidateCode)) {
+            lineCode = candidateCode;
+            if (candidateName) lineName = candidateName;
+          }
+        }
+
+        const validCode = fmt.validate(lineCode);
+        if (validCode) {
+          addItem(lineName || ('Prodotto #' + (idx + 1)), validCode, fk, true);
+          added++;
+        } else if (fmt.inputMode === 'numeric') {
+          // Auto-split space-separated or concatenated numeric codes
+          const parts = lineCode.split(/\s+/).filter(p => p);
+          if (parts.length > 1) {
+            parts.forEach((p, i) => {
+              const vc = fmt.validate(p);
+              if (vc) {
+                addItem(lineName || ('Prodotto #' + (idx + 1 + '.' + i)), vc, fk, true);
+                added++;
+              } else {
+                skipped++;
+                if (skipped <= 3) errors.push(p.substring(0, 20));
+              }
+            });
+          } else {
+            const digitsOnly = lineCode.replace(/\D/g, '');
+            if (digitsOnly.length > fmt.maxLen) {
+              let chunkSize = fmt.maxLen;
+              if (digitsOnly.length % fmt.maxLen !== 0 && digitsOnly.length % (fmt.maxLen - 1) === 0) chunkSize = fmt.maxLen - 1;
+
+              if (chunkSize > 0) {
+                for (let i = 0; i < digitsOnly.length; i += chunkSize) {
+                  const chunk = digitsOnly.substring(i, i + chunkSize);
+                  const vc = fmt.validate(chunk);
+                  if (vc) {
+                    addItem(lineName || ('Prodotto #' + (idx + 1 + '.' + (i / chunkSize))), vc, fk, true);
+                    added++;
+                  } else {
+                    skipped++;
+                    if (skipped <= 3) errors.push(chunk.substring(0, 20));
+                  }
+                }
+              } else {
+                skipped++;
+                if (skipped <= 3) errors.push(lineCode.substring(0, 20));
+              }
+            } else {
+              skipped++;
+              if (skipped <= 3) errors.push(lineCode.substring(0, 20));
+            }
+          }
+        } else {
+          skipped++;
+          if (skipped <= 3) errors.push(lineCode.substring(0, 20));
+        }
+      });
+
+      if (added) render();
+
+      if (!added) {
+        return setMsg('merr', `⚠ Nessun codice valido per ${fmt.name}` + (errors.length ? ' — es: ' + errors.join(', ') : ''), 'err');
+      }
+
+      inpCode.value = '';
+      updateLineCount();
+      if (codes.length === 1) inpName.value = '';
+
+      const msg = added === 1
+        ? 'Barcode aggiunto ✓'
+        : `${added} barcode aggiunti ✓` + (skipped ? ` (${skipped} saltati)` : '');
+      toast(msg);
+
+      if (skipped) {
+        setMsg('merr', `⚠ ${skipped} codici non validi saltati` + (errors.length ? ': ' + errors.join(', ') + (skipped > 3 ? '...' : '') : ''), 'err');
+      }
+      inpName.focus();
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  FILE IMPORT
+    // ══════════════════════════════════════════════════════════════
+    const dropEl = document.getElementById('gb-drop'), fileInp = document.getElementById('file-inp');
+    dropEl.addEventListener('click', () => fileInp.click());
+    dropEl.addEventListener('dragover', e => { e.preventDefault(); dropEl.classList.add('over'); });
+    dropEl.addEventListener('dragleave', () => dropEl.classList.remove('over'));
+    dropEl.addEventListener('drop', e => { e.preventDefault(); dropEl.classList.remove('over'); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+    fileInp.addEventListener('change', () => { if (fileInp.files[0]) loadFile(fileInp.files[0]); fileInp.value = ''; });
+
+    function loadFile(file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      csvCache = null;
+      document.getElementById('map-panel').style.display = 'none';
+      if (ext === 'xlsx' || ext === 'xls') return importExcel(file);
+      const reader = new FileReader();
+      reader.onload = ev => {
+        if (ext === 'xml') return importXML(ev.target.result);
+        if (ext === 'pdf') return importPDF(ev.target.result);
+        return importCSV(ev.target.result);
+      };
+      reader.onerror = () => setMsg('fmsg', 'Errore lettura file', 'err');
+      if (ext === 'pdf') reader.readAsArrayBuffer(file);
+      else reader.readAsText(file, 'UTF-8');
+    }
+
+    function importExcel(file) {
+      setMsg('fmsg', '');
+      if (typeof XLSX === 'undefined') {
+        return setMsg('fmsg', 'Supporto Excel non disponibile (connessione internet richiesta per caricare il parser).', 'err');
+      }
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const wb = XLSX.read(ev.target.result, { type: 'array' });
+          const sheetName = wb.SheetNames[0];
+          if (!sheetName) return setMsg('fmsg', 'File Excel vuoto o non valido', 'err');
+          const ws = wb.Sheets[sheetName];
+          const rowsRaw = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
+          const rows = rowsRaw
+            .map(r => Array.isArray(r) ? r.map(c => String(c || '').trim()) : [])
+            .filter(r => r.some(c => c));
+          if (rows.length < 2) return setMsg('fmsg', 'File Excel vuoto o senza righe dati', 'err');
+          const headers = rows[0];
+          const dataRows = rows.slice(1);
+          csvCache = { headers, rows: dataRows };
+          const sN = document.getElementById('col-name'), sC = document.getElementById('col-code');
+          sN.innerHTML = sC.innerHTML = headers.map((h, i) => `<option value="${i}">${h || 'Col ' + (i + 1)}</option>`).join('');
+          headers.forEach((h, i) => { if (/nome|descr|referenz|prodott|articol|denom/i.test(h)) sN.value = i; if (/cod|ean|barcode|gtin|num|art/i.test(h)) sC.value = i; });
+          document.getElementById('map-panel').style.display = 'block';
+          setMsg('fmsg', `✓ File Excel caricato: ${dataRows.length} righe trovate`, 'ok');
+        } catch (e) {
+          setMsg('fmsg', 'Errore lettura Excel: ' + e.message, 'err');
+        }
+      };
+      reader.onerror = () => setMsg('fmsg', 'Errore lettura file Excel', 'err');
+      reader.readAsArrayBuffer(file);
+    }
+
+    function splitCSVLine(line, delim) {
+      const result = []; let cur = '', inQ = false;
+      for (let i = 0; i < line.length; i++) { const ch = line[i]; if (ch === '"') { inQ = !inQ; continue; } if (ch === delim && !inQ) { result.push(cur.trim()); cur = ''; continue; } cur += ch; }
+      result.push(cur.trim()); return result;
+    }
+
+    function importCSV(text) {
+      setMsg('fmsg', ''); document.getElementById('map-panel').style.display = 'none';
+      const fl = text.split('\n')[0] || '';
+      const delim = fl.includes(';') ? ';' : fl.includes('\t') ? '\t' : ',';
+      const rows = text.trim().split('\n').map(l => splitCSVLine(l, delim)).filter(r => r.some(c => c));
+      if (rows.length < 2) return setMsg('fmsg', 'File CSV vuoto o non valido', 'err');
+      const headers = rows[0], dataRows = rows.slice(1);
+      csvCache = { headers, rows: dataRows };
+      const sN = document.getElementById('col-name'), sC = document.getElementById('col-code');
+      sN.innerHTML = sC.innerHTML = headers.map((h, i) => `<option value="${i}">${h || 'Col ' + (i + 1)}</option>`).join('');
+      headers.forEach((h, i) => { if (/nome|descr|referenz|prodott|articol|denom/i.test(h)) sN.value = i; if (/cod|ean|barcode|gtin|num|art/i.test(h)) sC.value = i; });
+      document.getElementById('map-panel').style.display = 'block';
+      setMsg('fmsg', `✓ File caricato: ${dataRows.length} righe trovate`, 'ok');
+    }
+
+    function importPDF(buffer) {
+      setMsg('fmsg', '');
+      csvCache = null;
+      document.getElementById('map-panel').style.display = 'none';
+      const fk = selFormat.value, fmt = FORMATS[fk];
+      const decoderUtf8 = new TextDecoder('utf-8', { fatal: false });
+      const decoderLatin = new TextDecoder('windows-1252', { fatal: false });
+      const text = (decoderUtf8.decode(buffer) + '\n' + decoderLatin.decode(buffer)).replace(/[\u200B-\u200D\uFEFF]/g, ' ');
+      let codes = [];
+      if (fmt.inputMode === 'numeric') {
+        const tokenMatches = [...text.matchAll(/\d{6,32}/g)];
+        tokenMatches.forEach(m => {
+          const digits = (m[0] || '').replace(/\D/g, '');
+          if (!digits) return;
+          if (digits.length <= fmt.maxLen) {
+            const vc = fmt.validate(digits);
+            if (vc) codes.push(vc);
+            return;
+          }
+          const parsed = extractValidNumericChunks(digits, fmt);
+          if (parsed.valid.length) codes.push(...parsed.valid);
+        });
+      } else {
+        const lines = parseCodesFromText(text);
+        lines.forEach(line => {
+          const vc = fmt.validate(line);
+          if (vc) codes.push(vc);
+        });
+      }
+
+      if (!codes.length) return setMsg('fmsg', 'Nessun codice valido trovato nel PDF', 'err');
+      const unique = [];
+      const seen = new Set();
+      codes.forEach(c => { if (!seen.has(c)) { seen.add(c); unique.push(c); } });
+      unique.forEach((code, i) => addItem('Prodotto PDF #' + (i + 1), code, fk, true));
+      render();
+      setMsg('fmsg', `✓ ${unique.length} barcode importati da PDF` + (codes.length !== unique.length ? ` (${codes.length - unique.length} duplicati ignorati)` : ''), 'ok');
+      toast(`${unique.length} barcode importati ✓`);
+    }
+
+    document.getElementById('btn-import-csv').addEventListener('click', () => {
+      if (!csvCache) return;
+      const ci = +document.getElementById('col-code').value, ni = +document.getElementById('col-name').value;
+      const fk = selFormat.value, fmt = FORMATS[fk];
+      let added = 0, skipped = 0;
+      csvCache.rows.forEach(row => {
+        const name = (row[ni] || '').trim() || 'Prodotto', raw = (row[ci] || '').trim();
+        const code = fmt.validate(raw);
+        if (code) { addItem(name, code, fk, true); added++; } else skipped++;
+      });
+      render();
+      csvCache = null; document.getElementById('map-panel').style.display = 'none';
+      if (!added) return setMsg('fmsg', 'Nessun codice valido trovato nella colonna', 'err');
+      setMsg('fmsg', `✓ ${added} barcode importati` + (skipped ? ` (${skipped} saltati)` : ''), 'ok');
+      toast(`${added} barcode importati ✓`);
+    });
+
+    function importXML(text) {
+      setMsg('fmsg', '');
+      try {
+        const doc = new DOMParser().parseFromString(text, 'text/xml');
+        if (doc.querySelector('parsererror')) return setMsg('fmsg', 'XML non valido', 'err');
+        const all = [...doc.querySelectorAll('*')];
+        const tagCount = {};
+        all.forEach(el => { if (!el.children.length && el.textContent.trim()) tagCount[el.tagName.toLowerCase()] = (tagCount[el.tagName.toLowerCase()] || 0) + 1; });
+        const codePat = /ean|barcode|codic|code|gtin|articol|cod_art|ref/i;
+        const namePat = /nome|descr|referenz|prodott|articol|denom|titol/i;
+        let codeTag = null, nameTag = null, maxCnt = 0;
+        Object.keys(tagCount).forEach(tag => { if (codePat.test(tag) && tagCount[tag] > maxCnt) { codeTag = tag; maxCnt = tagCount[tag]; } });
+        Object.keys(tagCount).forEach(tag => { if (namePat.test(tag)) nameTag = tag; });
+        const fk = selFormat.value, fmt = FORMATS[fk];
+        let added = 0, skipped = 0;
+        if (codeTag) {
+          doc.querySelectorAll(codeTag).forEach(codeEl => {
+            const raw = codeEl.textContent.trim();
+            const code = fmt.validate(raw);
+            let name = codeTag;
+            const parent = codeEl.parentElement;
+            if (parent) { const nEl = nameTag ? parent.querySelector(nameTag) : null; name = nEl ? nEl.textContent.trim() : parent.tagName + ' #' + (added + skipped + 1); }
+            if (code) { addItem(name, code, fk, true); added++; } else skipped++;
+          });
+          render();
+        } else {
+          // If no specific code tag is found, be more strict to avoid matching random page numbers
+          all.forEach(el => { 
+            if (!el.children.length) { 
+              const raw = el.textContent.trim(); 
+              const code = fmt.validate(raw); 
+              if (code) {
+                // Ignore obvious false positives like page numbers or dates when scanning blindly
+                if (/date|time|page|count|config/i.test(el.tagName)) return;
+                
+                // For EAN-13 numeric blind match, ensure it actually looks like an EAN and not a random zero-padded number
+                if (fmt.inputMode === 'numeric' && raw.length < 8) return; 
+
+                addItem(el.tagName, code, fk, true); 
+                added++; 
+              } 
+            } 
+          });
+          render();
+        }
+        if (!added) return setMsg('fmsg', 'Nessun codice valido trovato nel file XML', 'err');
+        setMsg('fmsg', `✓ ${added} barcode importati da XML` + (skipped ? ` (${skipped} saltati)` : ''), 'ok');
+        toast(`${added} barcode importati ✓`);
+      } catch (e) { setMsg('fmsg', 'Errore XML: ' + e.message, 'err'); }
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  INIT
+    // ══════════════════════════════════════════════════════════════
+    render();
+    if (!document.body.classList.contains('app-locked')) inpName.focus();
+  </script>
+</body>
+
+</html>
