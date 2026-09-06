@@ -637,6 +637,7 @@
         /* Footer */
         .site-footer { text-align:center; padding:2rem 1.8rem; border-top:1px solid var(--border-subtle); font-size:0.8rem; color:var(--text-tertiary); position:relative; z-index:1; }
         .site-footer a { color:var(--accent); }
+        .hp-field { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
         .site-footer .footer-legal { max-width:760px; margin:0.8rem auto 0; font-size:0.7rem; line-height:1.6; color:var(--text-tertiary); opacity:0.85; }
 
         /* Hidden login */
@@ -1388,11 +1389,11 @@
             <form id="contactForm" novalidate>
                 <div class="form-group">
                     <label for="name" data-i18n="contact_name">Nome</label>
-                    <input type="text" id="name" name="name" placeholder="Il tuo nome" data-i18n-placeholder="contact_name_ph" required autocomplete="name">
+                    <input type="text" id="name" name="name" placeholder="Il tuo nome" data-i18n-placeholder="contact_name_ph" required autocomplete="name" maxlength="80">
                 </div>
                 <div class="form-group">
                     <label for="email" data-i18n="contact_email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="La tua email" data-i18n-placeholder="contact_email_ph" required autocomplete="email">
+                    <input type="email" id="email" name="email" placeholder="La tua email" data-i18n-placeholder="contact_email_ph" required autocomplete="email" maxlength="120">
                 </div>
                 <div class="form-group">
                     <label for="requestType" data-i18n="contact_type">Tipo di Richiesta</label>
@@ -1429,11 +1430,16 @@
                 </div>
                 <div class="form-group">
                     <label for="message" data-i18n="contact_message">Messaggio</label>
-                    <textarea id="message" name="message" placeholder="Descrivi il tuo progetto..." data-i18n-placeholder="contact_message_ph" required></textarea>
+                    <textarea id="message" name="message" placeholder="Descrivi il tuo progetto..." data-i18n-placeholder="contact_message_ph" required maxlength="3000"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="projectLink" data-i18n="contact_link">Link Progetto / Brief (opzionale)</label>
-                    <input type="url" id="projectLink" name="projectLink" placeholder="https://..." data-i18n-placeholder="contact_link_ph">
+                    <input type="url" id="projectLink" name="projectLink" placeholder="https://..." data-i18n-placeholder="contact_link_ph" maxlength="300" pattern="https?://.+">
+                </div>
+                <!-- honeypot anti-bot: invisibile agli umani, compilato dai crawler -->
+                <div class="hp-field" aria-hidden="true">
+                    <label for="company">Company</label>
+                    <input type="text" id="company" name="company" tabindex="-1" autocomplete="off">
                 </div>
                 <div class="form-group-checkbox">
                     <input type="checkbox" id="gdprConsent" name="gdprConsent" required>
@@ -1960,19 +1966,55 @@
                 formFeedback.className = 'form-feedback' + (kind ? ' ' + kind : '');
             }
 
+            const FORM_LOADED_AT = Date.now();
+            let lastSentAt = 0;
+            const LIMITS = { name: 80, email: 120, message: 3000, projectLink: 300 };
+
             contactForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 // FormData: niente 8 getElementById, e i nuovi campi vengono raccolti da soli
                 const data = Object.fromEntries(new FormData(contactForm).entries());
+
+                // honeypot: se compilato è un bot → finto successo, nessuna richiesta
+                if ((data.company || '').trim() !== '') {
+                    contactForm.reset();
+                    return say(t('Messaggio inviato con successo!', 'Message sent successfully!'), 'success');
+                }
+                delete data.company;
+
+                // time-trap: submit umano non avviene entro 3 secondi dal caricamento
+                if (Date.now() - FORM_LOADED_AT < 3000) {
+                    return say(t('Attendi un istante prima di inviare.', 'Please wait a moment before sending.'), 'error');
+                }
+                // throttle: max un invio ogni 30 secondi
+                if (Date.now() - lastSentAt < 30000) {
+                    return say(t('Hai già inviato una richiesta. Riprova tra poco.', 'You already sent a request. Please try again shortly.'), 'error');
+                }
+
                 const name = (data.name || '').trim();
                 const email = (data.email || '').trim();
                 const message = (data.message || '').trim();
+                const link = (data.projectLink || '').trim();
 
                 if (!name || !email || !message || !data.requestType) {
                     return say(t('Compila tutti i campi obbligatori.', 'Please fill in all required fields.'), 'error');
                 }
+                // limiti di lunghezza anche lato JS (maxlength è aggirabile)
+                for (const k in LIMITS) {
+                    if ((data[k] || '').length > LIMITS[k]) {
+                        return say(t('Uno dei campi supera la lunghezza massima.', 'One of the fields exceeds the maximum length.'), 'error');
+                    }
+                }
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                     return say(t('Inserisci un\'email valida.', 'Please enter a valid email.'), 'error');
+                }
+                // niente CRLF nei campi brevi: previene header injection lato mailer
+                if (/[\r\n]/.test(name) || /[\r\n]/.test(email)) {
+                    return say(t('Caratteri non ammessi nei campi Nome/Email.', 'Invalid characters in Name/Email fields.'), 'error');
+                }
+                // solo http/https: blocca javascript:, data:, file: ecc.
+                if (link && !/^https?:\/\/[^\s]+$/i.test(link)) {
+                    return say(t('Il link progetto deve iniziare con http:// o https://', 'Project link must start with http:// or https://'), 'error');
                 }
                 if (!contactForm.gdprConsent.checked) {
                     return say(t('Accetta l\'informativa sulla privacy.', 'Please accept the privacy policy.'), 'error');
@@ -1991,6 +2033,7 @@
                 })
                 .then(res => {
                     if (!res.ok) throw new Error('Form submission failed');
+                    lastSentAt = Date.now();
                     say(t('Messaggio inviato con successo!', 'Message sent successfully!'), 'success');
                     contactForm.reset();
                     setTimeout(() => say('', ''), 5000);
